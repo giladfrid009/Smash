@@ -17,11 +17,11 @@ class Smash
 
 	public:
 
-	Command* CreateCommand(const char* cmdStr);
-
 	Smash(Smash const&) = delete;
 
 	void operator=(Smash const&) = delete;
+
+	~Smash();
 
 	static Smash& GetInstance()
 	{
@@ -29,7 +29,7 @@ class Smash
 		return instance;
 	}
 
-	~Smash();
+	Command* CreateCommand(const char* cmdStr);
 
 	std::string GetPrompt()
 	{
@@ -39,5 +39,5 @@ class Smash
 	void ExecuteCommand(const char* cmdStr);
 };
 
-#endif // !SMASH_H_
+#endif // !SMASH_H
 

@@ -4,6 +4,13 @@
 #include <vector>
 #include <string.h>
 
+/* TODO: important
+* implement foreground Sleep command for testing
+* implement backGround Sleep command for testing
+* implement unknown Sleep command for testing
+* implemet blank command for pipe tests
+* test these commands in different scenarios, only after everything is working start adding the "real" commands.
+*/
 class Command
 {
 	public:

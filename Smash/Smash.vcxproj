@@ -87,6 +87,12 @@
     <ClInclude Include="SigHandlers.h" />
     <ClInclude Include="Smash.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="Roadmap.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Makefile" />
+  </ItemGroup>
   <ItemDefinitionGroup />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
