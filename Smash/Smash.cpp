@@ -18,14 +18,16 @@ Smash::~Smash()
 
 Command* Smash::CreateCommand(string& cmdStr)
 {
-	Trim(cmdStr);
-
 	Commands cmdKind = GetCommand(cmdStr);
 
 	vector<string> cmdArgs = ParseCommand(cmdStr);
 
 	switch (cmdKind)
 	{
+		case (Commands::Unknown):
+		{
+			return ExternalCommand::Create(cmdStr);
+		}
 		case (Commands::SleepPrint):
 		{
 			return SleepPrintCommand::Create(cmdArgs);

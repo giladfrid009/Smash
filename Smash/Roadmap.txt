@@ -1,6 +1,7 @@
 Roadmap:
 * Implement built-in sleep and then print command for testing
 * Implement external command handler
+* Implement running commands in background
 * Implement jobs command
 * Implement kill command
 * Implement timeout command

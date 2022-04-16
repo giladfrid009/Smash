@@ -19,11 +19,17 @@ class Command
 
 class ExternalCommand : public Command
 {
+	private:
+
+	std::string cmdStr;
+
+	ExternalCommand(std::string& cmdStr);
+
 	public:
 
-	ExternalCommand();
+	static Command* Create(std::string& cmdArgs);
 
-	virtual ~ExternalCommand();
+	virtual ~ExternalCommand() = default;
 
 	void Execute() override;
 };

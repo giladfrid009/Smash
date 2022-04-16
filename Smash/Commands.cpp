@@ -5,13 +5,16 @@
 #include <string>
 #include <iostream>
 
-SleepPrintCommand::SleepPrintCommand(int duration, std::string messege) : InternalCommand()
+using std::string;
+using std::vector;
+
+SleepPrintCommand::SleepPrintCommand(int duration, string messege) : InternalCommand()
 {
 	this->duration = (unsigned int)duration;
 	this->messege = messege;
 }
 
-Command* SleepPrintCommand::Create(std::vector<std::string>& cmdArgs)
+Command* SleepPrintCommand::Create(vector<string>& cmdArgs)
 {
 	try
 	{
@@ -39,4 +42,27 @@ void SleepPrintCommand::Execute()
 {
 	sleep(duration);
 	std::cout << messege << "\n";
+}
+
+ExternalCommand::ExternalCommand(string& cmdStr) : Command()
+{
+	this->cmdStr = cmdStr;
+}
+
+Command* ExternalCommand::Create(string& cmdStr)
+{
+	try
+	{
+		return new ExternalCommand(cmdStr);
+	}
+	catch (...)
+	{
+		return nullptr;
+	}
+}
+
+void ExternalCommand::Execute()
+{
+	string formattedCmd = "bash -c \"" + cmdStr + "\"";
+	system(formattedCmd.c_str());
 }

@@ -127,6 +127,11 @@ Commands GetCommand(const string& cmdStr)
 		return Commands::Kill;
 	}
 
+	if (cmdStr.find(I.PrintDir) != string::npos)
+	{
+		return Commands::PrintDir;
+	}
+
 	if (cmdStr.find(I.Quit) != string::npos)
 	{
 		return Commands::Quit;
