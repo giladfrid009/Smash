@@ -31,6 +31,7 @@ class JobEntry
 
 	JobEntry();
 
+	//todo: maybe jobEntry can accept ONLY externalCommands. make sure.
 	JobEntry(int jobId, pid_t pid, Command* command, bool isStopped);
 
 	void UpdateStatus();
@@ -54,6 +55,7 @@ class JobsList
 
 	~JobsList();
 
+	//todo: maybe job can accept ONLY externalCommands. make sure.
 	void AddJob(pid_t pid, Command* command, bool isStopped = false);
 
 	void Print();
