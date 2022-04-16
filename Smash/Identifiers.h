@@ -16,6 +16,7 @@ enum class Commands
 	Quit,
 	Tail,
 	Touch,
+	SleepPrint, //todo: remove later
 };
 
 enum class SpecialCommands
@@ -32,6 +33,7 @@ class Identifiers
 {
 	public:
 
+	const char* SleepPrint = "snp"; //todo: remove later
 	const char* PipeOut = "|";
 	const char* PipeErr = "|&";
 	const char* RedirectWrite = ">";

@@ -8,9 +8,11 @@ class Command
 {
 	public:
 
-	Command(const std::string& cmdStr);
+	Command()
+	{
+	}
 
-	virtual ~Command();
+	virtual ~Command() = default;
 
 	virtual void Execute() = 0;
 };
@@ -19,9 +21,9 @@ class ExternalCommand : public Command
 {
 	public:
 
-	ExternalCommand(const std::string& cmdStr);
+	ExternalCommand();
 
-	virtual ~ExternalCommand() {}
+	virtual ~ExternalCommand();
 
 	void Execute() override;
 };
@@ -30,9 +32,29 @@ class InternalCommand : public Command
 {
 	public:
 
-	InternalCommand(const std::string& cmdStr);
+	InternalCommand() : Command()
+	{
+	}
 
-	virtual ~InternalCommand() {}
+	virtual ~InternalCommand() override = default;
+};
+
+class SleepPrintCommand : public InternalCommand
+{
+	private:
+
+	unsigned int duration;
+	std::string messege;
+
+	SleepPrintCommand(int duration, std::string messege);
+
+	public:
+
+	static Command* Create(std::vector<std::string>& cmdArgs);
+
+	virtual ~SleepPrintCommand() override = default;
+
+	void Execute() override;
 };
 
 class JobsList

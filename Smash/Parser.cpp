@@ -61,102 +61,6 @@ vector<string> Split(const string& cmdStr, string seperator)
 	return result;
 }
 
-Commands GetCommand(const char* cmdStr)
-{
-	Identifiers I;
-	const string str(cmdStr);
-
-	if (GetSpecialCommand(cmdStr) != SpecialCommands::None)
-	{
-		return Commands::Special;
-	}
-
-	if (str.find(I.Background) != string::npos)
-	{
-		return Commands::Background;
-	}
-
-	if (str.find(I.ChangeDir) != string::npos)
-	{
-		return Commands::ChangeDir;
-	}
-
-	if (str.find(I.ChangePrompt) != string::npos)
-	{
-		return Commands::ChangePrompt;
-	}
-
-	if (str.find(I.Foreground) != string::npos)
-	{
-		return Commands::Foreground;
-	}
-
-	if (str.find(I.Jobs) != string::npos)
-	{
-		return Commands::Jobs;
-	}
-
-	if (str.find(I.Kill) != string::npos)
-	{
-		return Commands::Kill;
-	}
-
-	if (str.find(I.Quit) != string::npos)
-	{
-		return Commands::Quit;
-	}
-
-	if (str.find(I.ShowPid) != string::npos)
-	{
-		return Commands::ShowPid;
-	}
-
-	if (str.find(I.Tail) != string::npos)
-	{
-		return Commands::Tail;
-	}
-
-	if (str.find(I.Touch) != string::npos)
-	{
-		return Commands::Touch;
-	}
-
-	return Commands::Unknown;
-}
-
-SpecialCommands GetSpecialCommand(const char* cmdStr)
-{
-	Identifiers I;
-	const string str(cmdStr);
-
-	if (str.find(I.Timeout) != string::npos)
-	{
-		return SpecialCommands::Timeout;
-	}
-
-	if (str.find(I.PipeErr) != string::npos)
-	{
-		return SpecialCommands::PipeErr;
-	}
-
-	if (str.find(I.PipeOut) != string::npos)
-	{
-		return SpecialCommands::PipeOut;
-	}
-
-	if (str.find(I.RedirectAppend) != string::npos)
-	{
-		return SpecialCommands::RedirectAppend;
-	}
-
-	if (str.find(I.RedirectWrite) != string::npos)
-	{
-		return SpecialCommands::RedirectWrite;
-	}
-
-	return SpecialCommands::None;
-}
-
 bool IsRunInBackground(const string& cmdStr)
 {
 	return cmdStr[cmdStr.find_last_not_of(WHITESPACE)] == '&';
@@ -177,4 +81,103 @@ string RemoveBackgroundSign(const string& cmdStr)
 	}
 
 	return RightTrim(cmdStr.substr(0, len));
+}
+
+Commands GetCommand(const string& cmdStr)
+{
+	Identifiers I;
+
+	if (GetSpecialCommand(cmdStr) != SpecialCommands::None)
+	{
+		return Commands::Special;
+	}
+
+	if (cmdStr.find(I.SleepPrint) != string::npos) //todo: remove later
+	{
+		return Commands::SleepPrint;
+	}
+
+	if (cmdStr.find(I.Background) != string::npos)
+	{
+		return Commands::Background;
+	}
+
+	if (cmdStr.find(I.ChangeDir) != string::npos)
+	{
+		return Commands::ChangeDir;
+	}
+
+	if (cmdStr.find(I.ChangePrompt) != string::npos)
+	{
+		return Commands::ChangePrompt;
+	}
+
+	if (cmdStr.find(I.Foreground) != string::npos)
+	{
+		return Commands::Foreground;
+	}
+
+	if (cmdStr.find(I.Jobs) != string::npos)
+	{
+		return Commands::Jobs;
+	}
+
+	if (cmdStr.find(I.Kill) != string::npos)
+	{
+		return Commands::Kill;
+	}
+
+	if (cmdStr.find(I.Quit) != string::npos)
+	{
+		return Commands::Quit;
+	}
+
+	if (cmdStr.find(I.ShowPid) != string::npos)
+	{
+		return Commands::ShowPid;
+	}
+
+	if (cmdStr.find(I.Tail) != string::npos)
+	{
+		return Commands::Tail;
+	}
+
+	if (cmdStr.find(I.Touch) != string::npos)
+	{
+		return Commands::Touch;
+	}
+
+	return Commands::Unknown;
+}
+
+SpecialCommands GetSpecialCommand(const string& cmdStr)
+{
+	Identifiers I;
+
+	if (cmdStr.find(I.Timeout) != string::npos)
+	{
+		return SpecialCommands::Timeout;
+	}
+
+	if (cmdStr.find(I.PipeErr) != string::npos)
+	{
+		return SpecialCommands::PipeErr;
+	}
+
+	if (cmdStr.find(I.PipeOut) != string::npos)
+	{
+		return SpecialCommands::PipeOut;
+	}
+
+	if (cmdStr.find(I.RedirectAppend) != string::npos)
+	{
+		return SpecialCommands::RedirectAppend;
+	}
+
+	if (cmdStr.find(I.RedirectWrite) != string::npos)
+	{
+		return SpecialCommands::RedirectWrite;
+	}
+
+	return SpecialCommands::None;
 }
