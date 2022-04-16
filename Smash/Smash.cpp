@@ -26,11 +26,11 @@ Command* Smash::CreateCommand(string& cmdStr)
 	{
 		case (Commands::Unknown):
 		{
-			return ExternalCommand::Create(cmdStr);
+			return ExternalCommand::Create(cmdStr, cmdArgs);
 		}
 		case (Commands::SleepPrint):
 		{
-			return SleepPrintCommand::Create(cmdArgs);
+			return SleepPrintCommand::Create(cmdStr, cmdArgs);
 		}
 		default:
 		{

@@ -76,6 +76,7 @@
   <PropertyGroup Label="UserMacros" />
   <ItemGroup>
     <ClCompile Include="Commands.cpp" />
+    <ClCompile Include="JobList.cpp" />
     <ClCompile Include="Smash.cpp" />
     <ClCompile Include="Parser.cpp" />
     <ClCompile Include="SigHandlers.cpp" />
@@ -84,6 +85,7 @@
   <ItemGroup>
     <ClInclude Include="Identifiers.h" />
     <ClInclude Include="Commands.h" />
+    <ClInclude Include="JobList.h" />
     <ClInclude Include="Parser.h" />
     <ClInclude Include="SigHandlers.h" />
     <ClInclude Include="Smash.h" />

@@ -3,31 +3,33 @@
 
 #include <vector>
 #include <string>
+#include <sys/wait.h>
+#include <cassert>
 
 class Command
 {
-	public:
+	protected:
 
-	Command()
-	{
-	}
+	std::string cmdStr;
+
+	Command(std::string cmdStr);
+
+	public:
 
 	virtual ~Command() = default;
 
 	virtual void Execute() = 0;
+
+	std::string GetCommandString();
 };
 
 class ExternalCommand : public Command
 {
-	private:
-
-	std::string cmdStr;
-
 	ExternalCommand(std::string& cmdStr);
 
 	public:
 
-	static Command* Create(std::string& cmdArgs);
+	static Command* Create(std::string& cmdStr, std::vector<std::string>& cmdArgs);
 
 	virtual ~ExternalCommand() = default;
 
@@ -38,7 +40,7 @@ class InternalCommand : public Command
 {
 	public:
 
-	InternalCommand() : Command()
+	InternalCommand(std::string& cmdStr) : Command(cmdStr)
 	{
 	}
 
@@ -47,51 +49,20 @@ class InternalCommand : public Command
 
 class SleepPrintCommand : public InternalCommand
 {
-	private:
+	protected:
 
 	unsigned int duration;
 	std::string messege;
 
-	SleepPrintCommand(int duration, std::string messege);
+	SleepPrintCommand(std::string& cmdStr, int duration, std::string messege);
 
 	public:
 
-	static Command* Create(std::vector<std::string>& cmdArgs);
+	static Command* Create(std::string& cmdStr, std::vector<std::string>& cmdArgs);
 
 	virtual ~SleepPrintCommand() override = default;
 
 	void Execute() override;
-};
-
-class JobsList
-{
-	public:
-
-	class JobEntry
-	{
-	};
-
-	public:
-
-	JobsList();
-
-	~JobsList();
-
-	void AddJob(Command* cmd, bool isStopped = false);
-
-	void PrintJobsList();
-
-	void KillAllJobs();
-
-	void RemoveFinishedJobs();
-
-	JobEntry* GetJobById(int jobId);
-
-	void RemoveJobById(int jobId);
-
-	JobEntry* GetLastJob(int* lastJobId);
-
-	JobEntry* GetLastStoppedJob(int* jobId);
 };
 
 #endif //SMASH_COMMAND_H_
