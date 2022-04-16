@@ -1,11 +1,11 @@
 Roadmap:
 * Implement built-in sleep and then print command for testing
-* Implement extermal command handler
+* Implement external command handler
 * Implement jobs command
 * Implement kill command
 * Implement timeout command
-* Implement bg command
 * Implement fg command
+* Implement bg command
 * Implement io redirection '>'
 * Implement pipe command '|'
 * Implement rest of the stuff in no particular order

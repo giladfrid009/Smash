@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
 		perror("smash error: failed to set alarm handler");
 	}
 
-	/*string command = "\t\n\t ls -a -o&   \n\t";
+	/*string command = "cd ..; cd ..; ls -a;  ";
 
 	bool isBG = IsRunInBackground(command);
 	std::string x = RemoveBackgroundSign(command);
@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
 
 	auto res = ParseCommand(command);
 
-	CallExternal("pwd; cd ..; ls -a;");*/
+	CallExternal("pwd; cd ..; cd ..; ls -a;");*/
 
 	Smash& smash = Smash::GetInstance();
 
