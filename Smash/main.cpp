@@ -1,9 +1,14 @@
 #include <iostream>
 #include <unistd.h>
+#include <vector>
+#include <string>
 #include <sys/wait.h>
 #include <signal.h>
 #include "Smash.h"
 #include "SigHandlers.h"
+#include "Parser.h"
+
+using std::string;
 
 //todo: remove later
 void CallExternal(string command)
@@ -46,16 +51,25 @@ int main(int argc, char* argv[])
 		perror("smash error: failed to set alarm handler");
 	}
 
-	Smash& smash = Smash::GetInstance();
+	char* command = "\t\n\t ls -a -o&   \n\t";
+
+	bool isBG = IsRunInBackground(command);
+	std::string x = RemoveBackgroundSign(command);
+
+	SpecialCommands cmdType = GetSpecialCommand(command);
+
+	auto res = ParseCommand(string(command));
 
 	CallExternal("pwd; cd ..; ls -a;");
+
+	Smash& smash = Smash::GetInstance();
 
 	while (true)
 	{
 		std::cout << smash.GetPrompt();
 		std::string cmdStr;
 		std::getline(std::cin, cmdStr);
-		smash.ExecuteCommand(cmdStr.c_str());
+		smash.ExecuteCommand(cmdStr);
 	}
 
 	return 0;

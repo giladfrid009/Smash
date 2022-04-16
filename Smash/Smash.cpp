@@ -1,9 +1,9 @@
 #include "Smash.h"
 #include "Commands.h"
 
-#include <string.h>
+#include <string>
 
-using namespace std;
+using std::string;
 
 Smash::Smash()
 {
@@ -16,7 +16,7 @@ Smash::~Smash()
 /**
 * Creates and returns a pointer to Command class which matches the given command line (cmdStr)
 */
-Command* Smash::CreateCommand(const char* cmdStr)
+Command* Smash::CreateCommand(string& cmdStr)
 {
 	// For example:
 	/*
@@ -38,7 +38,7 @@ Command* Smash::CreateCommand(const char* cmdStr)
 	return nullptr;
 }
 
-void Smash::ExecuteCommand(const char* cmdStr)
+void Smash::ExecuteCommand(string& cmdStr)
 {
 	// for example:
 	// Command* cmd = CreateCommand(cmdStr);

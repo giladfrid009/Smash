@@ -1,21 +1,12 @@
 #include "Parser.h"
-#include <string.h>
-#include <iostream>
+#include "Identifiers.h"
+#include <string>
 #include <sstream>
-#include <iomanip>
+#include <vector>
 
-using namespace std;
-
-#if 0
-#define FUNC_ENTRY()  \
-  cout << __PRETTY_FUNCTION__ << " --> " << endl;
-
-#define FUNC_EXIT()  \
-  cout << __PRETTY_FUNCTION__ << " <-- " << endl;
-#else
-#define FUNC_ENTRY()
-#define FUNC_EXIT()
-#endif
+using std::string;
+using std::vector;
+using std::istringstream;
 
 const string WHITESPACE = " \n\r\t\f\v";
 
@@ -36,45 +27,154 @@ string Trim(const string& str)
 	return RightTrim(LeftTrim(str));
 }
 
-int ParseCommand(const char* cmdStr, char** args)
+vector<string> ParseCommand(const string& cmdStr)
 {
-	FUNC_ENTRY()
-		int i = 0;
+	istringstream iss(Trim(cmdStr));
+	string buffer;
+	vector<string> result;
 
-	std::istringstream iss(Trim(std::string(cmdStr)).c_str());
-
-	for (string s; iss >> s; )
+	while (iss >> buffer)
 	{
-		args[i] = (char*)malloc(s.length() + 1);
-		memset(args[i], 0, s.length() + 1);
-		strcpy(args[i], s.c_str());
-		args[++i] = NULL;
+		result.push_back(buffer);
 	}
-	return i;
 
-	FUNC_EXIT()
+	return result;
 }
 
-bool IsBackgroundComamnd(const char* cmdStr)
+vector<string> Split(const string& cmdStr, string seperator)
 {
-	const string str(cmdStr);
-	return str[str.find_last_not_of(WHITESPACE)] == '&';
+	size_t sepLen = seperator.length();
+	size_t startPos = 0;
+	size_t endPos;
+	string buffer;
+	vector<string> result;
+
+	while ((endPos = cmdStr.find(seperator, startPos)) != string::npos)
+	{
+		buffer = cmdStr.substr(startPos, endPos - startPos);
+		startPos = endPos + sepLen;
+		result.push_back(buffer);
+	}
+
+	result.push_back(cmdStr.substr(startPos));
+
+	return result;
 }
 
-void RemoveBackgroundSign(char* cmdStr)
+Commands GetCommand(const char* cmdStr)
 {
+	Identifiers I;
 	const string str(cmdStr);
-	size_t idx = str.find_last_not_of(WHITESPACE);
 
-	if (idx == string::npos)
+	if (GetSpecialCommand(cmdStr) != SpecialCommands::None)
 	{
-		return;
+		return Commands::Special;
 	}
 
-	if (cmdStr[idx] != '&')
+	if (str.find(I.Background) != string::npos)
 	{
-		return;
+		return Commands::Background;
 	}
-	cmdStr[idx] = ' ';
-	cmdStr[str.find_last_not_of(WHITESPACE, idx) + 1] = 0;
+
+	if (str.find(I.ChangeDir) != string::npos)
+	{
+		return Commands::ChangeDir;
+	}
+
+	if (str.find(I.ChangePrompt) != string::npos)
+	{
+		return Commands::ChangePrompt;
+	}
+
+	if (str.find(I.Foreground) != string::npos)
+	{
+		return Commands::Foreground;
+	}
+
+	if (str.find(I.Jobs) != string::npos)
+	{
+		return Commands::Jobs;
+	}
+
+	if (str.find(I.Kill) != string::npos)
+	{
+		return Commands::Kill;
+	}
+
+	if (str.find(I.Quit) != string::npos)
+	{
+		return Commands::Quit;
+	}
+
+	if (str.find(I.ShowPid) != string::npos)
+	{
+		return Commands::ShowPid;
+	}
+
+	if (str.find(I.Tail) != string::npos)
+	{
+		return Commands::Tail;
+	}
+
+	if (str.find(I.Touch) != string::npos)
+	{
+		return Commands::Touch;
+	}
+
+	return Commands::Unknown;
+}
+
+SpecialCommands GetSpecialCommand(const char* cmdStr)
+{
+	Identifiers I;
+	const string str(cmdStr);
+
+	if (str.find(I.Timeout) != string::npos)
+	{
+		return SpecialCommands::Timeout;
+	}
+
+	if (str.find(I.PipeErr) != string::npos)
+	{
+		return SpecialCommands::PipeErr;
+	}
+
+	if (str.find(I.PipeOut) != string::npos)
+	{
+		return SpecialCommands::PipeOut;
+	}
+
+	if (str.find(I.RedirectAppend) != string::npos)
+	{
+		return SpecialCommands::RedirectAppend;
+	}
+
+	if (str.find(I.RedirectWrite) != string::npos)
+	{
+		return SpecialCommands::RedirectWrite;
+	}
+
+	return SpecialCommands::None;
+}
+
+bool IsRunInBackground(const string& cmdStr)
+{
+	return cmdStr[cmdStr.find_last_not_of(WHITESPACE)] == '&';
+}
+
+string RemoveBackgroundSign(const string& cmdStr)
+{
+	size_t len = cmdStr.find_last_not_of(WHITESPACE);
+
+	if (len == string::npos)
+	{
+		return cmdStr;
+	}
+
+	if (cmdStr[len] != '&')
+	{
+		return cmdStr;
+	}
+
+	return RightTrim(cmdStr.substr(0, len));
 }

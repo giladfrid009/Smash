@@ -2,11 +2,8 @@
 #define SMASH_H
 
 #include <vector>
-#include <string.h>
-#include <iostream>
+#include <string>
 #include "Commands.h"
-
-using namespace std;
 
 class Smash
 {
@@ -29,14 +26,14 @@ class Smash
 		return instance;
 	}
 
-	Command* CreateCommand(const char* cmdStr);
+	Command* CreateCommand(std::string& cmdStr);
 
 	std::string GetPrompt()
 	{
 		return promptText + "> ";
 	}
 
-	void ExecuteCommand(const char* cmdStr);
+	void ExecuteCommand(std::string& cmdStr);
 };
 
 #endif // !SMASH_H
