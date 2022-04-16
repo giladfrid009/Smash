@@ -28,10 +28,7 @@ class Smash
 
 	Command* CreateCommand(std::string& cmdStr);
 
-	std::string GetPrompt()
-	{
-		return promptText + "> ";
-	}
+	std::string GetPrompt();
 
 	void ExecuteCommand(std::string& cmdStr);
 };

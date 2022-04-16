@@ -4,6 +4,8 @@
 
 #include <vector>
 #include <string>
+#include <unistd.h>
+#include <iostream>
 
 using std::string;
 using std::vector;
@@ -41,6 +43,11 @@ Command* Smash::CreateCommand(string& cmdStr)
 	return nullptr;
 }
 
+inline string Smash::GetPrompt()
+{
+	return promptText + "> ";
+}
+
 void Smash::ExecuteCommand(string& cmdStr)
 {
 	Command* cmd = CreateCommand(cmdStr);
@@ -50,7 +57,35 @@ void Smash::ExecuteCommand(string& cmdStr)
 		return;
 	}
 
-	cmd->Execute();
+	if (GetCommand(cmdStr) == Commands::Unknown) //todo: need to fork and execv and not use system function
+	{
+		pid_t pid = fork();
+
+		if (pid == 0)
+		{
+			//todo: move into cmd->Execute() probably
+			setpgrp();
+
+			char* arr[] = {"bash", "-c", &cmdStr[0], NULL};
+
+			execv("/bin/bash", arr);
+			std::cout << "cant exec\n";
+			exit(0);
+		}
+		else if (pid > 0)
+		{
+			waitpid(pid, nullptr, 0);
+			std::cout << "success\n";
+		}
+		else
+		{
+			std::cout << "failed fork\n";
+		}
+	}
+	else
+	{
+		cmd->Execute();
+	}
 
 	delete cmd;
 }
