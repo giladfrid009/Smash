@@ -41,44 +41,44 @@ string Smash::Prompt()
 
 void Smash::ExecuteCommand(string& cmdStr)
 {
+	bool inBackground = IsRunInBackground(cmdStr);
+
 	vector<string> cmdArgs = ParseCommand(cmdStr);
 
 	Command* cmd = CreateCommand(cmdStr, cmdArgs);
+
+	jobs.RemoveFinished();
 
 	if (cmd == nullptr)
 	{
 		return;
 	}
 
-	if (CommandType(cmdArgs) == Commands::Unknown) //todo: need to fork and execv and not use system function
+	if (CommandType(cmdArgs) == Commands::Unknown)
 	{
 		pid_t pid = fork();
 
-		if (pid == 0)
+		if (pid < 0)
 		{
-			//todo: move into cmd->Execute() probably
+			perror("smash error: fork failure");
+		}
+		else if (pid == 0)
+		{
 			setpgrp();
-
-			char* arr[] = {"bash", "-c", &cmdStr[0], NULL};
-
-			execv("/bin/bash", arr);
-			std::cout << "cant exec\n";
-			exit(0);
+			cmd->Execute();
 		}
-		else if (pid > 0)
+		else if (inBackground)
 		{
-			waitpid(pid, nullptr, 0);
-			std::cout << "success\n";
+			jobs.AddJob(pid, cmd, false);
+			return;
 		}
-		else
-		{
-			std::cout << "failed fork\n";
-		}
+
+		waitpid(pid, nullptr, 0);
+		delete cmd;
+		return;
 	}
-	else
-	{
-		cmd->Execute();
-	}
+
+	cmd->Execute();
 
 	delete cmd;
 }

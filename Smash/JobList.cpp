@@ -33,15 +33,13 @@ void JobEntry::UpdateStatus()
 	{
 		return;
 	}
-	else if (result > 0)
+	else if (result == pid)
 	{
-		assert(result == pid);
 		status = JobStatus::Finished;
 	}
 	else
 	{
-		//todo: handle error correctly
-		perror("smash error: bad wait pid check");
+		perror("smash error: waitpid failure");
 	}
 }
 
@@ -77,6 +75,8 @@ JobsList::~JobsList()
 
 void JobsList::AddJob(pid_t pid, Command* command, bool isStopped)
 {
+	RemoveFinished();
+
 	if (command == nullptr)
 	{
 		return;
@@ -84,13 +84,15 @@ void JobsList::AddJob(pid_t pid, Command* command, bool isStopped)
 
 	int jobId = NextJobId();
 
-	JobEntry job(jobId, pid, command, isStopped);
+	JobEntry job = JobEntry(jobId, pid, command, isStopped);
 
 	jobs[jobId] = job;
 }
 
 void JobsList::Print()
 {
+	RemoveFinished();
+
 	vector <int> keys;
 
 	for (auto i = jobs.begin(); i != jobs.end(); i++)
@@ -125,21 +127,23 @@ void JobsList::UpdateStatus()
 
 void JobsList::RemoveFinished()
 {
+	UpdateStatus();
+
 	for (auto i = jobs.begin(); i != jobs.end(); i++)
 	{
 		JobEntry job = i->second;
 
 		if (job.Status() == JobStatus::Finished)
 		{
-			job.Destroy();
 			jobs.erase(i->first);
+			job.Destroy();
 		}
 	}
 }
 
 int JobsList::NextJobId()
 {
-	int max = 1;
+	int max = 0;
 
 	for (auto i = jobs.begin(); i != jobs.end(); i++)
 	{
@@ -149,5 +153,5 @@ int JobsList::NextJobId()
 		}
 	}
 
-	return max;
+	return max + 1;
 }

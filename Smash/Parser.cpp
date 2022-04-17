@@ -31,7 +31,9 @@ string Trim(const string& str)
 
 vector<string> ParseCommand(const string& cmdStr)
 {
-	istringstream iss(Trim(cmdStr));
+	string formatted = Trim(RemoveBackgroundSign(cmdStr));
+
+	istringstream iss(formatted);
 	string buffer;
 	vector<string> result;
 

@@ -65,4 +65,4 @@ class SleepPrintCommand : public InternalCommand
 	void Execute() override;
 };
 
-#endif //SMASH_COMMAND_H_
+#endif //SMASH_COMMAND_H

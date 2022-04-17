@@ -2,12 +2,14 @@
 #define SMASH_H
 
 #include "Commands.h"
+#include "JobList.h"
 #include <vector>
 #include <string>
 
 class Smash
 {
 	private:
+	JobsList jobs;
 	std::string promptText = "smash";
 
 	Smash();

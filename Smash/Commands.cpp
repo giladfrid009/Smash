@@ -36,8 +36,15 @@ Command* ExternalCommand::Create(string& cmdStr, vector<string>& cmdArgs)
 
 void ExternalCommand::Execute()
 {
-	string formattedCmd = "bash -c \"" + cmdStr + "\"";
-	system(formattedCmd.c_str());
+	string formatted = Trim(RemoveBackgroundSign(cmdStr));
+
+	char* args[] = {"bash", "-c", &formatted[0], NULL};
+
+	execv("/bin/bash", args);
+
+	perror("smash error: execv failure");
+
+	exit(0);
 }
 
 SleepPrintCommand::SleepPrintCommand(string& cmdStr, int duration, string messege) : InternalCommand(cmdStr)
