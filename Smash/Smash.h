@@ -20,7 +20,7 @@ class Smash
 
 	~Smash();
 
-	static Smash& GetInstance()
+	static Smash& Instance()
 	{
 		static Smash instance;
 		return instance;
@@ -28,7 +28,7 @@ class Smash
 
 	Command* CreateCommand(std::string& cmdStr, std::vector<std::string>& cmdArgs);
 
-	std::string GetPrompt();
+	std::string Prompt();
 
 	void ExecuteCommand(std::string& cmdStr);
 };

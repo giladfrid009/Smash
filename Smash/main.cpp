@@ -38,11 +38,11 @@ int main(int argc, char* argv[])
 
 	CallExternal("pwd; cd ..; cd ..; ls -a;");*/
 
-	Smash& smash = Smash::GetInstance();
+	Smash& smash = Smash::Instance();
 
 	while (true)
 	{
-		std::cout << smash.GetPrompt();
+		std::cout << smash.Prompt();
 		std::string cmdStr;
 		std::getline(std::cin, cmdStr);
 		smash.ExecuteCommand(cmdStr);

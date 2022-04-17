@@ -13,7 +13,7 @@ Command::Command(std::string cmdStr)
 	this->cmdStr = cmdStr;
 }
 
-std::string Command::GetCommandString()
+std::string Command::CommandString()
 {
 	return cmdStr;
 }
@@ -50,7 +50,7 @@ Command* SleepPrintCommand::Create(string& cmdStr, vector<string>& cmdArgs)
 {
 	try
 	{
-		if (GetCommand(cmdArgs) != Commands::SleepPrint)
+		if (CommandType(cmdArgs) != Commands::SleepPrint)
 		{
 			return nullptr;
 		}

@@ -20,7 +20,7 @@ class Command
 
 	virtual void Execute() = 0;
 
-	std::string GetCommandString();
+	std::string CommandString();
 };
 
 class ExternalCommand : public Command

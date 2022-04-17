@@ -43,6 +43,7 @@ vector<string> ParseCommand(const string& cmdStr)
 	return result;
 }
 
+//todo: remove if unused
 vector<string> Split(const string& cmdStr, string seperator)
 {
 	size_t sepLen = seperator.length();
@@ -90,7 +91,8 @@ static bool Contains(vector<string>& cmdStr, string predicate)
 	return std::any_of(cmdStr.begin(), cmdStr.end(), [predicate] (string str) {return str == predicate; });
 }
 
-Commands GetCommand(vector<string>& cmdArgs)
+//todo: find better name
+Commands CommandType(vector<string>& cmdArgs)
 {
 	if (cmdArgs.size() < 1) return Commands::Unknown;
 

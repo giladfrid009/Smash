@@ -54,7 +54,7 @@ void JobEntry::Print()
 {
 	int diffTime = (int)difftime(time(nullptr), startTime);
 
-	std::cout << "[" << jobId << "] " << command->GetCommandString() << " : " << pid << " " << diffTime;
+	std::cout << "[" << jobId << "] " << command->CommandString() << " : " << pid << " " << diffTime;
 
 	if (status == JobStatus::Stopped)
 	{

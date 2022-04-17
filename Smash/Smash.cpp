@@ -20,9 +20,9 @@ Smash::~Smash()
 
 Command* Smash::CreateCommand(string& cmdStr, vector<string>& cmdArgs)
 {
-	Commands cmdKind = GetCommand(cmdArgs);
+	Commands cmd = CommandType(cmdArgs);
 
-	switch (cmdKind)
+	switch (cmd)
 	{
 		case (Commands::Unknown): return ExternalCommand::Create(cmdStr, cmdArgs);
 
@@ -34,7 +34,7 @@ Command* Smash::CreateCommand(string& cmdStr, vector<string>& cmdArgs)
 	return nullptr;
 }
 
-string Smash::GetPrompt()
+string Smash::Prompt()
 {
 	return promptText + "> ";
 }
@@ -50,7 +50,7 @@ void Smash::ExecuteCommand(string& cmdStr)
 		return;
 	}
 
-	if (GetCommand(cmdArgs) == Commands::Unknown) //todo: need to fork and execv and not use system function
+	if (CommandType(cmdArgs) == Commands::Unknown) //todo: need to fork and execv and not use system function
 	{
 		pid_t pid = fork();
 
