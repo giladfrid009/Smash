@@ -38,6 +38,8 @@ Command* Smash::CreateCommand(string& cmdStr, vector<string>& cmdArgs)
 
 			case (Commands::Jobs): return JobsCommand::Create(cmdStr, cmdArgs);
 
+			case (Commands::Kill): return KillCommand::Create(cmdStr, cmdArgs);
+
 			default: return nullptr;
 		}
 	}
