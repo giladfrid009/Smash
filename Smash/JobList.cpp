@@ -39,7 +39,7 @@ void JobEntry::UpdateStatus()
 	}
 	else
 	{
-		SysError("waitpid");
+		perror("smash error: waitpid failed");
 	}
 }
 

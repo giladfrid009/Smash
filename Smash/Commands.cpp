@@ -11,7 +11,7 @@
 using std::string;
 using std::vector;
 
-void SysError(string sysCall)
+static void SysError(string sysCall)
 {
 	string formatted = "smash error: " + sysCall + " failed";
 	perror(formatted.c_str());
@@ -52,7 +52,6 @@ void ExternalCommand::Execute()
 	execv("/bin/bash", args);
 
 	SysError("execv");
-
 	exit(0);
 }
 
@@ -64,13 +63,13 @@ SleepPrintCommand::SleepPrintCommand(string& cmdStr, int duration, string messeg
 
 Command* SleepPrintCommand::Create(string& cmdStr, vector<string>& cmdArgs)
 {
+	if (CommandType(cmdArgs) != Commands::SleepPrint)
+	{
+		return nullptr;
+	}
+
 	try
 	{
-		if (CommandType(cmdArgs) != Commands::SleepPrint)
-		{
-			return nullptr;
-		}
-
 		int duration = std::stoi(cmdArgs[1]);
 
 		return new SleepPrintCommand(cmdStr, duration, cmdArgs[2]);

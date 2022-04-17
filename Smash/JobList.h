@@ -73,14 +73,6 @@ class JobsList
 	private:
 
 	int NextJobId();
-
-	/*JobEntry* GetJobById(int jobId);
-
-	void RemoveJobById(int jobId);
-
-	JobEntry* GetLastJob(int* lastJobId);
-
-	JobEntry* GetLastStoppedJob(int* jobId);*/
 };
 
 #endif

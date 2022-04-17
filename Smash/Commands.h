@@ -6,8 +6,6 @@
 #include <sys/wait.h>
 #include <cassert>
 
-void SysError(string sysCall);
-
 class Command
 {
 	protected:

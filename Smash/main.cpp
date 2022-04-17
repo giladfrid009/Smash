@@ -14,29 +14,18 @@ int main(int argc, char* argv[])
 {
 	if (signal(SIGTSTP, Handler_CtrlZ) == SIG_ERR)
 	{
-		SysError("signal");
+		perror("smash error: signal failed");
 	}
 
 	if (signal(SIGINT, Handler_CtrlC) == SIG_ERR)
 	{
-		SysError("signal");
+		perror("smash error: signal failed");
 	}
 
 	if (signal(SIGALRM, Handler_Alarm) == SIG_ERR) //todo: fix later
 	{
-		SysError("signal");
+		perror("smash error: signal failed");
 	}
-
-	/*string command = "cd ..; cd ..; ls -a;  ";
-
-	bool isBG = IsRunInBackground(command);
-	std::string x = RemoveBackgroundSign(command);
-
-	SpecialCommands cmdType = GetSpecialCommand(command);
-
-	auto res = ParseCommand(command);
-
-	CallExternal("pwd; cd ..; cd ..; ls -a;");*/
 
 	Smash& smash = Smash::Instance();
 
