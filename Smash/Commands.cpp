@@ -11,6 +11,12 @@
 using std::string;
 using std::vector;
 
+void SysError(string sysCall)
+{
+	string formatted = "smash error: " + sysCall + " failed";
+	perror(formatted.c_str());
+}
+
 Command::Command(std::string cmdStr)
 {
 	this->cmdStr = cmdStr;
@@ -45,7 +51,7 @@ void ExternalCommand::Execute()
 
 	execv("/bin/bash", args);
 
-	perror("smash error: execv failure");
+	SysError("execv");
 
 	exit(0);
 }
@@ -87,19 +93,12 @@ JobsCommand::JobsCommand(std::string& cmdStr) : InternalCommand(cmdStr)
 
 Command* JobsCommand::Create(string& cmdStr, vector<string>& cmdArgs)
 {
-	try
-	{
-		if (CommandType(cmdArgs) != Commands::Jobs)
-		{
-			return nullptr;
-		}
-
-		return new JobsCommand(cmdStr);
-	}
-	catch (...)
+	if (CommandType(cmdArgs) != Commands::Jobs)
 	{
 		return nullptr;
 	}
+
+	return new JobsCommand(cmdStr);
 }
 
 void JobsCommand::Execute()
@@ -116,24 +115,28 @@ KillCommand::KillCommand(std::string& cmdStr, int signalNum, int jobId) : Intern
 
 Command* KillCommand::Create(std::string& cmdStr, std::vector<std::string>& cmdArgs)
 {
-	try
+	if (cmdArgs.size() != 3)
 	{
-		if (CommandType(cmdArgs) != Commands::Kill)
-		{
-			return nullptr;
-		}
-
-		int signalNum = (-1) * std::stoi(cmdArgs[1]);
-		int jobId = std::stoi(cmdArgs[2]);
-
-		return new KillCommand(cmdStr, signalNum, jobId);
+		fprintf(stderr, "smash error: kill: invalid arguments\n");
+		return nullptr;
 	}
-	catch (...)
+
+	if (CommandType(cmdArgs) != Commands::Kill)
 	{
 		return nullptr;
 	}
 
-	return nullptr;
+	try
+	{
+		int signalNum = (-1) * std::stoi(cmdArgs[1]);
+		int jobId = std::stoi(cmdArgs[2]);
+		return new KillCommand(cmdStr, signalNum, jobId);
+	}
+	catch (...)
+	{
+		fprintf(stderr, "smash error: kill: invalid arguments\n");
+		return nullptr;
+	}
 }
 
 void KillCommand::Execute()
@@ -147,13 +150,14 @@ void KillCommand::Execute()
 
 	if (pid < 0)
 	{
-		fprintf(stderr, "smash error : kill: job-id {0} does not exist", jobId);
+		fprintf(stderr, "smash error: kill: job-id {0} does not exist\n", jobId);
+		return;
 	}
 
 	int res = kill(pid, signalNum);
 
 	if (res < 0)
 	{
-		//todo: handle error
+		SysError("kill");
 	}
 }

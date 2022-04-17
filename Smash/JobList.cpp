@@ -39,13 +39,18 @@ void JobEntry::UpdateStatus()
 	}
 	else
 	{
-		perror("smash error: waitpid failure");
+		SysError("waitpid");
 	}
 }
 
 JobStatus JobEntry::Status()
 {
 	return status;
+}
+
+pid_t JobEntry::Pid()
+{
+	return pid;
 }
 
 void JobEntry::Print()
@@ -160,14 +165,15 @@ int JobsList::NextJobId()
 	return max + 1;
 }
 
-pid_t GetPid(int jobId)
+pid_t JobsList::GetPid(int jobId)
 {
 	for (auto i = jobs.begin(); i != jobs.end(); i++)
 	{
-		if (i->second.jobId == jobId)
+		if (i->first == jobId)
 		{
-			return i->second.pid;
+			return i->second.Pid();
 		}
 	}
+
 	return -1;
 }

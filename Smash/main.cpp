@@ -14,17 +14,17 @@ int main(int argc, char* argv[])
 {
 	if (signal(SIGTSTP, Handler_CtrlZ) == SIG_ERR)
 	{
-		perror("smash error: failed to set ctrl-Z handler");
+		SysError("signal");
 	}
 
 	if (signal(SIGINT, Handler_CtrlC) == SIG_ERR)
 	{
-		perror("smash error: failed to set ctrl-C handler");
+		SysError("signal");
 	}
 
 	if (signal(SIGALRM, Handler_Alarm) == SIG_ERR) //todo: fix later
 	{
-		perror("smash error: failed to set alarm handler");
+		SysError("signal");
 	}
 
 	/*string command = "cd ..; cd ..; ls -a;  ";

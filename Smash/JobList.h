@@ -38,6 +38,8 @@ class JobEntry
 
 	JobStatus Status();
 
+	pid_t Pid();
+
 	void Print();
 
 	void Destroy();

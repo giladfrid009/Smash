@@ -68,7 +68,7 @@ void Smash::ExecuteCommand(string& cmdStr)
 
 		if (pid < 0)
 		{
-			perror("smash error: fork failure");
+			SysError("fork");
 		}
 		else if (pid == 0)
 		{
@@ -87,6 +87,5 @@ void Smash::ExecuteCommand(string& cmdStr)
 	}
 
 	cmd->Execute();
-
 	delete cmd;
 }
