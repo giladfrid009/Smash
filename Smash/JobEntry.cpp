@@ -22,9 +22,8 @@ JobEntry::JobEntry(int jobID, pid_t pid, Command* command, bool isStopped)
 JobStatus JobEntry::Status()
 {
 	//todo: add Stop() and Continue() for JobList
-	//todo: should kill use Stop() and Continue() when sending these signals?
 
-	// jobs stopped = SIGTSTP, not SIGSTOP
+	// jobs stopped = SIGTSTP
 	// jobs continued = SIGOCONT
 
 	pid_t result = waitpid(pid, nullptr, WNOHANG);

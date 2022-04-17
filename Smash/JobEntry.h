@@ -24,7 +24,7 @@ class JobEntry
 
 	JobEntry();
 
-	//todo: maybe jobEntry can accept ONLY externalCommands. make sure.
+	//todo: can accept ONLY externalCommands
 	JobEntry(int jobID, pid_t pid, Command* command, bool isStopped);
 
 	JobStatus Status();

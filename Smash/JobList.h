@@ -23,7 +23,7 @@ class JobsList
 
 	~JobsList();
 
-	//todo: maybe job can accept ONLY externalCommands. make sure.
+	//todo: can accept ONLY ExternalCommands
 	void AddJob(pid_t pid, Command* command, bool isStopped = false);
 
 	void Print();

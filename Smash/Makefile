@@ -1,5 +1,3 @@
-#TODO: add headers
-#TODO: add srcs
 SUBMITTERS := 314615113_322784729
 COMPILER := g++
 COMPILER_FLAGS := --std=c++11 -Wall

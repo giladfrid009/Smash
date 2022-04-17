@@ -47,9 +47,8 @@ void JobsList::KillAll()
 {
 	//todo: send kill signal to all processes
 	// wait for all processes till no-one is left
-	// call UpdateStatus
-	// make sure everyone are stopped
-	// remove all entries from jobs
+	// call RemoveFinished()
+	// make sure everyone are gone
 }
 
 
