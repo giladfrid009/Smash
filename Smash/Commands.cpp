@@ -22,7 +22,7 @@ ExternalCommand::ExternalCommand(string& cmdStr) : Command(cmdStr)
 {
 }
 
-Command* ExternalCommand::Create(string& cmdStr, std::vector<std::string>& cmdArgs)
+Command* ExternalCommand::Create(string& cmdStr, vector<string>& cmdArgs)
 {
 	try
 	{
@@ -40,22 +40,17 @@ void ExternalCommand::Execute()
 	system(formattedCmd.c_str());
 }
 
-SleepPrintCommand::SleepPrintCommand(std::string& cmdStr, int duration, string messege) : InternalCommand(cmdStr)
+SleepPrintCommand::SleepPrintCommand(string& cmdStr, int duration, string messege) : InternalCommand(cmdStr)
 {
 	this->duration = (unsigned int)duration;
 	this->messege = messege;
 }
 
-Command* SleepPrintCommand::Create(std::string& cmdStr, std::vector<std::string>& cmdArgs)
+Command* SleepPrintCommand::Create(string& cmdStr, vector<string>& cmdArgs)
 {
 	try
 	{
-		if (cmdArgs.size() != 3)
-		{
-			return nullptr;
-		}
-
-		if (GetCommand(cmdArgs[0]) != Commands::SleepPrint)
+		if (GetCommand(cmdArgs) != Commands::SleepPrint)
 		{
 			return nullptr;
 		}

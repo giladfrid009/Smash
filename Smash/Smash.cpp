@@ -18,26 +18,17 @@ Smash::~Smash()
 {
 }
 
-Command* Smash::CreateCommand(string& cmdStr)
+Command* Smash::CreateCommand(string& cmdStr, vector<string>& cmdArgs)
 {
-	Commands cmdKind = GetCommand(cmdStr);
-
-	vector<string> cmdArgs = ParseCommand(cmdStr);
+	Commands cmdKind = GetCommand(cmdArgs);
 
 	switch (cmdKind)
 	{
-		case (Commands::Unknown):
-		{
-			return ExternalCommand::Create(cmdStr, cmdArgs);
-		}
-		case (Commands::SleepPrint):
-		{
-			return SleepPrintCommand::Create(cmdStr, cmdArgs);
-		}
-		default:
-		{
-			return nullptr;
-		}
+		case (Commands::Unknown): return ExternalCommand::Create(cmdStr, cmdArgs);
+
+		case (Commands::SleepPrint): return SleepPrintCommand::Create(cmdStr, cmdArgs);
+
+		default: return nullptr;
 	}
 
 	return nullptr;
@@ -50,14 +41,16 @@ string Smash::GetPrompt()
 
 void Smash::ExecuteCommand(string& cmdStr)
 {
-	Command* cmd = CreateCommand(cmdStr);
+	vector<string> cmdArgs = ParseCommand(cmdStr);
+
+	Command* cmd = CreateCommand(cmdStr, cmdArgs);
 
 	if (cmd == nullptr)
 	{
 		return;
 	}
 
-	if (GetCommand(cmdStr) == Commands::Unknown) //todo: need to fork and execv and not use system function
+	if (GetCommand(cmdArgs) == Commands::Unknown) //todo: need to fork and execv and not use system function
 	{
 		pid_t pid = fork();
 

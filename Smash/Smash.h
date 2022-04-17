@@ -1,9 +1,9 @@
 #ifndef SMASH_H
 #define SMASH_H
 
+#include "Commands.h"
 #include <vector>
 #include <string>
-#include "Commands.h"
 
 class Smash
 {
@@ -26,7 +26,7 @@ class Smash
 		return instance;
 	}
 
-	Command* CreateCommand(std::string& cmdStr);
+	Command* CreateCommand(std::string& cmdStr, std::vector<std::string>& cmdArgs);
 
 	std::string GetPrompt();
 
