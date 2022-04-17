@@ -8,7 +8,7 @@
 #define COMMAND_ARGS_MAX_LENGTH (200) //todo: maybe remove these defines
 #define COMMAND_MAX_ARGS (20)
 
-Commands CommandType(std::vector<std::string>& cmdArgs);
+Commands CommandType(const std::vector<std::string>& cmdArgs);
 
 std::string LeftTrim(const std::string& str);
 std::string RightTrim(const std::string& str);

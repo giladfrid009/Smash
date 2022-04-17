@@ -17,7 +17,7 @@ static void SysError(string sysCall)
 	perror(formatted.c_str());
 }
 
-Command::Command(std::string cmdStr)
+Command::Command(const std::string& cmdStr)
 {
 	this->cmdStr = cmdStr;
 }
@@ -27,15 +27,15 @@ std::string Command::ToString()
 	return cmdStr;
 }
 
-InternalCommand::InternalCommand(std::string& cmdStr) : Command(cmdStr)
+InternalCommand::InternalCommand(const std::string& cmdStr) : Command(cmdStr)
 {
 }
 
-ExternalCommand::ExternalCommand(string& cmdStr) : Command(cmdStr)
+ExternalCommand::ExternalCommand(const string& cmdStr) : Command(cmdStr)
 {
 }
 
-Command* ExternalCommand::Create(string& cmdStr, vector<string>& cmdArgs)
+Command* ExternalCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
 {
 	return new ExternalCommand(cmdStr);
 }
@@ -52,13 +52,13 @@ void ExternalCommand::Execute()
 	exit(0);
 }
 
-SleepPrintCommand::SleepPrintCommand(string& cmdStr, int duration, string messege) : InternalCommand(cmdStr)
+SleepPrintCommand::SleepPrintCommand(const string& cmdStr, int duration, string messege) : InternalCommand(cmdStr)
 {
 	this->duration = (unsigned int)duration;
 	this->messege = messege;
 }
 
-Command* SleepPrintCommand::Create(string& cmdStr, vector<string>& cmdArgs)
+Command* SleepPrintCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
 {
 	if (CommandType(cmdArgs) != Commands::SleepPrint)
 	{
@@ -82,11 +82,11 @@ void SleepPrintCommand::Execute()
 	std::cout << messege << "\n";
 }
 
-JobsCommand::JobsCommand(std::string& cmdStr) : InternalCommand(cmdStr)
+JobsCommand::JobsCommand(const std::string& cmdStr) : InternalCommand(cmdStr)
 {
 }
 
-Command* JobsCommand::Create(string& cmdStr, vector<string>& cmdArgs)
+Command* JobsCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
 {
 	if (CommandType(cmdArgs) != Commands::Jobs)
 	{
@@ -102,13 +102,13 @@ void JobsCommand::Execute()
 	instance.jobs.Print();
 }
 
-KillCommand::KillCommand(std::string& cmdStr, int signalNum, int jobID) : InternalCommand(cmdStr)
+KillCommand::KillCommand(const std::string& cmdStr, int signalNum, int jobID) : InternalCommand(cmdStr)
 {
 	this->signalNum = signalNum;
 	this->jobID = jobID;
 }
 
-Command* KillCommand::Create(std::string& cmdStr, std::vector<std::string>& cmdArgs)
+Command* KillCommand::Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs)
 {
 	if (CommandType(cmdArgs) != Commands::Kill)
 	{
@@ -117,7 +117,7 @@ Command* KillCommand::Create(std::string& cmdStr, std::vector<std::string>& cmdA
 
 	if (cmdArgs.size() != 3)
 	{
-		fprintf(stderr, "smash error: kill: invalid arguments\n");
+		std::cerr << "smash error: kill: invalid arguments" << std::endl;
 		return nullptr;
 	}
 
@@ -129,7 +129,7 @@ Command* KillCommand::Create(std::string& cmdStr, std::vector<std::string>& cmdA
 	}
 	catch (...)
 	{
-		fprintf(stderr, "smash error: kill: invalid arguments\n");
+		std::cerr << "smash error: kill: invalid arguments" << std::endl;
 		return nullptr;
 	}
 }
@@ -140,12 +140,9 @@ void KillCommand::Execute()
 
 	int pid = instance.jobs.GetPid(jobID);
 
-	//todo: go over all error handling
-	//todo: make all prints this way
-
 	if (pid < 0)
 	{
-		fprintf(stderr, "smash error: kill: job-id {0} does not exist\n", jobID);
+		std::cerr << "smash error: kill: job-id " << jobID << " does not exist" << std::endl;
 		return;
 	}
 

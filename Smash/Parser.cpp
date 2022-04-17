@@ -88,13 +88,13 @@ string RemoveBackgroundSign(const string& cmdStr)
 	return RightTrim(cmdStr.substr(0, len));
 }
 
-static bool Contains(vector<string>& cmdStr, string predicate)
+static bool Contains(const vector<string>& cmdStr, string predicate)
 {
 	return std::any_of(cmdStr.begin(), cmdStr.end(), [predicate] (string str) {return str == predicate; });
 }
 
 //todo: find better name
-Commands CommandType(vector<string>& cmdArgs)
+Commands CommandType(const vector<string>& cmdArgs)
 {
 	if (cmdArgs.size() < 1) return Commands::Unknown;
 
