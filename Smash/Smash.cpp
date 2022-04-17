@@ -18,6 +18,12 @@ Smash::~Smash()
 {
 }
 
+Smash& Smash::Instance()
+{
+	static Smash instance;
+	return instance;
+}
+
 Command* Smash::CreateCommand(string& cmdStr, vector<string>& cmdArgs)
 {
 	Commands cmd = CommandType(cmdArgs);
@@ -27,6 +33,8 @@ Command* Smash::CreateCommand(string& cmdStr, vector<string>& cmdArgs)
 		case (Commands::Unknown): return ExternalCommand::Create(cmdStr, cmdArgs);
 
 		case (Commands::SleepPrint): return SleepPrintCommand::Create(cmdStr, cmdArgs);
+
+		case (Commands::Jobs): return JobsCommand::Create(cmdStr, cmdArgs);
 
 		default: return nullptr;
 	}

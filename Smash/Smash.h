@@ -22,17 +22,17 @@ class Smash
 
 	~Smash();
 
-	static Smash& Instance()
-	{
-		static Smash instance;
-		return instance;
-	}
+	static Smash& Instance();
 
 	Command* CreateCommand(std::string& cmdStr, std::vector<std::string>& cmdArgs);
 
 	std::string Prompt();
 
 	void ExecuteCommand(std::string& cmdStr);
+
+	friend void JobsCommand::Execute();
+
+	friend void KillCommand::Execute();
 };
 
 #endif // !SMASH_H

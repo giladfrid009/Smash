@@ -66,6 +66,8 @@ class JobsList
 
 	void RemoveFinished();
 
+	pid_t GetPid(int jobId);
+
 	private:
 
 	int NextJobId();

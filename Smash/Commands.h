@@ -65,4 +65,37 @@ class SleepPrintCommand : public InternalCommand
 	void Execute() override;
 };
 
+class JobsCommand : public InternalCommand
+{
+	protected:
+
+	JobsCommand(std::string& cmdStr);
+
+	public:
+
+	static Command* Create(std::string& cmdStr, std::vector<std::string>& cmdArgs);
+
+	virtual ~JobsCommand() override = default;
+
+	void Execute() override;
+};
+
+class KillCommand : public InternalCommand
+{
+	protected:
+
+	int signalNum;
+	int jobId;
+
+	KillCommand(std::string& cmdStr, int signalNum, int jobId);
+
+	public:
+
+	static Command* Create(std::string& cmdStr, std::vector<std::string>& cmdArgs);
+
+	virtual ~KillCommand() override = default;
+
+	void Execute() override;
+};
+
 #endif //SMASH_COMMAND_H

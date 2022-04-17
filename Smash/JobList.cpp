@@ -129,14 +129,18 @@ void JobsList::RemoveFinished()
 {
 	UpdateStatus();
 
-	for (auto i = jobs.begin(); i != jobs.end(); i++)
+	for (auto i = jobs.begin(); i != jobs.end();)
 	{
-		JobEntry job = i->second;
+		JobEntry& job = i->second;
 
 		if (job.Status() == JobStatus::Finished)
 		{
-			jobs.erase(i->first);
 			job.Destroy();
+			i = jobs.erase(i);
+		}
+		else
+		{
+			i++;
 		}
 	}
 }
@@ -154,4 +158,16 @@ int JobsList::NextJobId()
 	}
 
 	return max + 1;
+}
+
+pid_t GetPid(int jobId)
+{
+	for (auto i = jobs.begin(); i != jobs.end(); i++)
+	{
+		if (i->second.jobId == jobId)
+		{
+			return i->second.pid;
+		}
+	}
+	return -1;
 }
