@@ -21,7 +21,7 @@ class JobEntry
 {
 	private:
 
-	int jobId;
+	int jobID;
 	pid_t pid;
 	Command* command;
 	JobStatus status;
@@ -32,7 +32,7 @@ class JobEntry
 	JobEntry();
 
 	//todo: maybe jobEntry can accept ONLY externalCommands. make sure.
-	JobEntry(int jobId, pid_t pid, Command* command, bool isStopped);
+	JobEntry(int jobID, pid_t pid, Command* command, bool isStopped);
 
 	void UpdateStatus();
 
@@ -68,11 +68,11 @@ class JobsList
 
 	void RemoveFinished();
 
-	pid_t GetPid(int jobId);
+	pid_t GetPid(int jobID);
 
 	private:
 
-	int NextJobId();
+	int NextID();
 };
 
 #endif

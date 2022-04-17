@@ -9,16 +9,16 @@ using std::vector;
 
 JobEntry::JobEntry()
 {
-	jobId = -1;
+	jobID = -1;
 	pid = -1;
 	command = nullptr;
 	status = JobStatus::Finished;
-	this->startTime = time(nullptr);
+	startTime = time(nullptr);
 }
 
-JobEntry::JobEntry(int jobId, pid_t pid, Command* command, bool isStopped)
+JobEntry::JobEntry(int jobID, pid_t pid, Command* command, bool isStopped)
 {
-	this->jobId = jobId;
+	this->jobID = jobID;
 	this->pid = pid;
 	this->command = command;
 	this->status = isStopped ? JobStatus::Stopped : JobStatus::Running;
@@ -55,9 +55,9 @@ pid_t JobEntry::Pid()
 
 void JobEntry::Print()
 {
-	int diffTime = (int)difftime(time(nullptr), startTime);
+	int diff = (int)difftime(time(nullptr), startTime);
 
-	std::cout << "[" << jobId << "] " << command->CommandString() << " : " << pid << " " << diffTime;
+	fprintf(stdout, "[{0}] {1} : {2}", jobID, command->ToString(), diff);
 
 	if (status == JobStatus::Stopped)
 	{
@@ -87,11 +87,11 @@ void JobsList::AddJob(pid_t pid, Command* command, bool isStopped)
 		return;
 	}
 
-	int jobId = NextJobId();
+	int newID = NextID();
 
-	JobEntry job = JobEntry(jobId, pid, command, isStopped);
+	JobEntry job = JobEntry(newID, pid, command, isStopped);
 
-	jobs[jobId] = job;
+	jobs[newID] = job;
 }
 
 void JobsList::Print()
@@ -150,7 +150,7 @@ void JobsList::RemoveFinished()
 	}
 }
 
-int JobsList::NextJobId()
+int JobsList::NextID()
 {
 	int max = 0;
 
@@ -165,11 +165,11 @@ int JobsList::NextJobId()
 	return max + 1;
 }
 
-pid_t JobsList::GetPid(int jobId)
+pid_t JobsList::GetPid(int jobID)
 {
 	for (auto i = jobs.begin(); i != jobs.end(); i++)
 	{
-		if (i->first == jobId)
+		if (i->first == jobID)
 		{
 			return i->second.Pid();
 		}

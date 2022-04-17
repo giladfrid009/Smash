@@ -22,7 +22,7 @@ Command::Command(std::string cmdStr)
 	this->cmdStr = cmdStr;
 }
 
-std::string Command::CommandString()
+std::string Command::ToString()
 {
 	return cmdStr;
 }
@@ -33,14 +33,7 @@ ExternalCommand::ExternalCommand(string& cmdStr) : Command(cmdStr)
 
 Command* ExternalCommand::Create(string& cmdStr, vector<string>& cmdArgs)
 {
-	try
-	{
-		return new ExternalCommand(cmdStr);
-	}
-	catch (...)
-	{
-		return nullptr;
-	}
+	return new ExternalCommand(cmdStr);
 }
 
 void ExternalCommand::Execute()
@@ -71,7 +64,6 @@ Command* SleepPrintCommand::Create(string& cmdStr, vector<string>& cmdArgs)
 	try
 	{
 		int duration = std::stoi(cmdArgs[1]);
-
 		return new SleepPrintCommand(cmdStr, duration, cmdArgs[2]);
 	}
 	catch (...)
@@ -106,30 +98,30 @@ void JobsCommand::Execute()
 	instance.jobs.Print();
 }
 
-KillCommand::KillCommand(std::string& cmdStr, int signalNum, int jobId) : InternalCommand(cmdStr)
+KillCommand::KillCommand(std::string& cmdStr, int signalNum, int jobID) : InternalCommand(cmdStr)
 {
 	this->signalNum = signalNum;
-	this->jobId = jobId;
+	this->jobID = jobID;
 }
 
 Command* KillCommand::Create(std::string& cmdStr, std::vector<std::string>& cmdArgs)
 {
+	if (CommandType(cmdArgs) != Commands::Kill)
+	{
+		return nullptr;
+	}
+
 	if (cmdArgs.size() != 3)
 	{
 		fprintf(stderr, "smash error: kill: invalid arguments\n");
 		return nullptr;
 	}
 
-	if (CommandType(cmdArgs) != Commands::Kill)
-	{
-		return nullptr;
-	}
-
 	try
 	{
 		int signalNum = (-1) * std::stoi(cmdArgs[1]);
-		int jobId = std::stoi(cmdArgs[2]);
-		return new KillCommand(cmdStr, signalNum, jobId);
+		int jobID = std::stoi(cmdArgs[2]);
+		return new KillCommand(cmdStr, signalNum, jobID);
 	}
 	catch (...)
 	{
@@ -142,14 +134,14 @@ void KillCommand::Execute()
 {
 	Smash& instance = Smash::Instance();
 
-	int pid = instance.jobs.GetPid(jobId);
+	int pid = instance.jobs.GetPid(jobID);
 
 	//todo: go over all error handling
 	//todo: make all prints this way
 
 	if (pid < 0)
 	{
-		fprintf(stderr, "smash error: kill: job-id {0} does not exist\n", jobId);
+		fprintf(stderr, "smash error: kill: job-id {0} does not exist\n", jobID);
 		return;
 	}
 

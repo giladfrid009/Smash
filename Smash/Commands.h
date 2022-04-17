@@ -20,7 +20,7 @@ class Command
 
 	virtual void Execute() = 0;
 
-	std::string CommandString();
+	std::string ToString();
 };
 
 class ExternalCommand : public Command
@@ -85,9 +85,9 @@ class KillCommand : public InternalCommand
 	protected:
 
 	int signalNum;
-	int jobId;
+	int jobID;
 
-	KillCommand(std::string& cmdStr, int signalNum, int jobId);
+	KillCommand(std::string& cmdStr, int signalNum, int jobID);
 
 	public:
 
