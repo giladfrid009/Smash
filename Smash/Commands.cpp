@@ -4,8 +4,8 @@
 #include "Smash.h"
 #include <unistd.h>
 #include <string>
+#include <vector>
 #include <iostream>
-#include <sys/types.h>
 #include <signal.h>
 
 using std::string;

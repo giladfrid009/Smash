@@ -1,7 +1,6 @@
 #include "Smash.h"
 #include "Commands.h"
 #include "Parser.h"
-
 #include <vector>
 #include <string>
 #include <unistd.h>

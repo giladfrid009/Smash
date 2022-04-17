@@ -1,12 +1,12 @@
+#include "Smash.h"
+#include "SigHandlers.h"
+#include "Parser.h"
 #include <iostream>
 #include <unistd.h>
 #include <vector>
 #include <string>
 #include <sys/wait.h>
 #include <signal.h>
-#include "Smash.h"
-#include "SigHandlers.h"
-#include "Parser.h"
 
 using std::string;
 

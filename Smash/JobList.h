@@ -11,8 +11,6 @@
 #include <time.h>
 #include <map>
 
-
-
 class JobsList
 {
 	private:
@@ -42,4 +40,3 @@ class JobsList
 };
 
 #endif
-
