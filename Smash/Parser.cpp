@@ -3,12 +3,14 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <algorithm>
 
 using std::string;
 using std::vector;
 using std::istringstream;
 
 const string WHITESPACE = " \n\r\t\f\v";
+const Identifiers I;
 
 string LeftTrim(const string& str)
 {
@@ -83,94 +85,50 @@ string RemoveBackgroundSign(const string& cmdStr)
 	return RightTrim(cmdStr.substr(0, len));
 }
 
-Commands GetCommand(const string& cmdStr) //todo: need to split cmdStr and look for command only in first arg
+static bool Contains(vector<string>& cmdStr, string predicate)
 {
-	Identifiers I;
+	return std::any_of(cmdStr.begin(), cmdStr.end(), [predicate] (string str) {return str == predicate; });
+}
 
-	if (cmdStr.find(I.Timeout) != string::npos)
-	{
-		return Commands::Timeout;
-	}
+Commands GetCommand(vector<string>& cmdArgs)
+{
+	if (cmdArgs.size() < 1) return Commands::Unknown;
 
-	if (cmdStr.find(I.PipeErr) != string::npos)
-	{
-		return Commands::PipeErr;
-	}
+	if (Contains(cmdArgs, I.PipeOut)) return Commands::PipeOut;
 
-	if (cmdStr.find(I.PipeOut) != string::npos)
-	{
-		return Commands::PipeOut;
-	}
+	if (Contains(cmdArgs, I.PipeErr)) return Commands::PipeErr;
 
-	if (cmdStr.find(I.RedirectAppend) != string::npos)
-	{
-		return Commands::RedirectAppend;
-	}
+	if (Contains(cmdArgs, I.RedirectWrite)) return Commands::RedirectWrite;
 
-	if (cmdStr.find(I.RedirectWrite) != string::npos)
-	{
-		return Commands::RedirectWrite;
-	}
+	if (Contains(cmdArgs, I.RedirectAppend)) return Commands::RedirectAppend;
 
-	if (cmdStr.find(I.SleepPrint) != string::npos) //todo: remove later
-	{
-		return Commands::SleepPrint;
-	}
+	string cmd = cmdArgs[0];
 
-	if (cmdStr.find(I.Background) != string::npos)
-	{
-		return Commands::Background;
-	}
+	if (cmd == I.Background) return Commands::Background;
 
-	if (cmdStr.find(I.ChangeDir) != string::npos)
-	{
-		return Commands::ChangeDir;
-	}
+	if (cmd == I.ChangeDir) return Commands::ChangeDir;
 
-	if (cmdStr.find(I.ChangePrompt) != string::npos)
-	{
-		return Commands::ChangePrompt;
-	}
+	if (cmd == I.ChangePrompt) return Commands::ChangePrompt;
 
-	if (cmdStr.find(I.Foreground) != string::npos)
-	{
-		return Commands::Foreground;
-	}
+	if (cmd == I.Foreground) return Commands::Foreground;
 
-	if (cmdStr.find(I.Jobs) != string::npos)
-	{
-		return Commands::Jobs;
-	}
+	if (cmd == I.Jobs) return Commands::Jobs;
 
-	if (cmdStr.find(I.Kill) != string::npos)
-	{
-		return Commands::Kill;
-	}
+	if (cmd == I.Kill) return Commands::Kill;
 
-	if (cmdStr.find(I.PrintDir) != string::npos)
-	{
-		return Commands::PrintDir;
-	}
+	if (cmd == I.PrintDir) return Commands::PrintDir;
 
-	if (cmdStr.find(I.Quit) != string::npos)
-	{
-		return Commands::Quit;
-	}
+	if (cmd == I.Quit) return Commands::Quit;
 
-	if (cmdStr.find(I.ShowPid) != string::npos)
-	{
-		return Commands::ShowPid;
-	}
+	if (cmd == I.ShowPid) return Commands::ShowPid;
 
-	if (cmdStr.find(I.Tail) != string::npos)
-	{
-		return Commands::Tail;
-	}
+	if (cmd == I.SleepPrint) return Commands::SleepPrint; //todo: remove later
 
-	if (cmdStr.find(I.Touch) != string::npos)
-	{
-		return Commands::Touch;
-	}
+	if (cmd == I.Tail) return Commands::Tail;
+
+	if (cmd == I.Timeout) return Commands::Timeout;
+
+	if (cmd == I.Touch) return Commands::Touch;
 
 	return Commands::Unknown;
 }
