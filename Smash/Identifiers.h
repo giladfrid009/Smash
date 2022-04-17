@@ -4,7 +4,11 @@
 enum class Commands
 {
 	Unknown,
-	Special,
+	PipeOut,
+	PipeErr,
+	RedirectWrite,
+	RedirectAppend,
+	Timeout,
 	ChangePrompt,
 	ShowPid,
 	PrintDir,
@@ -17,16 +21,6 @@ enum class Commands
 	Tail,
 	Touch,
 	SleepPrint, //todo: remove later
-};
-
-enum class SpecialCommands
-{
-	None,
-	PipeOut,
-	PipeErr,
-	RedirectWrite,
-	RedirectAppend,
-	Timeout
 };
 
 class Identifiers

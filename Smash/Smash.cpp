@@ -43,7 +43,7 @@ Command* Smash::CreateCommand(string& cmdStr)
 	return nullptr;
 }
 
-inline string Smash::GetPrompt()
+string Smash::GetPrompt()
 {
 	return promptText + "> ";
 }

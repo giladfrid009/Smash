@@ -83,13 +83,33 @@ string RemoveBackgroundSign(const string& cmdStr)
 	return RightTrim(cmdStr.substr(0, len));
 }
 
-Commands GetCommand(const string& cmdStr)
+Commands GetCommand(const string& cmdStr) //todo: need to split cmdStr and look for command only in first arg
 {
 	Identifiers I;
 
-	if (GetSpecialCommand(cmdStr) != SpecialCommands::None)
+	if (cmdStr.find(I.Timeout) != string::npos)
 	{
-		return Commands::Special;
+		return Commands::Timeout;
+	}
+
+	if (cmdStr.find(I.PipeErr) != string::npos)
+	{
+		return Commands::PipeErr;
+	}
+
+	if (cmdStr.find(I.PipeOut) != string::npos)
+	{
+		return Commands::PipeOut;
+	}
+
+	if (cmdStr.find(I.RedirectAppend) != string::npos)
+	{
+		return Commands::RedirectAppend;
+	}
+
+	if (cmdStr.find(I.RedirectWrite) != string::npos)
+	{
+		return Commands::RedirectWrite;
 	}
 
 	if (cmdStr.find(I.SleepPrint) != string::npos) //todo: remove later
@@ -153,36 +173,4 @@ Commands GetCommand(const string& cmdStr)
 	}
 
 	return Commands::Unknown;
-}
-
-SpecialCommands GetSpecialCommand(const string& cmdStr)
-{
-	Identifiers I;
-
-	if (cmdStr.find(I.Timeout) != string::npos)
-	{
-		return SpecialCommands::Timeout;
-	}
-
-	if (cmdStr.find(I.PipeErr) != string::npos)
-	{
-		return SpecialCommands::PipeErr;
-	}
-
-	if (cmdStr.find(I.PipeOut) != string::npos)
-	{
-		return SpecialCommands::PipeOut;
-	}
-
-	if (cmdStr.find(I.RedirectAppend) != string::npos)
-	{
-		return SpecialCommands::RedirectAppend;
-	}
-
-	if (cmdStr.find(I.RedirectWrite) != string::npos)
-	{
-		return SpecialCommands::RedirectWrite;
-	}
-
-	return SpecialCommands::None;
 }
