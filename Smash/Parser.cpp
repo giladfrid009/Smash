@@ -9,24 +9,23 @@ using std::string;
 using std::vector;
 using std::istringstream;
 
-const string WHITESPACE = " \n\r\t\f\v";
 const Identifiers I;
 
-string LeftTrim(const string& str)
+string LeftTrim(const string& cmdStr)
 {
-	size_t start = str.find_first_not_of(WHITESPACE);
-	return (start == std::string::npos) ? "" : str.substr(start);
+	size_t start = cmdStr.find_first_not_of(I.Whitespace);
+	return (start == std::string::npos) ? "" : cmdStr.substr(start);
 }
 
-string RightTrim(const string& str)
+string RightTrim(const string& cmdStr)
 {
-	size_t end = str.find_last_not_of(WHITESPACE);
-	return (end == std::string::npos) ? "" : str.substr(0, end + 1);
+	size_t end = cmdStr.find_last_not_of(I.Whitespace);
+	return (end == std::string::npos) ? "" : cmdStr.substr(0, end + 1);
 }
 
-string Trim(const string& str)
+string Trim(const string& cmdStr)
 {
-	return RightTrim(LeftTrim(str));
+	return RightTrim(LeftTrim(cmdStr));
 }
 
 vector<string> ParseCommand(const string& cmdStr)
@@ -68,12 +67,12 @@ vector<string> Split(const string& cmdStr, string seperator)
 
 bool IsRunInBackground(const string& cmdStr)
 {
-	return cmdStr[cmdStr.find_last_not_of(WHITESPACE)] == '&';
+	return cmdStr[cmdStr.find_last_not_of(I.Whitespace)] == '&';
 }
 
 string RemoveBackgroundSign(const string& cmdStr)
 {
-	size_t len = cmdStr.find_last_not_of(WHITESPACE);
+	size_t len = cmdStr.find_last_not_of(I.Whitespace);
 
 	if (len == string::npos)
 	{
@@ -88,9 +87,9 @@ string RemoveBackgroundSign(const string& cmdStr)
 	return RightTrim(cmdStr.substr(0, len));
 }
 
-static bool Contains(const vector<string>& cmdStr, string predicate)
+static bool Contains(const vector<string>& cmdArgs, string predicate)
 {
-	return std::any_of(cmdStr.begin(), cmdStr.end(), [predicate] (string str) {return str == predicate; });
+	return std::any_of(cmdArgs.begin(), cmdArgs.end(), [predicate] (string str) {return str == predicate; });
 }
 
 //todo: find better name

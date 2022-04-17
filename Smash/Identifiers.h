@@ -27,6 +27,8 @@ class Identifiers
 {
 	public:
 
+	const char* Whitespace = " \n\r\t\f\v";
+
 	const char* SleepPrint = "snp"; //todo: remove later
 	const char* PipeOut = "|";
 	const char* PipeErr = "|&";
