@@ -27,6 +27,10 @@ std::string Command::ToString()
 	return cmdStr;
 }
 
+InternalCommand::InternalCommand(std::string& cmdStr) : Command(cmdStr)
+{
+}
+
 ExternalCommand::ExternalCommand(string& cmdStr) : Command(cmdStr)
 {
 }

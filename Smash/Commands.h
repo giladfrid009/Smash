@@ -25,11 +25,11 @@ class Command
 
 class ExternalCommand : public Command
 {
-	ExternalCommand(std::string& cmdStr);
-
 	public:
 
 	static Command* Create(std::string& cmdStr, std::vector<std::string>& cmdArgs);
+
+	ExternalCommand(std::string& cmdStr);
 
 	virtual ~ExternalCommand() = default;
 
@@ -40,9 +40,7 @@ class InternalCommand : public Command
 {
 	public:
 
-	InternalCommand(std::string& cmdStr) : Command(cmdStr)
-	{
-	}
+	InternalCommand(std::string& cmdStr);
 
 	virtual ~InternalCommand() override = default;
 };
@@ -54,11 +52,11 @@ class SleepPrintCommand : public InternalCommand
 	unsigned int duration;
 	std::string messege;
 
-	SleepPrintCommand(std::string& cmdStr, int duration, std::string messege);
-
 	public:
 
 	static Command* Create(std::string& cmdStr, std::vector<std::string>& cmdArgs);
+
+	SleepPrintCommand(std::string& cmdStr, int duration, std::string messege);
 
 	virtual ~SleepPrintCommand() override = default;
 
@@ -67,13 +65,11 @@ class SleepPrintCommand : public InternalCommand
 
 class JobsCommand : public InternalCommand
 {
-	protected:
-
-	JobsCommand(std::string& cmdStr);
-
 	public:
 
 	static Command* Create(std::string& cmdStr, std::vector<std::string>& cmdArgs);
+
+	JobsCommand(std::string& cmdStr);
 
 	virtual ~JobsCommand() override = default;
 
@@ -87,11 +83,11 @@ class KillCommand : public InternalCommand
 	int signalNum;
 	int jobID;
 
-	KillCommand(std::string& cmdStr, int signalNum, int jobID);
-
 	public:
 
 	static Command* Create(std::string& cmdStr, std::vector<std::string>& cmdArgs);
+
+	KillCommand(std::string& cmdStr, int signalNum, int jobID);
 
 	virtual ~KillCommand() override = default;
 
