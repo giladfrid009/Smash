@@ -7,72 +7,6 @@ using std::string;
 using std::map;
 using std::vector;
 
-JobEntry::JobEntry()
-{
-	jobID = -1;
-	pid = -1;
-	command = nullptr;
-	status = JobStatus::Finished;
-	startTime = time(nullptr);
-}
-
-JobEntry::JobEntry(int jobID, pid_t pid, Command* command, bool isStopped)
-{
-	this->jobID = jobID;
-	this->pid = pid;
-	this->command = command;
-	this->status = isStopped ? JobStatus::Stopped : JobStatus::Running;
-	this->startTime = time(nullptr);
-}
-
-void JobEntry::UpdateStatus()
-{
-	pid_t result = waitpid(pid, nullptr, WNOHANG);
-
-	if (result == 0)
-	{
-		return;
-	}
-	else if (result == pid)
-	{
-		status = JobStatus::Finished;
-	}
-	else
-	{
-		perror("smash error: waitpid failed");
-	}
-}
-
-JobStatus JobEntry::Status()
-{
-	return status;
-}
-
-pid_t JobEntry::Pid()
-{
-	return pid;
-}
-
-void JobEntry::Print()
-{
-	int diff = (int)difftime(time(nullptr), startTime);
-
-	std::cout << "[" << jobID << "] " << command->ToString() << " : " << diff;
-
-	if (status == JobStatus::Stopped)
-	{
-		std::cout << " (stopped)";
-	}
-
-	std::cout << std::endl;
-}
-
-void JobEntry::Destroy()
-{
-	//todo: may cause problems later in bg or fg
-	delete command;
-}
-
 JobsList::~JobsList()
 {
 	KillAll();
@@ -80,8 +14,6 @@ JobsList::~JobsList()
 
 void JobsList::AddJob(pid_t pid, Command* command, bool isStopped)
 {
-	RemoveFinished();
-
 	if (command == nullptr)
 	{
 		return;
@@ -96,8 +28,6 @@ void JobsList::AddJob(pid_t pid, Command* command, bool isStopped)
 
 void JobsList::Print()
 {
-	RemoveFinished();
-
 	vector <int> keys;
 
 	for (auto i = jobs.begin(); i != jobs.end(); i++)
@@ -122,18 +52,9 @@ void JobsList::KillAll()
 	// remove all entries from jobs
 }
 
-void JobsList::UpdateStatus()
-{
-	for (auto i = jobs.begin(); i != jobs.end(); i++)
-	{
-		i->second.UpdateStatus();
-	}
-}
 
 void JobsList::RemoveFinished()
 {
-	UpdateStatus();
-
 	for (auto i = jobs.begin(); i != jobs.end();)
 	{
 		JobEntry& job = i->second;

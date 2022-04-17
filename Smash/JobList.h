@@ -1,6 +1,7 @@
 #ifndef JOBLIST_H
 #define JOBLIST_H
 
+#include "JobEntry.h"
 #include "Commands.h"
 #include "Identifiers.h"
 #include "Parser.h"
@@ -10,40 +11,7 @@
 #include <time.h>
 #include <map>
 
-enum class JobStatus
-{
-	Running,
-	Stopped,
-	Finished
-};
 
-class JobEntry
-{
-	private:
-
-	int jobID;
-	pid_t pid;
-	Command* command;
-	JobStatus status;
-	time_t startTime;
-
-	public:
-
-	JobEntry();
-
-	//todo: maybe jobEntry can accept ONLY externalCommands. make sure.
-	JobEntry(int jobID, pid_t pid, Command* command, bool isStopped);
-
-	void UpdateStatus();
-
-	JobStatus Status();
-
-	pid_t Pid();
-
-	void Print();
-
-	void Destroy();
-};
 
 class JobsList
 {
@@ -63,8 +31,6 @@ class JobsList
 	void Print();
 
 	void KillAll();
-
-	void UpdateStatus();
 
 	void RemoveFinished();
 
