@@ -398,6 +398,8 @@ void QuitCommand::Execute()
 	{
 		Smash& instance = Smash::Instance();
 
+		std::cout << "smash: sending SIGKILL signal to " << instance.jobs.Size() << " jobs:" << std::endl;
+
 		instance.jobs.PrintQuit();
 	}
 
