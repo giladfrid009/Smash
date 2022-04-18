@@ -8,7 +8,7 @@ Roadmap:
 * Handle CTRL+Z, CTRL+C
 * Implement fg command
 * Implement quit command
-* Run extensive tests on fg, bg	
+* Bugfix - jobs removed by fg and readded later with ctrl+z should retain their original job-id
 * Implement io redirection '>'
 * Implement pipe command '|'
 * Handle SIGALARM
