@@ -44,11 +44,17 @@ void ExternalCommand::Execute()
 {
 	string formatted = Trim(RemoveBackgroundSign(cmdStr));
 
-	char* args[] = {"bash", "-c", &formatted[0], NULL};
+	if (formatted.empty())
+	{
+		formatted = " ";
+	}
+
+	char* const args[] = {"bash", "-c", &formatted[0], NULL};
 
 	execv("/bin/bash", args);
 
 	SysError("execv");
+
 	exit(0);
 }
 
