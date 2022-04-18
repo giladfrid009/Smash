@@ -404,7 +404,7 @@ void ForegroundCommand::Execute()
 
 Command* QuitCommand::Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs)
 {
-	if (CommandType(cmdArgs) != Commands::Kill)
+	if (CommandType(cmdArgs) != Commands::Quit)
 	{
 		return nullptr;
 	}

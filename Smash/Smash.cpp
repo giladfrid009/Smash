@@ -49,6 +49,8 @@ Command* Smash::CreateCommand(string& cmdStr, vector<string>& cmdArgs)
 
 			case (Commands::ShowPid): return ShowPidCommand::Create(cmdStr, cmdArgs);
 
+			case (Commands::Quit): return QuitCommand::Create(cmdStr, cmdArgs);
+
 			default: return nullptr;
 		}
 	}
