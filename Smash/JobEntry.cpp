@@ -50,12 +50,12 @@ pid_t JobEntry::Pid() const
 	return pid;
 }
 
-Command* JobEntry::CommandPtr()
+Command* JobEntry::CommandPtr() const
 {
 	return command;
 }
 
-void JobEntry::PrintJob()
+void JobEntry::PrintJob() const
 {
 	if (command == nullptr)
 	{
@@ -74,7 +74,7 @@ void JobEntry::PrintJob()
 	std::cout << std::endl;
 }
 
-void JobEntry::PrintQuit()
+void JobEntry::PrintQuit() const
 {
 	if (command == nullptr)
 	{

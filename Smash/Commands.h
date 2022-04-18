@@ -44,24 +44,6 @@ class InternalCommand : public Command
 	virtual ~InternalCommand() override = default;
 };
 
-class SleepPrintCommand : public InternalCommand
-{
-	protected:
-
-	unsigned int duration;
-	std::string messege;
-
-	public:
-
-	static Command* Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs);
-
-	SleepPrintCommand(const std::string& cmdStr, int duration, std::string messege);
-
-	virtual ~SleepPrintCommand() override = default;
-
-	void Execute() override;
-};
-
 class JobsCommand : public InternalCommand
 {
 	public:

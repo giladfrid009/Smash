@@ -23,12 +23,11 @@ class JobsList
 
 	~JobsList();
 
-	//todo: can accept ONLY ExternalCommands
 	void AddJob(pid_t pid, Command* command, bool isStopped = false);
 
-	void PrintJobs();
+	void PrintJobs() const;
 
-	void PrintQuit();
+	void PrintQuit() const;
 
 	void KillAll();
 
@@ -36,19 +35,21 @@ class JobsList
 
 	Command* Remove(int jobID);
 
-	pid_t GetPid(int jobID);
+	pid_t GetPid(int jobID) const;
 
 	JobStatus GetStatus(int jobID);
 
 	int MaxStopped();
 
-	int MaxID();
+	int MaxID() const;
+
+	long unsigned int Size() const;
 
 	void SetStatus(int jobID, JobStatus status);
 
 	private:
 
-	int NextID();
+	int NextID() const;
 };
 
 #endif

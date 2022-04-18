@@ -125,8 +125,6 @@ Commands CommandType(const vector<string>& cmdArgs)
 
 	if (cmd == I.ShowPid) return Commands::ShowPid;
 
-	if (cmd == I.SleepPrint) return Commands::SleepPrint; //todo: remove later
-
 	if (cmd == I.Tail) return Commands::Tail;
 
 	if (cmd == I.Timeout) return Commands::Timeout;

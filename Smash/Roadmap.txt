@@ -7,6 +7,8 @@ Roadmap:
 * Implement bg command
 * Handle CTRL+Z, CTRL+C
 * Implement fg command
+* Implement quit command
+* Run extensive tests on fg, bg
 * Implement io redirection '>'
 * Implement pipe command '|'
 * Handle SIGALARM

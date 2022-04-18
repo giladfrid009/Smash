@@ -26,9 +26,9 @@ void JobsList::AddJob(pid_t pid, Command* command, bool isStopped)
 	jobs[newID] = job;
 }
 
-void JobsList::PrintJobs()
+void JobsList::PrintJobs() const
 {
-	vector <int> keys;
+	vector<int> keys;
 
 	for (auto i = jobs.begin(); i != jobs.end(); i++)
 	{
@@ -39,11 +39,11 @@ void JobsList::PrintJobs()
 
 	for (auto i = keys.begin(); i != keys.end(); i++)
 	{
-		jobs[*i].PrintJob();
+		jobs.at(*i).PrintJob();
 	}
 }
 
-void JobsList::PrintQuit()
+void JobsList::PrintQuit() const
 {
 	vector<JobEntry> keys;
 
@@ -100,7 +100,7 @@ Command* JobsList::Remove(int jobID)
 	return cmd;
 }
 
-int JobsList::NextID()
+int JobsList::NextID() const
 {
 	int max = MaxID();
 
@@ -112,7 +112,12 @@ int JobsList::NextID()
 	return max + 1;
 }
 
-int JobsList::MaxID()
+long unsigned int JobsList::Size() const
+{
+	return jobs.size();
+}
+
+int JobsList::MaxID() const
 {
 	int max = -1;
 
@@ -127,7 +132,7 @@ int JobsList::MaxID()
 	return max;
 }
 
-pid_t JobsList::GetPid(int jobID)
+pid_t JobsList::GetPid(int jobID) const
 {
 	for (auto i = jobs.begin(); i != jobs.end(); i++)
 	{

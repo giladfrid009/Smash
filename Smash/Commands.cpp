@@ -52,36 +52,6 @@ void ExternalCommand::Execute()
 	exit(0);
 }
 
-SleepPrintCommand::SleepPrintCommand(const string& cmdStr, int duration, string messege) : InternalCommand(cmdStr)
-{
-	this->duration = (unsigned int)duration;
-	this->messege = messege;
-}
-
-Command* SleepPrintCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
-{
-	if (CommandType(cmdArgs) != Commands::SleepPrint)
-	{
-		return nullptr;
-	}
-
-	try
-	{
-		int duration = std::stoi(cmdArgs[1]);
-		return new SleepPrintCommand(cmdStr, duration, cmdArgs[2]);
-	}
-	catch (...)
-	{
-		return nullptr;
-	}
-}
-
-void SleepPrintCommand::Execute()
-{
-	sleep(duration);
-	std::cout << messege << "\n";
-}
-
 JobsCommand::JobsCommand(const std::string& cmdStr) : InternalCommand(cmdStr)
 {
 }

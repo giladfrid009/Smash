@@ -25,7 +25,6 @@ class JobEntry
 
 	JobEntry();
 
-	//todo: can accept ONLY externalCommands
 	JobEntry(int jobID, pid_t pid, Command* command, bool isStopped);
 
 	void SetStatus(JobStatus status);
@@ -34,11 +33,11 @@ class JobEntry
 
 	pid_t Pid() const;
 
-	Command* CommandPtr();
+	Command* CommandPtr() const;
 
-	void PrintJob();
+	void PrintJob() const;
 
-	void PrintQuit();
+	void PrintQuit() const;
 
 	void Destroy();
 };

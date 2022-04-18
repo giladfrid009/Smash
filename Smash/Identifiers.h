@@ -19,8 +19,7 @@ enum class Commands
 	Background,
 	Quit,
 	Tail,
-	Touch,
-	SleepPrint, //todo: remove later
+	Touch
 };
 
 class Identifiers
@@ -29,7 +28,6 @@ class Identifiers
 
 	const char* Whitespace = " \n\r\t\f\v";
 
-	const char* SleepPrint = "snp"; //todo: remove later
 	const char* PipeOut = "|";
 	const char* PipeErr = "|&";
 	const char* RedirectWrite = ">";
