@@ -10,7 +10,8 @@ class Smash
 {
 	private:
 	JobsList jobs;
-	std::string promptText = "smash";
+	pid_t currentPid;
+	std::string promptText;
 
 	Smash();
 
@@ -27,6 +28,8 @@ class Smash
 	Command* CreateCommand(std::string& cmdStr, std::vector<std::string>& cmdArgs);
 
 	std::string Prompt();
+
+	pid_t CurrentPid();
 
 	void ExecuteCommand(std::string& cmdStr);
 

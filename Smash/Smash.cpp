@@ -11,6 +11,8 @@ using std::vector;
 
 Smash::Smash()
 {
+	currentPid = -1;
+	promptText = "smash";
 }
 
 Smash::~Smash()
@@ -80,6 +82,7 @@ void Smash::ExecuteCommand(string& cmdStr)
 		{
 			setpgrp();
 			cmd->Execute();
+			return;
 		}
 		else if (inBackground)
 		{
@@ -87,11 +90,19 @@ void Smash::ExecuteCommand(string& cmdStr)
 			return;
 		}
 
+		currentPid = pid;
 		waitpid(pid, nullptr, 0);
+		currentPid = -1;
+
 		delete cmd;
 		return;
 	}
 
 	cmd->Execute();
 	delete cmd;
+}
+
+pid_t Smash::CurrentPid()
+{
+	return currentPid;
 }
