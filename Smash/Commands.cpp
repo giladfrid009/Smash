@@ -147,6 +147,7 @@ Command* BackgroundCommand::Create(const std::string& cmdStr, const std::vector<
 		try
 		{
 			int jobID = std::stoi(cmdArgs[1]); //todo: check ASCII validation
+
 			return new BackgroundCommand(cmdStr, jobID);
 		}
 		catch (...)
@@ -241,6 +242,7 @@ ChangePromptCommand::ChangePromptCommand(const std::string& cmdStr, std::string 
 void ChangePromptCommand::Execute()
 {
 	Smash& instatnce = Smash::Instance();
+
 	instatnce.prompt = this->prompt;
 }
 
@@ -348,7 +350,7 @@ void ForegroundCommand::Execute()
 		killComm.Execute();
 	}
 
-	int pid = instance.jobs.GetPid(jobID);
+	pid_t pid = instance.jobs.GetPid(dstID);
 
 	Command* cmd = instance.jobs.Remove(dstID);
 
