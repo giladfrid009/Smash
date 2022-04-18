@@ -9,7 +9,10 @@ using std::vector;
 
 JobsList::~JobsList()
 {
-	KillAll();
+	for (auto i = jobs.begin(); i != jobs.end(); i++)
+	{
+		delete i->second.CommandPtr();
+	}
 }
 
 void JobsList::AddJob(pid_t pid, Command* command, bool isStopped)

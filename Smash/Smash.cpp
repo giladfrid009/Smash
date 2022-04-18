@@ -17,7 +17,6 @@ Smash::Smash()
 
 Smash::~Smash()
 {
-	jobs.KillAll();
 }
 
 Smash& Smash::Instance()
