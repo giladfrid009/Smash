@@ -26,9 +26,7 @@ void JobEntry::SetStatus(JobStatus status)
 
 JobStatus JobEntry::Status()
 {
-	//todo: add Stop() and Continue() for JobList
 	//todo: how SIGCONT and SIGTSTP are sent?
-
 	// jobs stopped = SIGTSTP
 	// jobs continued = SIGOCONT
 
@@ -68,6 +66,5 @@ void JobEntry::Print()
 
 void JobEntry::Destroy()
 {
-	//todo: may cause problems later in bg or fg
 	delete command;
 }

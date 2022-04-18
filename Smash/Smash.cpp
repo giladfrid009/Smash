@@ -91,8 +91,19 @@ void Smash::ExecuteCommand(string& cmdStr)
 		}
 
 		currentPid = pid;
-		waitpid(pid, nullptr, 0);
+
+		int exitStat;
+
+		waitpid(pid, &exitStat, WUNTRACED);
+
 		currentPid = -1;
+
+		if (WIFSTOPPED(exitStat))
+		{
+			jobs.AddJob(pid, cmd, true);
+			std::cout << "foreground process stopped" << std::endl; //todo: earase
+			return;
+		}
 
 		delete cmd;
 		return;
