@@ -97,3 +97,43 @@ pid_t JobsList::GetPid(int jobID)
 
 	return -1;
 }
+
+JobStatus JobsList::GetStatus(int jobID)
+{
+	for (auto i = jobs.begin(); i != jobs.end(); i++)
+	{
+		if (i->first == jobID)
+		{
+			return i->second.Status();
+		}
+	}
+
+	return JobStatus::Unknown;
+}
+
+int JobsList::MaxStopped()
+{
+	int max = -1;
+
+	for (auto i = jobs.begin(); i != jobs.end(); i++)
+	{
+		if (i->second.Status() == JobStatus::Stopped)
+		{
+			max = i->first;
+		}
+	}
+
+	return max;
+}
+
+void JobsList::SetStatus(int jobID, JobStatus status)
+{
+	for (auto i = jobs.begin(); i != jobs.end(); i++)
+	{
+		if (i->first == jobID)
+		{
+			i->second.SetStatus(status);
+			return;
+		}
+	}
+}

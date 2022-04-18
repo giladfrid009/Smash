@@ -6,7 +6,7 @@ JobEntry::JobEntry()
 	jobID = -1;
 	pid = -1;
 	command = nullptr;
-	status = JobStatus::Finished;
+	status = JobStatus::Unknown;
 	startTime = time(nullptr);
 }
 
@@ -19,9 +19,15 @@ JobEntry::JobEntry(int jobID, pid_t pid, Command* command, bool isStopped)
 	this->startTime = time(nullptr);
 }
 
+void JobEntry::SetStatus(JobStatus status)
+{
+	this->status = status;
+}
+
 JobStatus JobEntry::Status()
 {
 	//todo: add Stop() and Continue() for JobList
+	//todo: how SIGCONT and SIGTSTP are sent?
 
 	// jobs stopped = SIGTSTP
 	// jobs continued = SIGOCONT

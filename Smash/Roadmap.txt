@@ -4,9 +4,10 @@ Roadmap:
 * Implement running commands in background
 * Implement jobs command
 * Implement kill command
-* Implement timeout command
-* Implement fg command
 * Implement bg command
+* Handle Signals
+* Implement fg command
 * Implement io redirection '>'
 * Implement pipe command '|'
+* Implement timeout command
 * Implement rest of the stuff in no particular order

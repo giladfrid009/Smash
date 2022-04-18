@@ -33,6 +33,8 @@ class Smash
 	friend void JobsCommand::Execute();
 
 	friend void KillCommand::Execute();
+
+	friend void BackgroundCommand::Execute();
 };
 
 #endif // !SMASH_H

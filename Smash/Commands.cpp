@@ -153,3 +153,87 @@ void KillCommand::Execute()
 		SysError("kill");
 	}
 }
+
+Command* BackgroundCommand::Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs)
+{
+	if (CommandType(cmdArgs) != Commands::Background)
+	{
+		return nullptr;
+	}
+
+	if (cmdArgs.size() == 1)
+	{
+		return new BackgroundCommand(cmdStr);
+	}
+
+	if (cmdArgs.size() == 2)
+	{
+		try
+		{
+			int jobID = std::stoi(cmdArgs[1]); //todo: check ASCII validation
+			return new BackgroundCommand(cmdStr, jobID);
+		}
+		catch (...)
+		{
+			std::cerr << "smash error: bg: invalid arguments" << std::endl;
+		}
+	}
+
+	std::cerr << "smash error: bg: invalid arguments" << std::endl;
+
+	return nullptr;
+}
+
+BackgroundCommand::BackgroundCommand(const std::string& cmdStr) : InternalCommand(cmdStr)
+{
+	jobID = -1;
+	useID = false;
+}
+
+BackgroundCommand::BackgroundCommand(const std::string& cmdStr, int jobID) : InternalCommand(cmdStr)
+{
+	this->jobID = jobID;
+	this->useID = true;
+}
+
+void BackgroundCommand::Execute()
+{
+	Smash& instance = Smash::Instance();
+
+	int dstID = -1;
+
+	if (useID)
+	{
+		JobStatus status = instance.jobs.GetStatus(jobID);
+
+		if (status == JobStatus::Finished || status == JobStatus::Unknown)
+		{
+			std::cerr << "smash error: bg: job-id " << jobID << " does not exist" << std::endl;
+			return;
+		}
+
+		if (status == JobStatus::Running)
+		{
+			std::cerr << "smash error: bg: job-id " << jobID << " is already running in the background" << std::endl;
+			return;
+		}
+
+		dstID = jobID;
+	}
+	else
+	{
+		int dstID = instance.jobs.MaxStopped();
+
+		if (dstID == -1)
+		{
+			std::cerr << "smash error: bg: there is no stopped jobs to resume" << std::endl;
+			return;
+		}
+	}
+
+	KillCommand killComm("", SIGCONT, dstID);
+
+	killComm.Execute();
+
+	instance.jobs.SetStatus(dstID, JobStatus::Running);
+}

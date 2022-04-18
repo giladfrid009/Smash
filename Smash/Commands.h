@@ -93,4 +93,24 @@ class KillCommand : public InternalCommand
 	void Execute() override;
 };
 
+class BackgroundCommand :public InternalCommand
+{
+	protected:
+
+	int jobID;
+	bool useID;
+
+	public:
+
+	static Command* Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs);
+
+	BackgroundCommand(const std::string& cmdStr);
+
+	BackgroundCommand(const std::string& cmdStr, int jobID);
+
+	virtual ~BackgroundCommand() override = default;
+
+	void Execute() override;
+};
+
 #endif //SMASH_COMMAND_H

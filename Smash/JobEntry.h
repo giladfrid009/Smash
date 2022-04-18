@@ -7,7 +7,8 @@ enum class JobStatus
 {
 	Running,
 	Stopped,
-	Finished
+	Finished,
+	Unknown
 };
 
 class JobEntry
@@ -26,6 +27,8 @@ class JobEntry
 
 	//todo: can accept ONLY externalCommands
 	JobEntry(int jobID, pid_t pid, Command* command, bool isStopped);
+
+	void SetStatus(JobStatus status);
 
 	JobStatus Status();
 

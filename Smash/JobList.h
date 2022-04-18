@@ -34,6 +34,12 @@ class JobsList
 
 	pid_t GetPid(int jobID);
 
+	JobStatus GetStatus(int jobID);
+
+	int MaxStopped();
+
+	void SetStatus(int jobID, JobStatus status);
+
 	private:
 
 	int NextID();
