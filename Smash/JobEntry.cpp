@@ -83,8 +83,3 @@ void JobEntry::PrintQuit() const
 
 	std::cout << pid << ": " << command->ToString() << std::endl;
 }
-
-void JobEntry::Destroy()
-{
-	delete command;
-}

@@ -79,7 +79,8 @@ void JobsList::RemoveFinished()
 
 		if (job.Status() == JobStatus::Finished)
 		{
-			job.Destroy();
+			delete job.CommandPtr();
+
 			i = jobs.erase(i);
 		}
 		else

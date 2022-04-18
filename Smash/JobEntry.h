@@ -38,8 +38,6 @@ class JobEntry
 	void PrintJob() const;
 
 	void PrintQuit() const;
-
-	void Destroy();
 };
 
 #endif // !JOBENTRY_H
