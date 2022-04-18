@@ -378,7 +378,15 @@ void ForegroundCommand::Execute()
 
 	int exitStat;
 
+	std::cout << "start waiting" << std::endl; //todo: remove
+
+	instance.currentPid = pid;
+
 	pid = waitpid(pid, &exitStat, WUNTRACED);
+
+	instance.currentPid = -1;
+
+	std::cout << "end waiting" << std::endl; //todo: remove
 
 	if (pid < 0)
 	{
@@ -388,6 +396,8 @@ void ForegroundCommand::Execute()
 
 	if (WIFSTOPPED(exitStat))
 	{
+		std::cout << "WIFSTOPPED" << std::endl; //todo: remove
+
 		instance.jobs.AddJob(pid, cmd, true);
 	}
 }
