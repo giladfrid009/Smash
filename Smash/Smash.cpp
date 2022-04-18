@@ -25,7 +25,17 @@ Smash& Smash::Instance()
 	return instance;
 }
 
-Command* Smash::CreateCommand(string& cmdStr, vector<string>& cmdArgs)
+string Smash::Prompt() const
+{
+	return prompt + "> ";
+}
+
+pid_t Smash::CurrentPid() const
+{
+	return currentPid;
+}
+
+Command* Smash::CreateCommand(string& cmdStr, vector<string>& cmdArgs) const
 {
 	try
 	{
@@ -56,11 +66,6 @@ Command* Smash::CreateCommand(string& cmdStr, vector<string>& cmdArgs)
 	{
 		return nullptr;
 	}
-}
-
-string Smash::Prompt()
-{
-	return prompt + "> ";
 }
 
 void Smash::ExecuteCommand(string& cmdStr)
@@ -98,9 +103,9 @@ void Smash::ExecuteCommand(string& cmdStr)
 			return;
 		}
 
-		currentPid = pid;
-
 		int exitStat;
+
+		currentPid = pid;
 
 		waitpid(pid, &exitStat, WUNTRACED);
 
@@ -120,7 +125,4 @@ void Smash::ExecuteCommand(string& cmdStr)
 	delete cmd;
 }
 
-pid_t Smash::CurrentPid()
-{
-	return currentPid;
-}
+

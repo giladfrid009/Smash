@@ -9,6 +9,7 @@
 class Smash
 {
 	private:
+
 	JobsList jobs;
 	pid_t currentPid;
 	std::string prompt;
@@ -17,19 +18,17 @@ class Smash
 
 	public:
 
+	static Smash& Instance();
+
 	Smash(Smash const&) = delete;
 
 	void operator=(Smash const&) = delete;
 
 	~Smash();
 
-	static Smash& Instance();
+	std::string Prompt() const;
 
-	Command* CreateCommand(std::string& cmdStr, std::vector<std::string>& cmdArgs);
-
-	std::string Prompt();
-
-	pid_t CurrentPid();
+	pid_t CurrentPid() const;
 
 	void ExecuteCommand(std::string& cmdStr);
 
@@ -44,6 +43,10 @@ class Smash
 	friend void ChangePromptCommand::Execute();
 
 	friend void QuitCommand::Execute();
+
+	private:
+
+	Command* CreateCommand(std::string& cmdStr, std::vector<std::string>& cmdArgs) const;
 };
 
 #endif // !SMASH_H
