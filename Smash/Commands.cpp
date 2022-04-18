@@ -333,8 +333,8 @@ ForegroundCommand::ForegroundCommand(const std::string& cmdStr) : InternalComman
 
 ForegroundCommand::ForegroundCommand(const std::string& cmdStr, int jobID) : InternalCommand(cmdStr)
 {
-	jobID = jobID;
-	useID = true;
+	this->jobID = jobID;
+	this->useID = true;
 }
 
 void ForegroundCommand::Execute()
