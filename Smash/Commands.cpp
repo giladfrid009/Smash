@@ -401,6 +401,8 @@ void QuitCommand::Execute()
 		std::cout << "smash: sending SIGKILL signal to " << instance.jobs.Size() << " jobs:" << std::endl;
 
 		instance.jobs.PrintQuit();
+
+		instance.jobs.KillAll();
 	}
 
 	exit(0);
