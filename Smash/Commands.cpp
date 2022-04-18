@@ -222,7 +222,7 @@ void BackgroundCommand::Execute()
 	}
 	else
 	{
-		int dstID = instance.jobs.MaxStopped();
+		dstID = instance.jobs.MaxStopped();
 
 		if (dstID == -1)
 		{
@@ -236,4 +236,61 @@ void BackgroundCommand::Execute()
 	killComm.Execute();
 
 	instance.jobs.SetStatus(dstID, JobStatus::Running);
+}
+
+Command* ChangePromptCommand::Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs)
+{
+	if (CommandType(cmdArgs) != Commands::ChangePrompt)
+	{
+		return nullptr;
+	}
+
+	if (cmdArgs.size() == 1)
+	{
+		return new ChangePromptCommand(cmdStr, "smash");
+	}
+	else if (cmdArgs.size() > 1)
+	{
+		return new ChangePromptCommand(cmdStr, cmdArgs[1]);
+	}
+
+	return nullptr;
+}
+
+ChangePromptCommand::ChangePromptCommand(const std::string& cmdStr, std::string prompt) : InternalCommand(cmdStr)
+{
+	this->prompt = prompt;
+}
+
+void ChangePromptCommand::Execute()
+{
+	Smash& instatnce = Smash::Instance();
+	instatnce.prompt = this->prompt;
+}
+
+Command* ShowPidCommand::Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs)
+{
+	if (CommandType(cmdArgs) != Commands::ShowPid)
+	{
+		return nullptr;
+	}
+
+	return new ShowPidCommand(cmdStr);
+}
+
+ShowPidCommand::ShowPidCommand(const std::string& cmdStr) : InternalCommand(cmdStr)
+{
+}
+
+void ShowPidCommand::Execute()
+{
+	pid_t pid = getpid();
+
+	if (pid < 0)
+	{
+		SysError("getpid");
+		return;
+	}
+
+	std::cout << "smash pid is " << pid << std::endl;
 }

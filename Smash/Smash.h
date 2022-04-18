@@ -11,7 +11,7 @@ class Smash
 	private:
 	JobsList jobs;
 	pid_t currentPid;
-	std::string promptText;
+	std::string prompt;
 
 	Smash();
 
@@ -38,6 +38,8 @@ class Smash
 	friend void KillCommand::Execute();
 
 	friend void BackgroundCommand::Execute();
+
+	friend void ChangePromptCommand::Execute();
 };
 
 #endif // !SMASH_H

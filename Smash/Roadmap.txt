@@ -5,9 +5,10 @@ Roadmap:
 * Implement jobs command
 * Implement kill command
 * Implement bg command
-* Handle Signals
+* Handle CTRL+Z, CTRL+C
 * Implement fg command
 * Implement io redirection '>'
 * Implement pipe command '|'
+* Handle SIGALARM
 * Implement timeout command
 * Implement rest of the stuff in no particular order

@@ -113,4 +113,34 @@ class BackgroundCommand :public InternalCommand
 	void Execute() override;
 };
 
+class ChangePromptCommand :public InternalCommand
+{
+	protected:
+
+	std::string prompt;
+
+	public:
+
+	static Command* Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs);
+
+	ChangePromptCommand(const std::string& cmdStr, std::string prompt);
+
+	virtual ~ChangePromptCommand() override = default;
+
+	void Execute() override;
+};
+
+class ShowPidCommand :public InternalCommand
+{
+	public:
+
+	static Command* Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs);
+
+	ShowPidCommand(const std::string& cmdStr);
+
+	virtual ~ShowPidCommand() override = default;
+
+	void Execute() override;
+};
+
 #endif //SMASH_COMMAND_H

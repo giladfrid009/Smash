@@ -12,7 +12,7 @@ using std::vector;
 Smash::Smash()
 {
 	currentPid = -1;
-	promptText = "smash";
+	prompt = "smash";
 }
 
 Smash::~Smash()
@@ -41,6 +41,10 @@ Command* Smash::CreateCommand(string& cmdStr, vector<string>& cmdArgs)
 
 			case (Commands::Kill): return KillCommand::Create(cmdStr, cmdArgs);
 
+			case (Commands::Background): return BackgroundCommand::Create(cmdStr, cmdArgs);
+
+			case (Commands::ChangePrompt): return ChangePromptCommand::Create(cmdStr, cmdArgs);
+
 			default: return nullptr;
 		}
 	}
@@ -52,7 +56,7 @@ Command* Smash::CreateCommand(string& cmdStr, vector<string>& cmdArgs)
 
 string Smash::Prompt()
 {
-	return promptText + "> ";
+	return prompt + "> ";
 }
 
 void Smash::ExecuteCommand(string& cmdStr)
@@ -101,7 +105,6 @@ void Smash::ExecuteCommand(string& cmdStr)
 		if (WIFSTOPPED(exitStat))
 		{
 			jobs.AddJob(pid, cmd, true);
-			std::cout << "foreground process stopped" << std::endl; //todo: earase
 			return;
 		}
 
