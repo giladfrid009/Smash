@@ -32,11 +32,13 @@ class JobEntry
 
 	JobStatus Status();
 
-	pid_t Pid();
+	pid_t Pid() const;
 
 	Command* CommandPtr();
 
-	void Print();
+	void PrintJob();
+
+	void PrintQuit();
 
 	void Destroy();
 };

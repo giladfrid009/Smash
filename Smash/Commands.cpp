@@ -99,7 +99,7 @@ Command* JobsCommand::Create(const string& cmdStr, const vector<string>& cmdArgs
 void JobsCommand::Execute()
 {
 	Smash& instance = Smash::Instance();
-	instance.jobs.Print();
+	instance.jobs.PrintJobs();
 }
 
 KillCommand::KillCommand(const std::string& cmdStr, int signalNum, int jobID) : InternalCommand(cmdStr)
@@ -400,4 +400,36 @@ void ForegroundCommand::Execute()
 
 		instance.jobs.AddJob(pid, cmd, true);
 	}
+}
+
+Command* QuitCommand::Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs)
+{
+	if (CommandType(cmdArgs) != Commands::Kill)
+	{
+		return nullptr;
+	}
+
+	if (cmdArgs.size() >= 2 && cmdArgs[1] == "kill")
+	{
+		return new QuitCommand(cmdStr, true);
+	}
+
+	return new QuitCommand(cmdStr, false);
+}
+
+QuitCommand::QuitCommand(const std::string& cmdStr, bool killChildren) : InternalCommand(cmdStr)
+{
+	this->killChildren = killChildren;
+}
+
+void QuitCommand::Execute()
+{
+	if (killChildren)
+	{
+		Smash& instance = Smash::Instance();
+
+		instance.jobs.PrintQuit();
+	}
+
+	exit(0);
 }

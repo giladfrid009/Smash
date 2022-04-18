@@ -26,7 +26,7 @@ void JobsList::AddJob(pid_t pid, Command* command, bool isStopped)
 	jobs[newID] = job;
 }
 
-void JobsList::Print()
+void JobsList::PrintJobs()
 {
 	vector <int> keys;
 
@@ -39,7 +39,24 @@ void JobsList::Print()
 
 	for (auto i = keys.begin(); i != keys.end(); i++)
 	{
-		jobs[*i].Print();
+		jobs[*i].PrintJob();
+	}
+}
+
+void JobsList::PrintQuit()
+{
+	vector<JobEntry> keys;
+
+	for (auto i = jobs.begin(); i != jobs.end(); i++)
+	{
+		keys.push_back(i->second);
+	}
+
+	std::sort(keys.begin(), keys.end(), [] (const JobEntry& left, const JobEntry& right) {return left.Pid() < right.Pid(); });
+
+	for (auto i = keys.begin(); i != keys.end(); i++)
+	{
+		i->PrintQuit();
 	}
 }
 

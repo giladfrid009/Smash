@@ -42,6 +42,8 @@ class Smash
 	friend void ForegroundCommand::Execute();
 
 	friend void ChangePromptCommand::Execute();
+
+	friend void QuitCommand::Execute();
 };
 
 #endif // !SMASH_H

@@ -26,7 +26,9 @@ class JobsList
 	//todo: can accept ONLY ExternalCommands
 	void AddJob(pid_t pid, Command* command, bool isStopped = false);
 
-	void Print();
+	void PrintJobs();
+
+	void PrintQuit();
 
 	void KillAll();
 

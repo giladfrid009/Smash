@@ -45,7 +45,7 @@ JobStatus JobEntry::Status()
 	return status;
 }
 
-pid_t JobEntry::Pid()
+pid_t JobEntry::Pid() const
 {
 	return pid;
 }
@@ -55,8 +55,13 @@ Command* JobEntry::CommandPtr()
 	return command;
 }
 
-void JobEntry::Print()
+void JobEntry::PrintJob()
 {
+	if (command == nullptr)
+	{
+		return;
+	}
+
 	int diff = (int)difftime(time(nullptr), startTime);
 
 	std::cout << "[" << jobID << "] " << command->ToString() << " : " << diff;
@@ -67,6 +72,16 @@ void JobEntry::Print()
 	}
 
 	std::cout << std::endl;
+}
+
+void JobEntry::PrintQuit()
+{
+	if (command == nullptr)
+	{
+		return;
+	}
+
+	std::cout << pid << ": " << command->ToString() << std::endl;
 }
 
 void JobEntry::Destroy()

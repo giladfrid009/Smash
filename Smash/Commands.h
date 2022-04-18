@@ -161,4 +161,21 @@ class ShowPidCommand :public InternalCommand
 	void Execute() override;
 };
 
+class QuitCommand :public InternalCommand
+{
+	protected:
+
+	bool killChildren;
+
+	public:
+
+	static Command* Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs);
+
+	QuitCommand(const std::string& cmdStr, bool killChildren);
+
+	virtual ~QuitCommand() override = default;
+
+	void Execute() override;
+};
+
 #endif //SMASH_COMMAND_H
