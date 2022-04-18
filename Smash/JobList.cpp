@@ -51,7 +51,6 @@ void JobsList::KillAll()
 	// make sure everyone are gone
 }
 
-
 void JobsList::RemoveFinished()
 {
 	for (auto i = jobs.begin(); i != jobs.end();)
@@ -70,9 +69,35 @@ void JobsList::RemoveFinished()
 	}
 }
 
+Command* JobsList::Remove(int jobID)
+{
+	if (jobs.count(jobID) == 0)
+	{
+		return nullptr;
+	}
+
+	Command* cmd = jobs[jobID].CommandPtr();
+
+	jobs.erase(jobID);
+
+	return cmd;
+}
+
 int JobsList::NextID()
 {
-	int max = 0;
+	int max = MaxID();
+
+	if (max == -1)
+	{
+		return 1;
+	}
+
+	return max + 1;
+}
+
+int JobsList::MaxID()
+{
+	int max = -1;
 
 	for (auto i = jobs.begin(); i != jobs.end(); i++)
 	{
@@ -82,7 +107,7 @@ int JobsList::NextID()
 		}
 	}
 
-	return max + 1;
+	return max;
 }
 
 pid_t JobsList::GetPid(int jobID)

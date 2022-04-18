@@ -113,6 +113,24 @@ class BackgroundCommand :public InternalCommand
 	void Execute() override;
 };
 
+class ForegroundCommand :public InternalCommand
+{
+	public:
+
+	int jobID;
+	bool useID;
+
+	static Command* Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs);
+
+	ForegroundCommand(const std::string& cmdStr);
+
+	ForegroundCommand(const std::string& cmdStr, int jobID);
+
+	virtual ~ForegroundCommand() override = default;
+
+	void Execute() override;
+};
+
 class ChangePromptCommand :public InternalCommand
 {
 	protected:

@@ -294,3 +294,100 @@ void ShowPidCommand::Execute()
 
 	std::cout << "smash pid is " << pid << std::endl;
 }
+
+Command* ForegroundCommand::Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs)
+{
+	if (CommandType(cmdArgs) != Commands::Foreground)
+	{
+		return nullptr;
+	}
+
+	if (cmdArgs.size() == 1)
+	{
+		return new ForegroundCommand(cmdStr);
+	}
+
+	if (cmdArgs.size() == 2)
+	{
+		try
+		{
+			int jobID = std::stoi(cmdArgs[1]); //todo: check ASCII validation
+			return new ForegroundCommand(cmdStr, jobID);
+		}
+		catch (...)
+		{
+			std::cerr << "smash error: fg: invalid arguments" << std::endl;
+		}
+	}
+
+	std::cerr << "smash error: fg: invalid arguments" << std::endl;
+
+	return nullptr;
+}
+
+ForegroundCommand::ForegroundCommand(const std::string& cmdStr) : InternalCommand(cmdStr)
+{
+	jobID = -1;
+	useID = false;
+}
+
+ForegroundCommand::ForegroundCommand(const std::string& cmdStr, int jobID) : InternalCommand(cmdStr)
+{
+	jobID = jobID;
+	useID = true;
+}
+
+void ForegroundCommand::Execute()
+{
+	Smash& instance = Smash::Instance();
+
+	int dstID = -1;
+
+	if (useID)
+	{
+		JobStatus status = instance.jobs.GetStatus(jobID);
+
+		if (status == JobStatus::Finished || status == JobStatus::Unknown)
+		{
+			std::cerr << "smash error: fg: job-id " << jobID << " does not exist" << std::endl;
+			return;
+		}
+
+		dstID = jobID;
+	}
+	else
+	{
+		dstID = instance.jobs.MaxID();
+
+		if (dstID == -1)
+		{
+			std::cerr << "smash error: fg: jobs list is empty" << std::endl;
+			return;
+		}
+	}
+
+	if (instance.jobs.GetStatus(dstID) == JobStatus::Stopped)
+	{
+		KillCommand killComm("", SIGCONT, dstID);
+		killComm.Execute();
+	}
+
+	int pid = instance.jobs.GetPid(jobID);
+
+	Command* cmd = instance.jobs.Remove(dstID);
+
+	int exitStat;
+
+	pid = waitpid(pid, &exitStat, WUNTRACED);
+
+	if (pid < 0)
+	{
+		SysError("waitpid");
+		return;
+	}
+
+	if (WIFSTOPPED(exitStat))
+	{
+		instance.jobs.AddJob(pid, cmd, true);
+	}
+}

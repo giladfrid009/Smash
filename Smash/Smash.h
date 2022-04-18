@@ -39,6 +39,8 @@ class Smash
 
 	friend void BackgroundCommand::Execute();
 
+	friend void ForegroundCommand::Execute();
+
 	friend void ChangePromptCommand::Execute();
 };
 

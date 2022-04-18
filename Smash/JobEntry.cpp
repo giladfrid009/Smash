@@ -50,6 +50,11 @@ pid_t JobEntry::Pid()
 	return pid;
 }
 
+Command* JobEntry::CommandPtr()
+{
+	return command;
+}
+
 void JobEntry::Print()
 {
 	int diff = (int)difftime(time(nullptr), startTime);

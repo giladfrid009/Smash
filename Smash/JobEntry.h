@@ -34,6 +34,8 @@ class JobEntry
 
 	pid_t Pid();
 
+	Command* CommandPtr();
+
 	void Print();
 
 	void Destroy();

@@ -32,11 +32,15 @@ class JobsList
 
 	void RemoveFinished();
 
+	Command* Remove(int jobID);
+
 	pid_t GetPid(int jobID);
 
 	JobStatus GetStatus(int jobID);
 
 	int MaxStopped();
+
+	int MaxID();
 
 	void SetStatus(int jobID, JobStatus status);
 

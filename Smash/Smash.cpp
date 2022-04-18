@@ -43,6 +43,8 @@ Command* Smash::CreateCommand(string& cmdStr, vector<string>& cmdArgs)
 
 			case (Commands::Background): return BackgroundCommand::Create(cmdStr, cmdArgs);
 
+			case (Commands::Foreground): return ForegroundCommand::Create(cmdStr, cmdArgs);
+
 			case (Commands::ChangePrompt): return ChangePromptCommand::Create(cmdStr, cmdArgs);
 
 			case (Commands::ShowPid): return ShowPidCommand::Create(cmdStr, cmdArgs);
