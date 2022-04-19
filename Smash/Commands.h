@@ -160,4 +160,20 @@ class QuitCommand :public InternalCommand
 	void Execute() override;
 };
 
+class RedirectWriteCommand :public InternalCommand //todo:check if special commands 
+{
+	public:
+
+	std::string command;
+	std::string output;
+
+	static Command* Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs);
+
+	RedirectWriteCommand(const std::string& cmdStr, const std::string& command, const std::string& output);
+
+	virtual ~RedirectWriteCommand() override = default;
+
+	void Execute() override;
+};
+
 #endif //SMASH_COMMAND_H

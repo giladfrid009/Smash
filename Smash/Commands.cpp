@@ -8,6 +8,7 @@
 #include <iostream>
 #include <signal.h>
 #include <exception>
+#include <fcntl.h>
 
 using std::string;
 using std::vector;
@@ -426,4 +427,60 @@ void QuitCommand::Execute()
 	//todo: check if to free all Command* - probably not
 
 	exit(0);
+}
+
+Command* RedirectWriteCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
+{
+	if (CommandType(cmdArgs) != Commands::RedirectWrite)
+	{
+		return nullptr;
+	}
+
+	Identifiers I;
+
+	vector<string> args = Split(cmdStr, I.RedirectWrite);
+
+	if (args.size() != 2)
+	{
+		return nullptr;
+	}
+
+	return new RedirectWriteCommand(cmdStr, args[0], args[1]);
+}
+
+RedirectWriteCommand::RedirectWriteCommand(const string& cmdStr, const string& command, const string& output) : InternalCommand(cmdStr)
+{
+	this->command = RemoveBackgroundSign(command);
+	this->output = output;
+}
+
+void RedirectWriteCommand::Execute()
+{
+	Smash& instance = Smash::Instance();
+
+	int res;
+
+	int stdoutCopy = dup(STDOUT_FILENO); //todo: doesnt copy close-on-exec flag
+
+	if (res < 0) { SysError("dup"); return; }
+
+	res = close(STDOUT_FILENO);
+
+	if (res < 0) { SysError("close"); return; }
+
+	res = open(output.c_str(), O_WRONLY | O_CREAT);
+
+	if (res < 0) { SysError("open"); return; }
+
+	instance.ExecuteCommand(command);
+
+	res = close(STDOUT_FILENO);
+
+	if (res < 0) { SysError("close"); return; }
+
+	res = dup2(stdoutCopy, STDOUT_FILENO); //todo: doesnt copy close-on-exec flag
+
+	if (res < 0) { SysError("dup2"); return; }
+
+	res = close(stdoutCopy);
 }

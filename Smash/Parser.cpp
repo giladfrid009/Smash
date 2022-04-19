@@ -44,7 +44,6 @@ vector<string> ParseCommand(const string& cmdStr)
 	return result;
 }
 
-//todo: remove if unused
 vector<string> Split(const string& cmdStr, string seperator)
 {
 	size_t sepLen = seperator.length();
