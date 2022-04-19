@@ -349,11 +349,13 @@ void ForegroundCommand::Execute()
 		KillCommand killComm("", SIGCONT, dstID);
 
 		killComm.Execute();
+
+		//todo: probably set status to running 
 	}
 
 	pid_t pid = instance.jobs.GetPid(dstID);
 
-	Command* cmd = instance.jobs.Remove(dstID);
+	Command* cmd = instance.jobs.Remove(dstID); //todo: probably should not remove to retain original id
 
 	int exitStat;
 

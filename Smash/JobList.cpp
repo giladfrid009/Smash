@@ -32,33 +32,33 @@ void JobsList::AddJob(pid_t pid, Command* command, bool isStopped)
 
 void JobsList::PrintJobs() const
 {
-	vector<pair<int, JobEntry>> pairs;
+	vector<JobEntry> sorted;
 
 	for (const auto& pair : jobs)
 	{
-		pairs.push_back(pair);
+		sorted.push_back(pair.second);
 	}
 
-	std::sort(pairs.begin(), pairs.end(), [] (const pair<int, JobEntry>& left, const pair<int, JobEntry>& right) { return left.first < right.first; });
+	std::sort(sorted.begin(), sorted.end(), [] (const JobEntry& left, const JobEntry& right) {return left.Pid() < right.Pid(); });
 
-	for (const auto& pair : pairs)
+	for (const auto& pair : sorted)
 	{
-		pair.second.PrintJob();
+		pair.PrintJob();
 	}
 }
 
 void JobsList::PrintQuit() const
 {
-	vector<JobEntry> keys;
+	vector<JobEntry> sorted;
 
 	for (const auto& pair : jobs)
 	{
-		keys.push_back(pair.second);
+		sorted.push_back(pair.second);
 	}
 
-	std::sort(keys.begin(), keys.end(), [] (const JobEntry& left, const JobEntry& right) {return left.Pid() < right.Pid(); });
+	std::sort(sorted.begin(), sorted.end(), [] (const JobEntry& left, const JobEntry& right) {return left.Pid() < right.Pid(); });
 
-	for (const auto& job : keys)
+	for (const auto& job : sorted)
 	{
 		job.PrintQuit();
 	}
