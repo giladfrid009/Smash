@@ -57,7 +57,9 @@ Command* Smash::CreateCommand(string& cmdStr, vector<string>& cmdArgs) const
 
 			case (Commands::ShowPid): return ShowPidCommand::Create(cmdStr, cmdArgs);
 
-			case (Commands::Quit): return QuitCommand::Create(cmdStr, cmdArgs);
+			case (Commands::RedirectWrite): return QuitCommand::Create(cmdStr, cmdArgs);
+
+			case (Commands::RedirectWrite): return QuitCommand::Create(cmdStr, cmdArgs);
 
 			default: return nullptr;
 		}

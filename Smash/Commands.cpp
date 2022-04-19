@@ -462,7 +462,7 @@ void RedirectWriteCommand::Execute()
 
 	int stdoutCopy = dup(STDOUT_FILENO); //todo: doesnt copy close-on-exec flag
 
-	if (res < 0) { SysError("dup"); return; }
+	if (stdoutCopy < 0) { SysError("dup"); return; }
 
 	res = close(STDOUT_FILENO);
 
