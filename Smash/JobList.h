@@ -1,3 +1,4 @@
+
 #ifndef JOBLIST_H
 #define JOBLIST_H
 
@@ -10,6 +11,7 @@
 #include <iostream>
 #include <time.h>
 #include <map>
+#include <functional>
 
 class JobsList
 {
@@ -23,17 +25,13 @@ class JobsList
 
 	~JobsList();
 
-	void AddJob(pid_t pid, Command* command, bool isStopped = false);
+	void AddJob(pid_t pid, Command* command, bool isStopped = false); //todo: change isStopped to enum JobStatus with default value? 
 
-	void PrintJobs() const;
+	long unsigned int Size() const;
 
-	void PrintQuit() const;
-
-	void KillAll(); //todo: is it used anywhere?
+	void ForEach(std::function<void(const JobEntry&)> action) const;
 
 	void RemoveFinished();
-
-	Command* Remove(int jobID); //todo: remove later
 
 	pid_t GetPid(int jobID) const;
 
@@ -46,8 +44,6 @@ class JobsList
 	int MaxStopped();
 
 	int MaxID() const;
-
-	long unsigned int Size() const;
 
 	private:
 

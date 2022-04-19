@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <functional>
 
 using std::string;
 using std::map;
@@ -30,7 +31,8 @@ void JobsList::AddJob(pid_t pid, Command* command, bool isStopped)
 	jobs[newID] = job;
 }
 
-void JobsList::PrintJobs() const
+//todo: check potential uses
+void JobsList::ForEach(std::function<void(const JobEntry&)> action) const
 {
 	vector<JobEntry> sorted;
 
@@ -39,37 +41,12 @@ void JobsList::PrintJobs() const
 		sorted.push_back(pair.second);
 	}
 
-	std::sort(sorted.begin(), sorted.end(), [] (const JobEntry& left, const JobEntry& right) {return left.Pid() < right.Pid(); });
-
-	for (const auto& pair : sorted)
-	{
-		pair.PrintJob();
-	}
-}
-
-void JobsList::PrintQuit() const
-{
-	vector<JobEntry> sorted;
-
-	for (const auto& pair : jobs)
-	{
-		sorted.push_back(pair.second);
-	}
-
-	std::sort(sorted.begin(), sorted.end(), [] (const JobEntry& left, const JobEntry& right) {return left.Pid() < right.Pid(); });
+	std::sort(sorted.begin(), sorted.end(), [] (const JobEntry& left, const JobEntry& right) { return left.ID() < right.ID(); });
 
 	for (const auto& job : sorted)
 	{
-		job.PrintQuit();
+		action(job);
 	}
-}
-
-void JobsList::KillAll()
-{
-	//todo: send kill signal to all processes
-	// wait for all processes till no-one is left
-	// call RemoveFinished()
-	// make sure everyone are gone
 }
 
 void JobsList::RemoveFinished()
@@ -88,20 +65,6 @@ void JobsList::RemoveFinished()
 
 		i = jobs.erase(i);
 	}
-}
-
-Command* JobsList::Remove(int jobID)
-{
-	if (jobs.count(jobID) == 0)
-	{
-		return nullptr;
-	}
-
-	Command* cmd = jobs[jobID].CommandPtr();
-
-	jobs.erase(jobID);
-
-	return cmd;
 }
 
 void JobsList::ResetTime(int jobID)
@@ -147,6 +110,8 @@ int JobsList::MaxID() const
 	return max;
 }
 
+//todo: rename all Pid to PID
+//todo: rename all jobID to id
 pid_t JobsList::GetPid(int jobID) const
 {
 	if (jobs.count(jobID) == 0)

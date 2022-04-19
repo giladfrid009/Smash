@@ -26,9 +26,10 @@ void JobEntry::SetStatus(JobStatus status)
 
 JobStatus JobEntry::Status()
 {
-	//todo: how SIGCONT and SIGTSTP are sent?
-	// jobs stopped = SIGTSTP
-	// jobs continued = SIGOCONT
+	if (status == JobStatus::Finished || status == JobStatus::Unknown)
+	{
+		return status;
+	}
 
 	pid_t result = waitpid(pid, nullptr, WNOHANG);
 
@@ -48,6 +49,10 @@ JobStatus JobEntry::Status()
 pid_t JobEntry::Pid() const
 {
 	return pid;
+}
+int JobEntry::ID() const
+{
+	return jobID;
 }
 
 Command* JobEntry::CommandPtr() const

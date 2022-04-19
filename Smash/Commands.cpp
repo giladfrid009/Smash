@@ -7,9 +7,12 @@
 #include <vector>
 #include <iostream>
 #include <signal.h>
+#include <exception>
 
 using std::string;
 using std::vector;
+
+//todo: move command argument verification into constructors, and throw invalid_argument if failure
 
 static void SysError(string sysCall)
 {
@@ -75,11 +78,17 @@ Command* JobsCommand::Create(const string& cmdStr, const vector<string>& cmdArgs
 void JobsCommand::Execute()
 {
 	Smash& instance = Smash::Instance();
-	instance.jobs.PrintJobs();
+
+	instance.jobs.ForEach([] (const JobEntry& job) { job.PrintJob(); });
 }
 
 KillCommand::KillCommand(const std::string& cmdStr, int signalNum, int jobID) : InternalCommand(cmdStr)
 {
+	if (signalNum <= 0 || signalNum >= 32)
+	{
+		throw std::invalid_argument("signalNum");
+	}
+
 	this->signalNum = signalNum;
 	this->jobID = jobID;
 }
@@ -101,6 +110,7 @@ Command* KillCommand::Create(const std::string& cmdStr, const std::vector<std::s
 	{
 		int signalNum = (-1) * std::stoi(cmdArgs[1]);
 		int jobID = std::stoi(cmdArgs[2]);
+
 		return new KillCommand(cmdStr, signalNum, jobID);
 	}
 	catch (...)
@@ -350,12 +360,10 @@ void ForegroundCommand::Execute()
 
 		killComm.Execute();
 
-		//todo: probably set status to running 
+		instance.jobs.SetStatus(dstID, JobStatus::Running);
 	}
 
 	pid_t pid = instance.jobs.GetPid(dstID);
-
-	Command* cmd = instance.jobs.Remove(dstID); //todo: probably should not remove to retain original id
 
 	int exitStat;
 
@@ -373,9 +381,12 @@ void ForegroundCommand::Execute()
 
 	if (WIFSTOPPED(exitStat))
 	{
-		//todo: not re-add it but reset the timer, and set it's status to stopped
-		//todo: maybe remove isStopped from AddJob
-		instance.jobs.AddJob(pid, cmd, true);
+		instance.jobs.SetStatus(dstID, JobStatus::Stopped);
+		instance.jobs.ResetTime(dstID);
+	}
+	else
+	{
+		instance.jobs.SetStatus(dstID, JobStatus::Finished);
 	}
 }
 
@@ -407,10 +418,12 @@ void QuitCommand::Execute()
 
 		std::cout << "smash: sending SIGKILL signal to " << instance.jobs.Size() << " jobs:" << std::endl;
 
-		instance.jobs.PrintQuit();
+		instance.jobs.ForEach([] (const JobEntry& job) { job.PrintQuit(); });
 
-		instance.jobs.KillAll();
+		instance.jobs.ForEach([] (const JobEntry& job) { KillCommand kill("", SIGKILL, job.ID()); kill.Execute(); });
 	}
+
+	//todo: check if to free all Command* - probably not
 
 	exit(0);
 }

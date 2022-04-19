@@ -33,6 +33,8 @@ class JobEntry
 
 	pid_t Pid() const;
 
+	int ID() const;
+
 	Command* CommandPtr() const;
 
 	void ResetTime();
