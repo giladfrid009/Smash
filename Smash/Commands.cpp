@@ -468,7 +468,7 @@ void RedirectWriteCommand::Execute()
 
 	if (res < 0) { SysError("close"); return; }
 
-	res = open(output.c_str(), O_WRONLY | O_CREAT);
+	res = open(output.c_str(), O_WRONLY | O_CREAT | O_TRUNC);
 
 	if (res < 0) { SysError("open"); return; }
 
@@ -484,3 +484,60 @@ void RedirectWriteCommand::Execute()
 
 	res = close(stdoutCopy);
 }
+
+Command* RedirectAppendCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
+{
+	if (CommandType(cmdArgs) != Commands::RedirectAppend)
+	{
+		return nullptr;
+	}
+
+	Identifiers I;
+
+	vector<string> args = Split(cmdStr, I.RedirectAppend);
+
+	if (args.size() != 2)
+	{
+		return nullptr;
+	}
+
+	return new RedirectAppendCommand(cmdStr, args[0], args[1]);
+}
+
+RedirectAppendCommand::RedirectAppendCommand(const string& cmdStr, const string& command, const string& output) : InternalCommand(cmdStr)
+{
+	this->command = RemoveBackgroundSign(command);
+	this->output = output;
+}
+
+void RedirectAppendCommand::Execute()
+{
+	Smash& instance = Smash::Instance();
+
+	int res;
+
+	int stdoutCopy = dup(STDOUT_FILENO); //todo: doesnt copy close-on-exec flag
+
+	if (stdoutCopy < 0) { SysError("dup"); return; }
+
+	res = close(STDOUT_FILENO);
+
+	if (res < 0) { SysError("close"); return; }
+
+	res = open(output.c_str(), O_WRONLY | O_APPEND | O_CREAT);
+
+	if (res < 0) { SysError("open"); return; }
+
+	instance.ExecuteCommand(command);
+
+	res = close(STDOUT_FILENO);
+
+	if (res < 0) { SysError("close"); return; }
+
+	res = dup2(stdoutCopy, STDOUT_FILENO); //todo: doesnt copy close-on-exec flag
+
+	if (res < 0) { SysError("dup2"); return; }
+
+	res = close(stdoutCopy);
+}
+

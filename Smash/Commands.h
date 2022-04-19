@@ -160,7 +160,7 @@ class QuitCommand :public InternalCommand
 	void Execute() override;
 };
 
-class RedirectWriteCommand :public InternalCommand //todo:check if special commands 
+class RedirectWriteCommand : public InternalCommand
 {
 	public:
 
@@ -172,6 +172,22 @@ class RedirectWriteCommand :public InternalCommand //todo:check if special comma
 	RedirectWriteCommand(const std::string& cmdStr, const std::string& command, const std::string& output);
 
 	virtual ~RedirectWriteCommand() override = default;
+
+	void Execute() override;
+};
+
+class RedirectAppendCommand : public InternalCommand
+{
+	public:
+
+	std::string command;
+	std::string output;
+
+	static Command* Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs);
+
+	RedirectAppendCommand(const std::string& cmdStr, const std::string& command, const std::string& output);
+
+	virtual ~RedirectAppendCommand() override = default;
 
 	void Execute() override;
 };
