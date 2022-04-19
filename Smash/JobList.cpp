@@ -6,12 +6,13 @@
 using std::string;
 using std::map;
 using std::vector;
+using std::pair;
 
 JobsList::~JobsList()
 {
-	for (auto i = jobs.begin(); i != jobs.end(); i++)
+	for (const auto& pair : jobs)
 	{
-		delete i->second.CommandPtr();
+		delete pair.second.CommandPtr();
 	}
 }
 
@@ -31,18 +32,18 @@ void JobsList::AddJob(pid_t pid, Command* command, bool isStopped)
 
 void JobsList::PrintJobs() const
 {
-	vector<int> keys;
+	vector<pair<int, JobEntry>> pairs;
 
-	for (auto i = jobs.begin(); i != jobs.end(); i++)
+	for (const auto& pair : jobs)
 	{
-		keys.push_back(i->first);
+		pairs.push_back(pair);
 	}
 
-	std::sort(keys.begin(), keys.end());
+	std::sort(pairs.begin(), pairs.end(), [] (const pair<int, JobEntry>& left, const pair<int, JobEntry>& right) { return left.first < right.first; });
 
-	for (auto i = keys.begin(); i != keys.end(); i++)
+	for (const auto& pair : pairs)
 	{
-		jobs.at(*i).PrintJob();
+		pair.second.PrintJob();
 	}
 }
 
@@ -50,16 +51,16 @@ void JobsList::PrintQuit() const
 {
 	vector<JobEntry> keys;
 
-	for (auto i = jobs.begin(); i != jobs.end(); i++)
+	for (const auto& pair : jobs)
 	{
-		keys.push_back(i->second);
+		keys.push_back(pair.second);
 	}
 
 	std::sort(keys.begin(), keys.end(), [] (const JobEntry& left, const JobEntry& right) {return left.Pid() < right.Pid(); });
 
-	for (auto i = keys.begin(); i != keys.end(); i++)
+	for (const auto& job : keys)
 	{
-		i->PrintQuit();
+		job.PrintQuit();
 	}
 }
 
@@ -77,16 +78,15 @@ void JobsList::RemoveFinished()
 	{
 		JobEntry& job = i->second;
 
-		if (job.Status() == JobStatus::Finished)
-		{
-			delete job.CommandPtr();
-
-			i = jobs.erase(i);
-		}
-		else
+		if (job.Status() != JobStatus::Finished)
 		{
 			i++;
+			continue;
 		}
+
+		delete job.CommandPtr(); //toto: perhaps re-add JobEntry.Destroy
+
+		i = jobs.erase(i);
 	}
 }
 
@@ -103,6 +103,17 @@ Command* JobsList::Remove(int jobID)
 
 	return cmd;
 }
+
+void JobsList::ResetTime(int jobID)
+{
+	if (jobs.count(jobID) == 0)
+	{
+		return;
+	}
+
+	jobs.at(jobID).ResetTime();
+}
+
 
 int JobsList::NextID() const
 {
@@ -125,11 +136,11 @@ int JobsList::MaxID() const
 {
 	int max = -1;
 
-	for (auto i = jobs.begin(); i != jobs.end(); i++)
+	for (const auto& pair : jobs)
 	{
-		if (i->first > max)
+		if (pair.first > max)
 		{
-			max = i->first;
+			max = pair.first;
 		}
 	}
 
@@ -138,39 +149,33 @@ int JobsList::MaxID() const
 
 pid_t JobsList::GetPid(int jobID) const
 {
-	for (auto i = jobs.begin(); i != jobs.end(); i++)
+	if (jobs.count(jobID) == 0)
 	{
-		if (i->first == jobID)
-		{
-			return i->second.Pid();
-		}
+		return -1;
 	}
 
-	return -1;
+	return jobs.at(jobID).Pid();
 }
 
 JobStatus JobsList::GetStatus(int jobID)
 {
-	for (auto i = jobs.begin(); i != jobs.end(); i++)
+	if (jobs.count(jobID) == 0)
 	{
-		if (i->first == jobID)
-		{
-			return i->second.Status();
-		}
+		return JobStatus::Unknown;
 	}
 
-	return JobStatus::Unknown;
+	return jobs.at(jobID).Status();
 }
 
 int JobsList::MaxStopped()
 {
 	int max = -1;
 
-	for (auto i = jobs.begin(); i != jobs.end(); i++)
+	for (auto& pair : jobs)
 	{
-		if (i->second.Status() == JobStatus::Stopped)
+		if (pair.second.Status() == JobStatus::Stopped)
 		{
-			max = i->first;
+			max = pair.first;
 		}
 	}
 
@@ -179,12 +184,10 @@ int JobsList::MaxStopped()
 
 void JobsList::SetStatus(int jobID, JobStatus status)
 {
-	for (auto i = jobs.begin(); i != jobs.end(); i++)
+	if (jobs.count(jobID) == 0)
 	{
-		if (i->first == jobID)
-		{
-			i->second.SetStatus(status);
-			return;
-		}
+		return;
 	}
+
+	return jobs.at(jobID).SetStatus(status);
 }

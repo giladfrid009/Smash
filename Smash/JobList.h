@@ -29,23 +29,25 @@ class JobsList
 
 	void PrintQuit() const;
 
-	void KillAll();
+	void KillAll(); //todo: is it used anywhere?
 
 	void RemoveFinished();
 
-	Command* Remove(int jobID);
+	Command* Remove(int jobID); //todo: remove later
 
 	pid_t GetPid(int jobID) const;
 
 	JobStatus GetStatus(int jobID);
+
+	void SetStatus(int jobID, JobStatus status);
+
+	void ResetTime(int jobID);
 
 	int MaxStopped();
 
 	int MaxID() const;
 
 	long unsigned int Size() const;
-
-	void SetStatus(int jobID, JobStatus status);
 
 	private:
 

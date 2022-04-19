@@ -55,6 +55,11 @@ Command* JobEntry::CommandPtr() const
 	return command;
 }
 
+void JobEntry::ResetTime()
+{
+	startTime = time(nullptr);
+}
+
 void JobEntry::PrintJob() const
 {
 	if (command == nullptr)

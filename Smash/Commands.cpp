@@ -347,6 +347,7 @@ void ForegroundCommand::Execute()
 	if (instance.jobs.GetStatus(dstID) == JobStatus::Stopped)
 	{
 		KillCommand killComm("", SIGCONT, dstID);
+
 		killComm.Execute();
 	}
 
@@ -370,6 +371,8 @@ void ForegroundCommand::Execute()
 
 	if (WIFSTOPPED(exitStat))
 	{
+		//todo: not re-add it but reset the timer, and set it's status to stopped
+		//todo: maybe remove isStopped from AddJob
 		instance.jobs.AddJob(pid, cmd, true);
 	}
 }

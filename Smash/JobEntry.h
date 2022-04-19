@@ -35,6 +35,8 @@ class JobEntry
 
 	Command* CommandPtr() const;
 
+	void ResetTime();
+
 	void PrintJob() const;
 
 	void PrintQuit() const;
