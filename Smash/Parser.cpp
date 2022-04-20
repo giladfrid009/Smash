@@ -99,6 +99,11 @@ static bool Contains(const vector<string>& cmdArgs, string predicate)
 	return std::any_of(cmdArgs.begin(), cmdArgs.end(), [predicate] (string str) {return str == predicate; });
 }
 
+Commands CommandType(const string& cmdStr)
+{
+	return CommandType(ParseCommand(cmdStr));
+}
+
 Commands CommandType(const vector<string>& cmdArgs)
 {
 	if (cmdArgs.size() < 1) return Commands::Unknown;

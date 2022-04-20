@@ -565,7 +565,6 @@ void PipeOutCommand::Execute()
 	//todo: fix PipeOut
 	//todo: add error checking
 	//todo: fix PipeErrCommand
-	// changed on commit bbea1b55d9b24b510d8e0678047c6c631380a9bd
 
 	Smash& instance = Smash::Instance();
 
@@ -602,20 +601,22 @@ void PipeOutCommand::Execute()
 
 	waitpid(pid, nullptr, 0);
 
-	string leftOutput;
-	char readBuff[ReadSize];
-
-	while (read(STDIN_FILENO, readBuff, ReadSize) > 0)
+	if (CommandType(right) != Commands::Unknown)
 	{
-		leftOutput.append(readBuff);
-	}
+		string leftOutput;
+		char readBuff[ReadSize];
 
-	if (leftOutput.empty() == false)
+		while (read(STDIN_FILENO, readBuff, ReadSize) > 0)
+		{
+			leftOutput.append(readBuff);
+		}
+
+		instance.ExecuteCommand(right + " " + leftOutput);
+	}
+	else
 	{
-		leftOutput.insert(0, " ");
+		instance.ExecuteCommand(right);
 	}
-
-	instance.ExecuteCommand(right + leftOutput);
 
 	dup2(inCopy, STDIN_FILENO);
 	close(inCopy);
