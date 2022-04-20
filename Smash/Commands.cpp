@@ -10,8 +10,6 @@
 #include <exception>
 #include <fcntl.h>
 
-#define COMMAND_ARGS_MAX_LENGTH (200) //todo: maybe remove these defines
-#define COMMAND_MAX_ARGS (20)
 
 using std::string;
 using std::vector;
@@ -21,8 +19,6 @@ using std::cerr;
 using std::endl;
 
 const size_t ReadSize = 4096 * sizeof(char);
-
-//todo: move command argument verification into constructors, and throw invalid_argument if failure
 
 static void SysError(string sysCall)
 {
@@ -173,6 +169,7 @@ Command* BackgroundCommand::Create(const string& cmdStr, const vector<string>& c
 		catch (...)
 		{
 			cerr << "smash error: bg: invalid arguments" << endl;
+			return nullptr;
 		}
 	}
 
@@ -315,6 +312,7 @@ Command* ForegroundCommand::Create(const string& cmdStr, const vector<string>& c
 		catch (...)
 		{
 			cerr << "smash error: fg: invalid arguments" << endl;
+			return nullptr;
 		}
 	}
 
@@ -460,7 +458,7 @@ Command* RedirectWriteCommand::Create(const string& cmdStr, const vector<string>
 RedirectWriteCommand::RedirectWriteCommand(const string& cmdStr, const string& command, const string& output) : InternalCommand(cmdStr)
 {
 	this->command = RemoveBackgroundSign(command);
-	this->output = output;
+	this->output = Trim(output);
 }
 
 void RedirectWriteCommand::Execute()
@@ -510,7 +508,7 @@ Command* RedirectAppendCommand::Create(const string& cmdStr, const vector<string
 RedirectAppendCommand::RedirectAppendCommand(const string& cmdStr, const string& command, const string& output) : InternalCommand(cmdStr)
 {
 	this->command = RemoveBackgroundSign(command);
-	this->output = output;
+	this->output = Trim(output);
 }
 
 void RedirectAppendCommand::Execute()
@@ -565,57 +563,58 @@ PipeOutCommand::PipeOutCommand(const string& cmdStr, const string& left, const s
 
 void PipeOutCommand::Execute()
 {
+	//todo: add error checking
+	//todo: fix PipeErrCommand
+
 	Smash& instance = Smash::Instance();
 
+	int inCopy = dup(STDIN_FILENO);
 	int outCopy = dup(STDOUT_FILENO);
-
-	if (outCopy < 0) { SysError("dup"); return; }
 
 	int pipeFds[2];
 
-	int res = pipe(pipeFds);
-
-	if (res < 0) { SysError("pipe"); return; }
+	pipe(pipeFds);
 
 	int readPipe = pipeFds[0];
 	int writePipe = pipeFds[1];
 
-	res = dup2(writePipe, STDOUT_FILENO);
+	dup2(writePipe, STDOUT_FILENO);
+	close(writePipe);
 
-	if (res < 0) { SysError("dup2"); return; }
+	pid_t pid = fork();
 
-	instance.ExecuteCommand(left);
+	if (pid == 0)
+	{
+		close(readPipe);
+		close(STDIN_FILENO);
 
-	res = fcntl(readPipe, F_SETFL, fcntl(readPipe, F_GETFL) | O_NONBLOCK);
+		instance.ExecuteCommand(left);
 
-	if (res < 0) { SysError("fcntl"); return; }
+		exit(0);
+	}
+
+	dup2(outCopy, STDOUT_FILENO);
+	close(outCopy);
+
+	dup2(readPipe, STDIN_FILENO);
+	close(readPipe);
+
+	waitpid(pid, nullptr, 0);
+
+	//fcntl(STDIN_FILENO, F_SETFL, fcntl(STDIN_FILENO, F_GETFL) | O_NONBLOCK); //todo: maybe remove
 
 	string leftOutput;
-
 	char readBuff[ReadSize];
 
-	while (read(readPipe, readBuff, ReadSize) > 0)
+	while (read(STDIN_FILENO, readBuff, ReadSize) > 0)
 	{
 		leftOutput = leftOutput.append(readBuff);
 	}
 
-	res = dup2(outCopy, STDOUT_FILENO);
-
-	if (res < 0) { SysError("dup2"); return; }
-
 	instance.ExecuteCommand(right.append(" ").append(leftOutput));
 
-	res = close(outCopy);
-
-	if (res < 0) { SysError("close"); }
-
-	res = close(readPipe);
-
-	if (res < 0) { SysError("close"); }
-
-	res = close(writePipe);
-
-	if (res < 0) { SysError("close"); }
+	dup2(inCopy, STDIN_FILENO);
+	close(inCopy);
 }
 
 Command* PipeErrCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
