@@ -575,20 +575,20 @@ void PipeOutCommand::Execute()
 
 	int res = pipe(pipeFds);
 
-	if (outCopy < 0) { SysError("pipe"); return; }
+	if (res < 0) { SysError("pipe"); return; }
 
 	int readPipe = pipeFds[0];
 	int writePipe = pipeFds[1];
 
 	res = dup2(writePipe, STDOUT_FILENO);
 
-	if (outCopy < 0) { SysError("dup2"); return; }
+	if (res < 0) { SysError("dup2"); return; }
 
 	instance.ExecuteCommand(left);
 
 	res = fcntl(readPipe, F_SETFL, fcntl(readPipe, F_GETFL) | O_NONBLOCK);
 
-	if (outCopy < 0) { SysError("fcntl"); return; }
+	if (res < 0) { SysError("fcntl"); return; }
 
 	string leftOutput;
 
@@ -601,21 +601,21 @@ void PipeOutCommand::Execute()
 
 	res = dup2(outCopy, STDOUT_FILENO);
 
-	if (outCopy < 0) { SysError("dup2"); return; }
+	if (res < 0) { SysError("dup2"); return; }
 
 	instance.ExecuteCommand(right.append(" ").append(leftOutput));
 
 	res = close(outCopy);
 
-	if (outCopy < 0) { SysError("close"); }
+	if (res < 0) { SysError("close"); }
 
 	res = close(readPipe);
 
-	if (outCopy < 0) { SysError("close"); }
+	if (res < 0) { SysError("close"); }
 
 	res = close(writePipe);
 
-	if (outCopy < 0) { SysError("close"); }
+	if (res < 0) { SysError("close"); }
 }
 
 Command* PipeErrCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
@@ -655,20 +655,20 @@ void PipeErrCommand::Execute()
 
 	int res = pipe(pipeFds);
 
-	if (errCopy < 0) { SysError("pipe"); return; }
+	if (res < 0) { SysError("pipe"); return; }
 
 	int readPipe = pipeFds[0];
 	int writePipe = pipeFds[1];
 
 	res = dup2(writePipe, STDERR_FILENO);
 
-	if (errCopy < 0) { SysError("dup2"); return; }
+	if (res < 0) { SysError("dup2"); return; }
 
 	instance.ExecuteCommand(left);
 
 	res = fcntl(readPipe, F_SETFL, fcntl(readPipe, F_GETFL) | O_NONBLOCK);
 
-	if (errCopy < 0) { SysError("fcntl"); return; }
+	if (res < 0) { SysError("fcntl"); return; }
 
 	string leftOutput;
 
@@ -681,19 +681,19 @@ void PipeErrCommand::Execute()
 
 	res = dup2(errCopy, STDERR_FILENO);
 
-	if (errCopy < 0) { SysError("dup2"); return; }
+	if (res < 0) { SysError("dup2"); return; }
 
 	instance.ExecuteCommand(right.append(" ").append(leftOutput));
 
 	res = close(errCopy);
 
-	if (errCopy < 0) { SysError("close"); }
+	if (res < 0) { SysError("close"); }
 
 	res = close(readPipe);
 
-	if (errCopy < 0) { SysError("close"); }
+	if (res < 0) { SysError("close"); }
 
 	res = close(writePipe);
 
-	if (errCopy < 0) { SysError("close"); }
+	if (res < 0) { SysError("close"); }
 }
