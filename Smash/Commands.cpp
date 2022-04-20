@@ -9,17 +9,18 @@
 #include <signal.h>
 #include <exception>
 #include <fcntl.h>
-#include <cassert>
-#include <sstream>
 
 #define COMMAND_ARGS_MAX_LENGTH (200) //todo: maybe remove these defines
 #define COMMAND_MAX_ARGS (20)
 
-
 using std::string;
 using std::vector;
+using std::cin;
+using std::cout;
+using std::cerr;
+using std::endl;
 
-const int ReadSize = 4096 * sizeof(char);
+const size_t ReadSize = 4096 * sizeof(char);
 
 //todo: move command argument verification into constructors, and throw invalid_argument if failure
 
@@ -29,17 +30,17 @@ static void SysError(string sysCall)
 	perror(formatted.c_str());
 }
 
-Command::Command(const std::string& cmdStr)
+Command::Command(const string& cmdStr)
 {
 	this->cmdStr = cmdStr;
 }
 
-std::string Command::ToString()
+string Command::ToString()
 {
 	return cmdStr;
 }
 
-InternalCommand::InternalCommand(const std::string& cmdStr) : Command(cmdStr)
+InternalCommand::InternalCommand(const string& cmdStr) : Command(cmdStr)
 {
 }
 
@@ -70,7 +71,7 @@ void ExternalCommand::Execute()
 	exit(0);
 }
 
-JobsCommand::JobsCommand(const std::string& cmdStr) : InternalCommand(cmdStr)
+JobsCommand::JobsCommand(const string& cmdStr) : InternalCommand(cmdStr)
 {
 }
 
@@ -91,7 +92,7 @@ void JobsCommand::Execute()
 	instance.jobs.ForEach([] (const JobEntry& job) { job.PrintJob(); });
 }
 
-KillCommand::KillCommand(const std::string& cmdStr, int signalNum, int jobID) : InternalCommand(cmdStr)
+KillCommand::KillCommand(const string& cmdStr, int signalNum, int jobID) : InternalCommand(cmdStr)
 {
 	if (signalNum <= 0 || signalNum >= 32)
 	{
@@ -102,7 +103,7 @@ KillCommand::KillCommand(const std::string& cmdStr, int signalNum, int jobID) : 
 	this->jobID = jobID;
 }
 
-Command* KillCommand::Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs)
+Command* KillCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
 {
 	if (CommandType(cmdArgs) != Commands::Kill)
 	{
@@ -111,7 +112,7 @@ Command* KillCommand::Create(const std::string& cmdStr, const std::vector<std::s
 
 	if (cmdArgs.size() != 3)
 	{
-		std::cerr << "smash error: kill: invalid arguments" << std::endl;
+		cerr << "smash error: kill: invalid arguments" << endl;
 		return nullptr;
 	}
 
@@ -124,7 +125,7 @@ Command* KillCommand::Create(const std::string& cmdStr, const std::vector<std::s
 	}
 	catch (...)
 	{
-		std::cerr << "smash error: kill: invalid arguments" << std::endl;
+		cerr << "smash error: kill: invalid arguments" << endl;
 		return nullptr;
 	}
 }
@@ -137,7 +138,7 @@ void KillCommand::Execute()
 
 	if (pid < 0)
 	{
-		std::cerr << "smash error: kill: job-id " << jobID << " does not exist" << std::endl;
+		cerr << "smash error: kill: job-id " << jobID << " does not exist" << endl;
 		return;
 	}
 
@@ -149,7 +150,7 @@ void KillCommand::Execute()
 	}
 }
 
-Command* BackgroundCommand::Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs)
+Command* BackgroundCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
 {
 	if (CommandType(cmdArgs) != Commands::Background)
 	{
@@ -171,22 +172,22 @@ Command* BackgroundCommand::Create(const std::string& cmdStr, const std::vector<
 		}
 		catch (...)
 		{
-			std::cerr << "smash error: bg: invalid arguments" << std::endl;
+			cerr << "smash error: bg: invalid arguments" << endl;
 		}
 	}
 
-	std::cerr << "smash error: bg: invalid arguments" << std::endl;
+	cerr << "smash error: bg: invalid arguments" << endl;
 
 	return nullptr;
 }
 
-BackgroundCommand::BackgroundCommand(const std::string& cmdStr) : InternalCommand(cmdStr)
+BackgroundCommand::BackgroundCommand(const string& cmdStr) : InternalCommand(cmdStr)
 {
 	jobID = -1;
 	useID = false;
 }
 
-BackgroundCommand::BackgroundCommand(const std::string& cmdStr, int jobID) : InternalCommand(cmdStr)
+BackgroundCommand::BackgroundCommand(const string& cmdStr, int jobID) : InternalCommand(cmdStr)
 {
 	this->jobID = jobID;
 	this->useID = true;
@@ -204,13 +205,13 @@ void BackgroundCommand::Execute()
 
 		if (status == JobStatus::Finished || status == JobStatus::Unknown)
 		{
-			std::cerr << "smash error: bg: job-id " << jobID << " does not exist" << std::endl;
+			cerr << "smash error: bg: job-id " << jobID << " does not exist" << endl;
 			return;
 		}
 
 		if (status == JobStatus::Running)
 		{
-			std::cerr << "smash error: bg: job-id " << jobID << " is already running in the background" << std::endl;
+			cerr << "smash error: bg: job-id " << jobID << " is already running in the background" << endl;
 			return;
 		}
 
@@ -222,7 +223,7 @@ void BackgroundCommand::Execute()
 
 		if (dstID == -1)
 		{
-			std::cerr << "smash error: bg: there is no stopped jobs to resume" << std::endl;
+			cerr << "smash error: bg: there is no stopped jobs to resume" << endl;
 			return;
 		}
 	}
@@ -234,7 +235,7 @@ void BackgroundCommand::Execute()
 	instance.jobs.SetStatus(dstID, JobStatus::Running);
 }
 
-Command* ChangePromptCommand::Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs)
+Command* ChangePromptCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
 {
 	if (CommandType(cmdArgs) != Commands::ChangePrompt)
 	{
@@ -253,7 +254,7 @@ Command* ChangePromptCommand::Create(const std::string& cmdStr, const std::vecto
 	return nullptr;
 }
 
-ChangePromptCommand::ChangePromptCommand(const std::string& cmdStr, std::string prompt) : InternalCommand(cmdStr)
+ChangePromptCommand::ChangePromptCommand(const string& cmdStr, string prompt) : InternalCommand(cmdStr)
 {
 	this->prompt = prompt;
 }
@@ -265,7 +266,7 @@ void ChangePromptCommand::Execute()
 	instatnce.prompt = this->prompt;
 }
 
-Command* ShowPidCommand::Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs)
+Command* ShowPidCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
 {
 	if (CommandType(cmdArgs) != Commands::ShowPid)
 	{
@@ -275,7 +276,7 @@ Command* ShowPidCommand::Create(const std::string& cmdStr, const std::vector<std
 	return new ShowPidCommand(cmdStr);
 }
 
-ShowPidCommand::ShowPidCommand(const std::string& cmdStr) : InternalCommand(cmdStr)
+ShowPidCommand::ShowPidCommand(const string& cmdStr) : InternalCommand(cmdStr)
 {
 }
 
@@ -289,10 +290,10 @@ void ShowPidCommand::Execute()
 		return;
 	}
 
-	std::cout << "smash pid is " << pid << std::endl;
+	cout << "smash pid is " << pid << endl;
 }
 
-Command* ForegroundCommand::Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs)
+Command* ForegroundCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
 {
 	if (CommandType(cmdArgs) != Commands::Foreground)
 	{
@@ -313,22 +314,22 @@ Command* ForegroundCommand::Create(const std::string& cmdStr, const std::vector<
 		}
 		catch (...)
 		{
-			std::cerr << "smash error: fg: invalid arguments" << std::endl;
+			cerr << "smash error: fg: invalid arguments" << endl;
 		}
 	}
 
-	std::cerr << "smash error: fg: invalid arguments" << std::endl;
+	cerr << "smash error: fg: invalid arguments" << endl;
 
 	return nullptr;
 }
 
-ForegroundCommand::ForegroundCommand(const std::string& cmdStr) : InternalCommand(cmdStr)
+ForegroundCommand::ForegroundCommand(const string& cmdStr) : InternalCommand(cmdStr)
 {
 	jobID = -1;
 	useID = false;
 }
 
-ForegroundCommand::ForegroundCommand(const std::string& cmdStr, int jobID) : InternalCommand(cmdStr)
+ForegroundCommand::ForegroundCommand(const string& cmdStr, int jobID) : InternalCommand(cmdStr)
 {
 	this->jobID = jobID;
 	this->useID = true;
@@ -346,7 +347,7 @@ void ForegroundCommand::Execute()
 
 		if (status == JobStatus::Finished || status == JobStatus::Unknown)
 		{
-			std::cerr << "smash error: fg: job-id " << jobID << " does not exist" << std::endl;
+			cerr << "smash error: fg: job-id " << jobID << " does not exist" << endl;
 			return;
 		}
 
@@ -358,7 +359,7 @@ void ForegroundCommand::Execute()
 
 		if (dstID == -1)
 		{
-			std::cerr << "smash error: fg: jobs list is empty" << std::endl;
+			cerr << "smash error: fg: jobs list is empty" << endl;
 			return;
 		}
 	}
@@ -399,7 +400,7 @@ void ForegroundCommand::Execute()
 	}
 }
 
-Command* QuitCommand::Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs)
+Command* QuitCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
 {
 	if (CommandType(cmdArgs) != Commands::Quit)
 	{
@@ -414,7 +415,7 @@ Command* QuitCommand::Create(const std::string& cmdStr, const std::vector<std::s
 	return new QuitCommand(cmdStr, false);
 }
 
-QuitCommand::QuitCommand(const std::string& cmdStr, bool killChildren) : InternalCommand(cmdStr)
+QuitCommand::QuitCommand(const string& cmdStr, bool killChildren) : InternalCommand(cmdStr)
 {
 	this->killChildren = killChildren;
 }
@@ -425,7 +426,7 @@ void QuitCommand::Execute()
 	{
 		Smash& instance = Smash::Instance();
 
-		std::cout << "smash: sending SIGKILL signal to " << instance.jobs.Size() << " jobs:" << std::endl;
+		cout << "smash: sending SIGKILL signal to " << instance.jobs.Size() << " jobs:" << endl;
 
 		instance.jobs.ForEach([] (const JobEntry& job) { job.PrintQuit(); });
 
@@ -574,40 +575,47 @@ void PipeOutCommand::Execute()
 
 	int res = pipe(pipeFds);
 
-	if (res < 0) { SysError("pipe"); return; }
+	if (outCopy < 0) { SysError("pipe"); return; }
 
 	int readPipe = pipeFds[0];
 	int writePipe = pipeFds[1];
 
 	res = dup2(writePipe, STDOUT_FILENO);
 
-	if (res < 0) { SysError("dup2"); return; }
+	if (outCopy < 0) { SysError("dup2"); return; }
 
 	instance.ExecuteCommand(left);
 
-	char leftOutput[ReadSize];
+	res = fcntl(readPipe, F_SETFL, fcntl(readPipe, F_GETFL) | O_NONBLOCK);
 
-	res = read(readPipe, leftOutput, ReadSize);
+	if (outCopy < 0) { SysError("fcntl"); return; }
 
-	if (res < 0) { SysError("read"); return; }
+	string leftOutput;
+
+	char readBuff[ReadSize];
+
+	while (read(readPipe, readBuff, ReadSize) > 0)
+	{
+		leftOutput = leftOutput.append(readBuff);
+	}
 
 	res = dup2(outCopy, STDOUT_FILENO);
 
-	if (res < 0) { SysError("dup2"); return; }
+	if (outCopy < 0) { SysError("dup2"); return; }
 
 	instance.ExecuteCommand(right.append(" ").append(leftOutput));
 
 	res = close(outCopy);
 
-	if (res < 0) { SysError("close"); }
+	if (outCopy < 0) { SysError("close"); }
 
 	res = close(readPipe);
 
-	if (res < 0) { SysError("close"); }
+	if (outCopy < 0) { SysError("close"); }
 
 	res = close(writePipe);
 
-	if (res < 0) { SysError("close"); }
+	if (outCopy < 0) { SysError("close"); }
 }
 
 Command* PipeErrCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
@@ -647,38 +655,45 @@ void PipeErrCommand::Execute()
 
 	int res = pipe(pipeFds);
 
-	if (res < 0) { SysError("pipe"); return; }
+	if (errCopy < 0) { SysError("pipe"); return; }
 
 	int readPipe = pipeFds[0];
 	int writePipe = pipeFds[1];
 
 	res = dup2(writePipe, STDERR_FILENO);
 
-	if (res < 0) { SysError("dup2"); return; }
+	if (errCopy < 0) { SysError("dup2"); return; }
 
 	instance.ExecuteCommand(left);
 
-	char leftOutput[ReadSize];
+	res = fcntl(readPipe, F_SETFL, fcntl(readPipe, F_GETFL) | O_NONBLOCK);
 
-	res = read(readPipe, leftOutput, ReadSize);
+	if (errCopy < 0) { SysError("fcntl"); return; }
 
-	if (res < 0) { SysError("read"); return; }
+	string leftOutput;
+
+	char readBuff[ReadSize];
+
+	while (read(readPipe, readBuff, ReadSize) > 0)
+	{
+		leftOutput = leftOutput.append(readBuff);
+	}
 
 	res = dup2(errCopy, STDERR_FILENO);
 
-	if (res < 0) { SysError("dup2"); return; }
+	if (errCopy < 0) { SysError("dup2"); return; }
 
 	instance.ExecuteCommand(right.append(" ").append(leftOutput));
 
 	res = close(errCopy);
 
-	if (res < 0) { SysError("close"); }
+	if (errCopy < 0) { SysError("close"); }
 
 	res = close(readPipe);
 
-	if (res < 0) { SysError("close"); }
+	if (errCopy < 0) { SysError("close"); }
 
 	res = close(writePipe);
 
-	if (res < 0) { SysError("close"); }
+	if (errCopy < 0) { SysError("close"); }
 }
