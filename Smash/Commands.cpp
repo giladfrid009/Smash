@@ -15,8 +15,11 @@
 #define COMMAND_ARGS_MAX_LENGTH (200) //todo: maybe remove these defines
 #define COMMAND_MAX_ARGS (20)
 
+
 using std::string;
 using std::vector;
+
+const int ReadSize = 4096 * sizeof(char);
 
 //todo: move command argument verification into constructors, and throw invalid_argument if failure
 
@@ -582,9 +585,9 @@ void PipeOutCommand::Execute()
 
 	instance.ExecuteCommand(left);
 
-	char leftOutput[4096 * sizeof(char)];
+	char leftOutput[ReadSize];
 
-	res = read(readPipe, leftOutput, 4096 * sizeof(char));
+	res = read(readPipe, leftOutput, ReadSize);
 
 	if (res < 0) { SysError("read"); return; }
 
@@ -609,7 +612,21 @@ void PipeOutCommand::Execute()
 
 Command* PipeErrCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
 {
-	return nullptr;
+	if (CommandType(cmdArgs) != Commands::PipeErr)
+	{
+		return nullptr;
+	}
+
+	Identifiers I;
+
+	vector<string> args = Split(cmdStr, I.PipeErr);
+
+	if (args.size() != 2)
+	{
+		return nullptr;
+	}
+
+	return new PipeErrCommand(cmdStr, args[0], args[1]);
 }
 
 PipeErrCommand::PipeErrCommand(const string& cmdStr, const string& left, const string& right) : InternalCommand(cmdStr)
@@ -620,5 +637,48 @@ PipeErrCommand::PipeErrCommand(const string& cmdStr, const string& left, const s
 
 void PipeErrCommand::Execute()
 {
+	Smash& instance = Smash::Instance();
 
+	int errCopy = dup(STDERR_FILENO);
+
+	if (errCopy < 0) { SysError("dup"); return; }
+
+	int pipeFds[2];
+
+	int res = pipe(pipeFds);
+
+	if (res < 0) { SysError("pipe"); return; }
+
+	int readPipe = pipeFds[0];
+	int writePipe = pipeFds[1];
+
+	res = dup2(writePipe, STDERR_FILENO);
+
+	if (res < 0) { SysError("dup2"); return; }
+
+	instance.ExecuteCommand(left);
+
+	char leftOutput[ReadSize];
+
+	res = read(readPipe, leftOutput, ReadSize);
+
+	if (res < 0) { SysError("read"); return; }
+
+	res = dup2(errCopy, STDERR_FILENO);
+
+	if (res < 0) { SysError("dup2"); return; }
+
+	instance.ExecuteCommand(right.append(" ").append(leftOutput));
+
+	res = close(errCopy);
+
+	if (res < 0) { SysError("close"); }
+
+	res = close(readPipe);
+
+	if (res < 0) { SysError("close"); }
+
+	res = close(writePipe);
+
+	if (res < 0) { SysError("close"); }
 }
