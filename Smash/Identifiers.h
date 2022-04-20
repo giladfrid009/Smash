@@ -10,7 +10,7 @@ enum class Commands
 	RedirectAppend,
 	Timeout,
 	ChangePrompt,
-	ShowPid,
+	ShowPID,
 	PrintDir,
 	ChangeDir,
 	Jobs,
@@ -34,7 +34,7 @@ class Identifiers
 	const char* RedirectAppend = ">>";
 	const char* Timeout = "timeout";
 	const char* ChangePrompt = "chprompt";
-	const char* ShowPid = "showpid";
+	const char* ShowPID = "showpid";
 	const char* PrintDir = "pwd";
 	const char* ChangeDir = "cd";
 	const char* Jobs = "jobs";

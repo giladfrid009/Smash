@@ -110,16 +110,14 @@ int JobsList::MaxID() const
 	return max;
 }
 
-//todo: rename all Pid to PID
-//todo: rename all jobID to id
-pid_t JobsList::GetPid(int jobID) const
+pid_t JobsList::GetPID(int jobID) const
 {
 	if (jobs.count(jobID) == 0)
 	{
 		return -1;
 	}
 
-	return jobs.at(jobID).Pid();
+	return jobs.at(jobID).PID();
 }
 
 JobStatus JobsList::GetStatus(int jobID)

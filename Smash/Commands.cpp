@@ -130,7 +130,7 @@ void KillCommand::Execute()
 {
 	Smash& instance = Smash::Instance();
 
-	int pid = instance.jobs.GetPid(jobID);
+	int pid = instance.jobs.GetPID(jobID);
 
 	if (pid < 0)
 	{
@@ -263,21 +263,21 @@ void ChangePromptCommand::Execute()
 	instatnce.prompt = this->prompt;
 }
 
-Command* ShowPidCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
+Command* ShowPIDCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
 {
-	if (CommandType(cmdArgs) != Commands::ShowPid)
+	if (CommandType(cmdArgs) != Commands::ShowPID)
 	{
 		return nullptr;
 	}
 
-	return new ShowPidCommand(cmdStr);
+	return new ShowPIDCommand(cmdStr);
 }
 
-ShowPidCommand::ShowPidCommand(const string& cmdStr) : InternalCommand(cmdStr)
+ShowPIDCommand::ShowPIDCommand(const string& cmdStr) : InternalCommand(cmdStr)
 {
 }
 
-void ShowPidCommand::Execute()
+void ShowPIDCommand::Execute()
 {
 	pid_t pid = getpid();
 
@@ -372,7 +372,7 @@ void ForegroundCommand::Execute()
 		instance.jobs.SetStatus(dstID, JobStatus::Running);
 	}
 
-	pid_t pid = instance.jobs.GetPid(dstID);
+	pid_t pid = instance.jobs.GetPID(dstID);
 
 	int exitStat;
 

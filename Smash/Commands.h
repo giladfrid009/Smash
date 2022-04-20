@@ -130,15 +130,15 @@ class ChangePromptCommand :public InternalCommand
 	void Execute() override;
 };
 
-class ShowPidCommand :public InternalCommand
+class ShowPIDCommand :public InternalCommand
 {
 	public:
 
 	static Command* Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs);
 
-	ShowPidCommand(const std::string& cmdStr);
+	ShowPIDCommand(const std::string& cmdStr);
 
-	virtual ~ShowPidCommand() override = default;
+	virtual ~ShowPIDCommand() override = default;
 
 	void Execute() override;
 };

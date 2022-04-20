@@ -129,7 +129,7 @@ Commands CommandType(const vector<string>& cmdArgs)
 
 	if (cmd == I.Quit) return Commands::Quit;
 
-	if (cmd == I.ShowPid) return Commands::ShowPid;
+	if (cmd == I.ShowPID) return Commands::ShowPID;
 
 	if (cmd == I.Tail) return Commands::Tail;
 

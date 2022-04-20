@@ -37,7 +37,7 @@ class JobsList
 
 	void RemoveFinished();
 
-	pid_t GetPid(int jobID) const;
+	pid_t GetPID(int jobID) const;
 
 	JobStatus GetStatus(int jobID);
 

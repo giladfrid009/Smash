@@ -55,7 +55,7 @@ Command* Smash::CreateCommand(const string& cmdStr, const vector<string>& cmdArg
 
 			case (Commands::ChangePrompt): return ChangePromptCommand::Create(cmdStr, cmdArgs);
 
-			case (Commands::ShowPid): return ShowPidCommand::Create(cmdStr, cmdArgs);
+			case (Commands::ShowPID): return ShowPIDCommand::Create(cmdStr, cmdArgs);
 
 			case (Commands::Quit): return QuitCommand::Create(cmdStr, cmdArgs);
 

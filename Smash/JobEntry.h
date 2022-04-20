@@ -31,7 +31,7 @@ class JobEntry
 
 	JobStatus Status();
 
-	pid_t Pid() const;
+	pid_t PID() const;
 
 	int ID() const;
 

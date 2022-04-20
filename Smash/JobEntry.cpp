@@ -46,7 +46,7 @@ JobStatus JobEntry::Status()
 	return status;
 }
 
-pid_t JobEntry::Pid() const
+pid_t JobEntry::PID() const
 {
 	return pid;
 }
