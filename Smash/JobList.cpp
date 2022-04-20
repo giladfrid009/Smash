@@ -31,7 +31,6 @@ void JobsList::AddJob(pid_t pid, Command* command, JobStatus status)
 	jobs[newID] = job;
 }
 
-//todo: check potential uses
 void JobsList::ForEach(std::function<void(const JobEntry&)> action) const
 {
 	vector<JobEntry> sorted;

@@ -562,6 +562,7 @@ PipeOutCommand::PipeOutCommand(const string& cmdStr, const string& left, const s
 
 void PipeOutCommand::Execute()
 {
+	//todo: fix PipeOut
 	//todo: add error checking
 	//todo: fix PipeErrCommand
 	// changed on commit bbea1b55d9b24b510d8e0678047c6c631380a9bd
@@ -601,17 +602,20 @@ void PipeOutCommand::Execute()
 
 	waitpid(pid, nullptr, 0);
 
-	//fcntl(STDIN_FILENO, F_SETFL, fcntl(STDIN_FILENO, F_GETFL) | O_NONBLOCK); //todo: maybe remove
-
 	string leftOutput;
 	char readBuff[ReadSize];
 
 	while (read(STDIN_FILENO, readBuff, ReadSize) > 0)
 	{
-		leftOutput = leftOutput.append(readBuff);
+		leftOutput.append(readBuff);
 	}
 
-	instance.ExecuteCommand(right.append(" ").append(leftOutput));
+	if (leftOutput.empty() == false)
+	{
+		leftOutput.insert(0, " ");
+	}
+
+	instance.ExecuteCommand(right + leftOutput);
 
 	dup2(inCopy, STDIN_FILENO);
 	close(inCopy);
@@ -675,7 +679,7 @@ void PipeErrCommand::Execute()
 
 	while (read(readPipe, readBuff, ReadSize) > 0)
 	{
-		leftError = leftError.append(readBuff);
+		leftError.append(readBuff);
 	}
 
 	res = dup2(errCopy, STDERR_FILENO);
