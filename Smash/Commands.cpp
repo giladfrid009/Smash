@@ -581,17 +581,7 @@ void PipeOutCommand::Execute()
 	dup2(writePipe, STDOUT_FILENO);
 	close(writePipe);
 
-	pid_t pid = fork();
-
-	if (pid == 0)
-	{
-		close(readPipe);
-		close(STDIN_FILENO);
-
-		instance.ExecuteCommand(left);
-
-		exit(0);
-	}
+	instance.ExecuteCommand(left);
 
 	dup2(outCopy, STDOUT_FILENO);
 	close(outCopy);
@@ -599,24 +589,23 @@ void PipeOutCommand::Execute()
 	dup2(readPipe, STDIN_FILENO);
 	close(readPipe);
 
-	waitpid(pid, nullptr, 0);
+	/*
+	* TODO:
+	* maybe external commands need input in cin and not with command?
+	* internal commands need input with command and not with cin?
+	*/
 
-	if (CommandType(right) != Commands::Unknown)
+	string leftOutput;
+
+	char readBuff[ReadSize];
+
+	while (read(STDIN_FILENO, readBuff, ReadSize) > 0)
 	{
-		string leftOutput;
-		char readBuff[ReadSize];
-
-		while (read(STDIN_FILENO, readBuff, ReadSize) > 0)
-		{
-			leftOutput.append(readBuff);
-		}
-
-		instance.ExecuteCommand(right + " " + leftOutput);
+		leftOutput.append(readBuff);
 	}
-	else
-	{
-		instance.ExecuteCommand(right);
-	}
+
+	instance.ExecuteCommand(right + " " + leftOutput);
+
 
 	dup2(inCopy, STDIN_FILENO);
 	close(inCopy);
