@@ -17,7 +17,7 @@ JobsList::~JobsList()
 	}
 }
 
-void JobsList::AddJob(pid_t pid, Command* command, bool isStopped)
+void JobsList::AddJob(pid_t pid, Command* command, JobStatus status)
 {
 	if (command == nullptr)
 	{
@@ -26,7 +26,7 @@ void JobsList::AddJob(pid_t pid, Command* command, bool isStopped)
 
 	int newID = NextID();
 
-	JobEntry job = JobEntry(newID, pid, command, isStopped);
+	JobEntry job = JobEntry(newID, pid, command, status);
 
 	jobs[newID] = job;
 }

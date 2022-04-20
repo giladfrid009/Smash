@@ -10,8 +10,6 @@ void Handler_CtrlZ(int signalNum)
 		return;
 	}
 
-	//todo: do we need to print it while there's no running job in fg?
-
 	std::cout << "smash: got ctrl-Z" << std::endl;
 
 	Smash& instance = Smash::Instance();
@@ -39,8 +37,6 @@ void Handler_CtrlC(int signalNum)
 	{
 		return;
 	}
-
-	//todo: do we need to print it while there's no running job in fg?
 
 	std::cout << "smash: got ctrl-C" << std::endl;
 

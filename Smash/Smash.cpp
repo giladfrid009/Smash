@@ -107,7 +107,7 @@ void Smash::ExecuteCommand(const string& cmdStr)
 		}
 		else if (inBackground)
 		{
-			jobs.AddJob(pid, cmd, false);
+			jobs.AddJob(pid, cmd);
 			return;
 		}
 
@@ -121,7 +121,7 @@ void Smash::ExecuteCommand(const string& cmdStr)
 
 		if (WIFSTOPPED(exitStat))
 		{
-			jobs.AddJob(pid, cmd, true);
+			jobs.AddJob(pid, cmd, JobStatus::Stopped);
 			return;
 		}
 

@@ -23,9 +23,13 @@ class JobsList
 
 	JobsList() = default;
 
+	JobsList(JobsList const&) = delete;
+
+	void operator=(JobsList const&) = delete;
+
 	~JobsList();
 
-	void AddJob(pid_t pid, Command* command, bool isStopped = false); //todo: change isStopped to enum JobStatus with default value? 
+	void AddJob(pid_t pid, Command* command, JobStatus status = JobStatus::Running);
 
 	long unsigned int Size() const;
 

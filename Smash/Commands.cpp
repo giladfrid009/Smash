@@ -162,7 +162,7 @@ Command* BackgroundCommand::Create(const string& cmdStr, const vector<string>& c
 	{
 		try
 		{
-			int jobID = std::stoi(cmdArgs[1]); //todo: check ASCII validation
+			int jobID = std::stoi(cmdArgs[1]);
 
 			return new BackgroundCommand(cmdStr, jobID);
 		}
@@ -306,7 +306,8 @@ Command* ForegroundCommand::Create(const string& cmdStr, const vector<string>& c
 	{
 		try
 		{
-			int jobID = std::stoi(cmdArgs[1]); //todo: check ASCII validation
+			int jobID = std::stoi(cmdArgs[1]);
+
 			return new ForegroundCommand(cmdStr, jobID);
 		}
 		catch (...)
@@ -430,8 +431,6 @@ void QuitCommand::Execute()
 
 		instance.jobs.ForEach([] (const JobEntry& job) { KillCommand kill("", SIGKILL, job.ID()); kill.Execute(); });
 	}
-
-	//todo: check if to free all Command* - probably not
 
 	exit(0);
 }
@@ -565,6 +564,7 @@ void PipeOutCommand::Execute()
 {
 	//todo: add error checking
 	//todo: fix PipeErrCommand
+	// changed on commit bbea1b55d9b24b510d8e0678047c6c631380a9bd
 
 	Smash& instance = Smash::Instance();
 

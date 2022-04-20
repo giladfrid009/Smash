@@ -10,12 +10,12 @@ JobEntry::JobEntry()
 	startTime = time(nullptr);
 }
 
-JobEntry::JobEntry(int jobID, pid_t pid, Command* command, bool isStopped)
+JobEntry::JobEntry(int jobID, pid_t pid, Command* command, JobStatus status)
 {
 	this->jobID = jobID;
 	this->pid = pid;
 	this->command = command;
-	this->status = isStopped ? JobStatus::Stopped : JobStatus::Running;
+	this->status = status;
 	this->startTime = time(nullptr);
 }
 

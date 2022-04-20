@@ -25,7 +25,7 @@ class JobEntry
 
 	JobEntry();
 
-	JobEntry(int jobID, pid_t pid, Command* command, bool isStopped);
+	JobEntry(int jobID, pid_t pid, Command* command, JobStatus status);
 
 	void SetStatus(JobStatus status);
 

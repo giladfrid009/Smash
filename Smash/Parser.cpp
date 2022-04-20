@@ -4,6 +4,7 @@
 #include <sstream>
 #include <vector>
 #include <algorithm>
+#include <exception>
 
 using std::string;
 using std::vector;
@@ -69,22 +70,28 @@ bool IsRunInBackground(const string& cmdStr)
 	return cmdStr[cmdStr.find_last_not_of(I.Whitespace)] == '&';
 }
 
-//todo: what happens if several bg signs in a row
 string RemoveBackgroundSign(const string& cmdStr)
 {
-	size_t len = cmdStr.find_last_not_of(I.Whitespace);
+	string trimmed = cmdStr;
 
-	if (len == string::npos)
+	while (true)
 	{
-		return cmdStr;
+		size_t len = trimmed.find_last_not_of(I.Whitespace);
+
+		if (len == string::npos)
+		{
+			return trimmed;
+		}
+
+		if (trimmed[len] != '&')
+		{
+			return trimmed;
+		}
+
+		trimmed = RightTrim(trimmed.substr(0, len));
 	}
 
-	if (cmdStr[len] != '&')
-	{
-		return cmdStr;
-	}
-
-	return RightTrim(cmdStr.substr(0, len));
+	return trimmed;
 }
 
 static bool Contains(const vector<string>& cmdArgs, string predicate)
@@ -92,7 +99,6 @@ static bool Contains(const vector<string>& cmdArgs, string predicate)
 	return std::any_of(cmdArgs.begin(), cmdArgs.end(), [predicate] (string str) {return str == predicate; });
 }
 
-//todo: find better name
 Commands CommandType(const vector<string>& cmdArgs)
 {
 	if (cmdArgs.size() < 1) return Commands::Unknown;
