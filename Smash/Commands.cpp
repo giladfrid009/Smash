@@ -670,20 +670,20 @@ void PipeErrCommand::Execute()
 
 	if (res < 0) { SysError("fcntl"); return; }
 
-	string leftOutput;
+	string leftError;
 
 	char readBuff[ReadSize];
 
 	while (read(readPipe, readBuff, ReadSize) > 0)
 	{
-		leftOutput = leftOutput.append(readBuff);
+		leftError = leftError.append(readBuff);
 	}
 
 	res = dup2(errCopy, STDERR_FILENO);
 
 	if (res < 0) { SysError("dup2"); return; }
 
-	instance.ExecuteCommand(right.append(" ").append(leftOutput));
+	instance.ExecuteCommand(right.append(" ").append(leftError));
 
 	res = close(errCopy);
 
