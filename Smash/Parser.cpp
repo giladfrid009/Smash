@@ -69,6 +69,7 @@ bool IsRunInBackground(const string& cmdStr)
 	return cmdStr[cmdStr.find_last_not_of(I.Whitespace)] == '&';
 }
 
+//todo: what happens if several bg signs in a row
 string RemoveBackgroundSign(const string& cmdStr)
 {
 	size_t len = cmdStr.find_last_not_of(I.Whitespace);

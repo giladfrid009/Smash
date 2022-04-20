@@ -30,7 +30,7 @@ class Smash
 
 	pid_t CurrentPid() const;
 
-	void ExecuteCommand(std::string& cmdStr);
+	void ExecuteCommand(const std::string& cmdStr);
 
 	friend void JobsCommand::Execute();
 
@@ -46,7 +46,7 @@ class Smash
 
 	private:
 
-	Command* CreateCommand(std::string& cmdStr, std::vector<std::string>& cmdArgs) const;
+	Command* CreateCommand(const std::string& cmdStr, const std::vector<std::string>& cmdArgs) const;
 };
 
 #endif // !SMASH_H

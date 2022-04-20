@@ -35,7 +35,7 @@ pid_t Smash::CurrentPid() const
 	return currentPid;
 }
 
-Command* Smash::CreateCommand(string& cmdStr, vector<string>& cmdArgs) const
+Command* Smash::CreateCommand(const string& cmdStr, const vector<string>& cmdArgs) const
 {
 	try
 	{
@@ -63,6 +63,10 @@ Command* Smash::CreateCommand(string& cmdStr, vector<string>& cmdArgs) const
 
 			case (Commands::RedirectAppend): return RedirectAppendCommand::Create(cmdStr, cmdArgs);
 
+			case (Commands::PipeOut): return PipeOutCommand::Create(cmdStr, cmdArgs);
+
+			case (Commands::PipeErr): return PipeErrCommand::Create(cmdStr, cmdArgs);
+
 			default: return nullptr;
 		}
 	}
@@ -72,7 +76,7 @@ Command* Smash::CreateCommand(string& cmdStr, vector<string>& cmdArgs) const
 	}
 }
 
-void Smash::ExecuteCommand(string& cmdStr)
+void Smash::ExecuteCommand(const string& cmdStr)
 {
 	bool inBackground = IsRunInBackground(cmdStr);
 

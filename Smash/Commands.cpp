@@ -9,6 +9,11 @@
 #include <signal.h>
 #include <exception>
 #include <fcntl.h>
+#include <cassert>
+#include <sstream>
+
+#define COMMAND_ARGS_MAX_LENGTH (200) //todo: maybe remove these defines
+#define COMMAND_MAX_ARGS (20)
 
 using std::string;
 using std::vector;
@@ -458,13 +463,11 @@ void RedirectWriteCommand::Execute()
 {
 	Smash& instance = Smash::Instance();
 
-	int res;
+	int outCopy = dup(STDOUT_FILENO);
 
-	int stdoutCopy = dup(STDOUT_FILENO); //todo: doesnt copy close-on-exec flag
+	if (outCopy < 0) { SysError("dup"); return; }
 
-	if (stdoutCopy < 0) { SysError("dup"); return; }
-
-	res = close(STDOUT_FILENO);
+	int res = close(STDOUT_FILENO);
 
 	if (res < 0) { SysError("close"); return; }
 
@@ -474,15 +477,11 @@ void RedirectWriteCommand::Execute()
 
 	instance.ExecuteCommand(command);
 
-	res = close(STDOUT_FILENO);
-
-	if (res < 0) { SysError("close"); return; }
-
-	res = dup2(stdoutCopy, STDOUT_FILENO); //todo: doesnt copy close-on-exec flag
+	res = dup2(outCopy, STDOUT_FILENO);
 
 	if (res < 0) { SysError("dup2"); return; }
 
-	res = close(stdoutCopy);
+	res = close(outCopy);
 }
 
 Command* RedirectAppendCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
@@ -514,13 +513,11 @@ void RedirectAppendCommand::Execute()
 {
 	Smash& instance = Smash::Instance();
 
-	int res;
+	int outCopy = dup(STDOUT_FILENO);
 
-	int stdoutCopy = dup(STDOUT_FILENO); //todo: doesnt copy close-on-exec flag
+	if (outCopy < 0) { SysError("dup"); return; }
 
-	if (stdoutCopy < 0) { SysError("dup"); return; }
-
-	res = close(STDOUT_FILENO);
+	int res = close(STDOUT_FILENO);
 
 	if (res < 0) { SysError("close"); return; }
 
@@ -530,14 +527,98 @@ void RedirectAppendCommand::Execute()
 
 	instance.ExecuteCommand(command);
 
-	res = close(STDOUT_FILENO);
-
-	if (res < 0) { SysError("close"); return; }
-
-	res = dup2(stdoutCopy, STDOUT_FILENO); //todo: doesnt copy close-on-exec flag
+	res = dup2(outCopy, STDOUT_FILENO);
 
 	if (res < 0) { SysError("dup2"); return; }
 
-	res = close(stdoutCopy);
+	res = close(outCopy);
 }
 
+Command* PipeOutCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
+{
+	if (CommandType(cmdArgs) != Commands::PipeOut)
+	{
+		return nullptr;
+	}
+
+	Identifiers I;
+
+	vector<string> args = Split(cmdStr, I.PipeOut);
+
+	if (args.size() != 2)
+	{
+		return nullptr;
+	}
+
+	return new PipeOutCommand(cmdStr, args[0], args[1]);
+}
+
+PipeOutCommand::PipeOutCommand(const string& cmdStr, const string& left, const string& right) : InternalCommand(cmdStr)
+{
+	this->left = RemoveBackgroundSign(left);
+	this->right = RemoveBackgroundSign(right);
+}
+
+void PipeOutCommand::Execute()
+{
+	Smash& instance = Smash::Instance();
+
+	int outCopy = dup(STDOUT_FILENO);
+
+	if (outCopy < 0) { SysError("dup"); return; }
+
+	int pipeFds[2];
+
+	int res = pipe(pipeFds);
+
+	if (res < 0) { SysError("pipe"); return; }
+
+	int readPipe = pipeFds[0];
+	int writePipe = pipeFds[1];
+
+	res = dup2(writePipe, STDOUT_FILENO);
+
+	if (res < 0) { SysError("dup2"); return; }
+
+	instance.ExecuteCommand(left);
+
+	char leftOutput[4096 * sizeof(char)];
+
+	res = read(readPipe, leftOutput, 4096 * sizeof(char));
+
+	if (res < 0) { SysError("read"); return; }
+
+	res = dup2(outCopy, STDOUT_FILENO);
+
+	if (res < 0) { SysError("dup2"); return; }
+
+	instance.ExecuteCommand(right.append(" ").append(leftOutput));
+
+	res = close(outCopy);
+
+	if (res < 0) { SysError("close"); }
+
+	res = close(readPipe);
+
+	if (res < 0) { SysError("close"); }
+
+	res = close(writePipe);
+
+	if (res < 0) { SysError("close"); }
+}
+
+Command* PipeErrCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
+{
+	return nullptr;
+}
+
+PipeErrCommand::PipeErrCommand(const string& cmdStr, const string& left, const string& right) : InternalCommand(cmdStr)
+{
+	this->left = RemoveBackgroundSign(left);
+	this->right = RemoveBackgroundSign(right);
+}
+
+void PipeErrCommand::Execute()
+{
+
+}

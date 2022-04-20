@@ -192,4 +192,36 @@ class RedirectAppendCommand : public InternalCommand
 	void Execute() override;
 };
 
+class PipeOutCommand : public InternalCommand
+{
+	public:
+
+	std::string left;
+	std::string right;
+
+	static Command* Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs);
+
+	PipeOutCommand(const std::string& cmdStr, const std::string& left, const std::string& right);
+
+	virtual ~PipeOutCommand() override = default;
+
+	void Execute() override;
+};
+
+class PipeErrCommand : public InternalCommand
+{
+	public:
+
+	std::string left;
+	std::string right;
+
+	static Command* Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs);
+
+	PipeErrCommand(const std::string& cmdStr, const std::string& left, const std::string& right);
+
+	virtual ~PipeErrCommand() override = default;
+
+	void Execute() override;
+};
+
 #endif //SMASH_COMMAND_H
