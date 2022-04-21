@@ -968,9 +968,7 @@ void TailCommand::Execute()
 		}
 	}
 
-	if (curLine)
-
-		res = close(fd);
+	res = close(fd);
 
 	if (res < 0) { SysError("close"); }
 }
