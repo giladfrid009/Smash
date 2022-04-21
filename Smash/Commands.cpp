@@ -9,7 +9,7 @@
 #include <signal.h>
 #include <exception>
 #include <fcntl.h>
-
+#include <utime.h>
 
 using std::string;
 using std::vector;
@@ -819,4 +819,61 @@ void ChangeDirCommand::Execute()
 	}
 
 	instance.prevPath = currPath;
+}
+
+Command* TouchCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
+{
+	if (CommandType(cmdArgs) != Commands::Touch)
+	{
+		return nullptr;
+	}
+
+	if (cmdArgs.size() != 3)
+	{
+		cout << "smash error: touch: invalid arguments" << endl;
+		return nullptr;
+	}
+
+	tm timeStruct;
+	timeStruct.tm_wday = 0;
+	timeStruct.tm_yday = 0;
+	timeStruct.tm_isdst = 0; 	//todo: check tm_isdst
+	timeStruct.tm_gmtoff = 0;
+	timeStruct.tm_zone = 0;
+
+	char* res = strptime(cmdArgs[2].c_str(), "%S:%M:%H:%d:%m:%Y", &timeStruct);
+
+	if (res == nullptr)
+	{
+		cout << "smash error: touch: invalid arguments" << endl;
+		return nullptr;
+	}
+
+	time_t time = mktime(&timeStruct);
+
+	if (time < 0)
+	{
+		return nullptr;
+	}
+
+	return new TouchCommand(cmdStr, cmdArgs[1], time);
+}
+
+TouchCommand::TouchCommand(const string& cmdStr, const string& path, time_t time) : InternalCommand(cmdStr)
+{
+	this->path = path;
+	this->time = time;
+}
+
+void TouchCommand::Execute()
+{
+	utimbuf fileAttrs{.actime = time, .modtime = time};
+
+	int res = utime(path.c_str(), &fileAttrs);
+
+	if (res < 0)
+	{
+		SysError("utime");
+		return;
+	}
 }

@@ -72,6 +72,8 @@ Command* Smash::CreateCommand(const string& cmdStr, const vector<string>& cmdArg
 
 			case (Commands::ChangeDir): return ChangeDirCommand::Create(cmdStr, cmdArgs);
 
+			case (Commands::Touch): return TouchCommand::Create(cmdStr, cmdArgs);
+
 			default: return nullptr;
 		}
 	}
