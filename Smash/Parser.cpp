@@ -96,7 +96,7 @@ string RemoveBackgroundSign(const string& cmdStr)
 
 static bool Contains(const vector<string>& cmdArgs, string predicate)
 {
-	return std::any_of(cmdArgs.begin(), cmdArgs.end(), [predicate] (string str) {return str == predicate; });
+	return std::any_of(cmdArgs.begin(), cmdArgs.end(), [predicate] (string str) { return str == predicate; });
 }
 
 Commands CommandType(const string& cmdStr)

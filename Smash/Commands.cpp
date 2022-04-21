@@ -560,6 +560,24 @@ PipeOutCommand::PipeOutCommand(const string& cmdStr, const string& left, const s
 	this->right = RemoveBackgroundSign(right);
 }
 
+static string ReadStdin()
+{
+	//fcntl(STDIN_FILENO, F_SETFL, fcntl(STDIN_FILENO, F_GETFL) | O_NONBLOCK);
+
+	string output;
+
+	char readBuff[ReadSize];
+
+	while (read(STDIN_FILENO, readBuff, ReadSize) > 0)
+	{
+		output.append(readBuff);
+	}
+
+	//fcntl(STDIN_FILENO, F_SETFL, fcntl(STDIN_FILENO, F_GETFL) & (~O_NONBLOCK));
+
+	return output;
+}
+
 void PipeOutCommand::Execute()
 {
 	//todo: fix PipeOut
@@ -589,23 +607,14 @@ void PipeOutCommand::Execute()
 	dup2(readPipe, STDIN_FILENO);
 	close(readPipe);
 
-	/*
-	* TODO:
-	* maybe external commands need input in cin and not with command?
-	* internal commands need input with command and not with cin?
-	*/
-
-	string leftOutput;
-
-	char readBuff[ReadSize];
-
-	while (read(STDIN_FILENO, readBuff, ReadSize) > 0)
+	if (CommandType(right) != Commands::Unknown)
 	{
-		leftOutput.append(readBuff);
+		instance.ExecuteCommand(right + " " + ReadStdin());
 	}
-
-	instance.ExecuteCommand(right + " " + leftOutput);
-
+	else
+	{
+		instance.ExecuteCommand(right);
+	}
 
 	dup2(inCopy, STDIN_FILENO);
 	close(inCopy);
