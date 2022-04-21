@@ -754,7 +754,7 @@ void PrintDirCommand::Execute()
 
 	if (path == nullptr)
 	{
-		SysError("get_current_dir_name");
+		SysError("getcwd");
 		return;
 	}
 
@@ -792,7 +792,7 @@ void ChangeDirCommand::Execute()
 
 	if (currPath == nullptr)
 	{
-		SysError("get_current_dir_name");
+		SysError("getcwd");
 		return;
 	}
 
