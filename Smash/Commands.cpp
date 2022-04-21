@@ -10,6 +10,7 @@
 #include <exception>
 #include <fcntl.h>
 #include <utime.h>
+#include <fstream>
 
 using std::string;
 using std::vector;
@@ -474,7 +475,7 @@ void RedirectWriteCommand::Execute()
 
 	res = open(output.c_str(), O_WRONLY | O_CREAT | O_TRUNC);
 
-	if (res < 0) { SysError("open"); return; }
+	if (res < 0 || res != STDOUT_FILENO) { SysError("open"); return; }
 
 	instance.ExecuteCommand(command);
 
@@ -524,7 +525,7 @@ void RedirectAppendCommand::Execute()
 
 	res = open(output.c_str(), O_WRONLY | O_APPEND | O_CREAT);
 
-	if (res < 0) { SysError("open"); return; }
+	if (res < 0 || res != STDOUT_FILENO) { SysError("open"); return; }
 
 	instance.ExecuteCommand(command);
 
@@ -870,4 +871,106 @@ void TouchCommand::Execute()
 	{
 		SysError("utime");
 	}
+}
+
+Command* TailCommand::Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs)
+{
+	if (CommandType(cmdArgs) != Commands::Tail)
+	{
+		return nullptr;
+	}
+
+	try
+	{
+		if (cmdArgs.size() == 2)
+		{
+			return new TailCommand(cmdStr, cmdArgs[1]);
+		}
+
+		if (cmdArgs.size() == 3)
+		{
+			int count = (-1) * std::stoi(cmdArgs[1]);
+
+			return new TailCommand(cmdStr, cmdArgs[2], count);
+		}
+	}
+	catch (...)
+	{
+		cout << "smash error: tail: invalid arguments" << endl;
+		return nullptr;
+	}
+
+	cout << "smash error: tail: invalid arguments" << endl;
+	return nullptr;
+}
+
+TailCommand::TailCommand(const std::string& cmdStr, const std::string& path, int count) : InternalCommand(cmdStr)
+{
+	if (count < 0)
+	{
+		throw std::invalid_argument("count");
+	}
+
+	this->path = path;
+	this->count = count;
+}
+
+void TailCommand::Execute()
+{
+	int fd = open(path.c_str(), O_RDONLY);
+
+	if (fd < 0) { SysError("open"); return; }
+
+	char curChar;
+	int curLine = 0;
+
+	while (read(fd, &curChar, 1 * sizeof(char)))
+	{
+		if (curChar == '\n')
+		{
+			curLine++;
+		}
+	}
+
+	if (count > curLine)
+	{
+		count = curLine;
+	}
+
+	int numLines = curLine;
+	int dstLine = curLine - count;
+
+	int res = close(fd);
+
+	if (res < 0) { SysError("close"); return; }
+
+	fd = open(path.c_str(), O_RDONLY);
+
+	if (fd < 0) { SysError("open"); return; }
+
+	curLine = 0;
+
+	while (read(fd, &curChar, 1 * sizeof(char)))
+	{
+		if (curChar == '\n')
+		{
+			curLine++;
+		}
+
+		if (curLine == dstLine && curChar == '\n')
+		{
+			continue;
+		}
+
+		if (curLine >= dstLine)
+		{
+			cout << curChar;
+		}
+	}
+
+	if (curLine)
+
+		res = close(fd);
+
+	if (res < 0) { SysError("close"); }
 }

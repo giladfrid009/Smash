@@ -74,6 +74,8 @@ Command* Smash::CreateCommand(const string& cmdStr, const vector<string>& cmdArg
 
 			case (Commands::Touch): return TouchCommand::Create(cmdStr, cmdArgs);
 
+			case (Commands::Tail): return TailCommand::Create(cmdStr, cmdArgs);
+
 			default: return nullptr;
 		}
 	}
