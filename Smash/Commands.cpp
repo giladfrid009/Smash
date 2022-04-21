@@ -732,3 +732,91 @@ void PipeErrCommand::Execute()
 
 	if (res < 0) { SysError("close"); return; }
 }
+
+Command* PrintDirCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
+{
+	if (CommandType(cmdArgs) != Commands::PrintDir)
+	{
+		return nullptr;
+	}
+
+	return new PrintDirCommand(cmdStr);
+}
+
+PrintDirCommand::PrintDirCommand(const string& cmdStr) : InternalCommand(cmdStr)
+{
+}
+
+void PrintDirCommand::Execute()
+{
+	char* path = get_current_dir_name();
+
+	if (path == nullptr)
+	{
+		SysError("get_current_dir_name");
+		return;
+	}
+
+	cout << path << endl;
+
+	free(path);
+}
+
+Command* ChangeDirCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
+{
+	if (CommandType(cmdArgs) != Commands::ChangeDir)
+	{
+		return nullptr;
+	}
+
+	if (cmdArgs.size() != 2)
+	{
+		cout << "smash error: cd: too many agruments" << endl;
+		return nullptr;
+	}
+
+	return new ChangeDirCommand(cmdStr, cmdArgs[1]);
+}
+
+ChangeDirCommand::ChangeDirCommand(const string& cmdStr, const string& path) : InternalCommand(cmdStr)
+{
+	this->path = Trim(path);
+}
+
+void ChangeDirCommand::Execute()
+{
+	Smash& instance = Smash::Instance();
+
+	char* currPath = get_current_dir_name();
+
+	if (currPath == nullptr)
+	{
+		SysError("get_current_dir_name");
+		return;
+	}
+
+	int res;
+
+	if (path == "-")
+	{
+		if (instance.prevPath == "")
+		{
+			cout << "smash error: cd: OLDPWD not set" << endl;
+			return;
+		}
+
+		res = chdir(instance.prevPath.c_str());
+	}
+	else
+	{
+		res = chdir(path.c_str());
+	}
+
+	if (res < 0)
+	{
+		SysError("chdir");
+		return;
+	}
+
+	instance.prevPath = currPath;
+}

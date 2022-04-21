@@ -162,10 +162,12 @@ class QuitCommand :public InternalCommand
 
 class RedirectWriteCommand : public InternalCommand
 {
-	public:
+	protected:
 
 	std::string command;
 	std::string output;
+
+	public:
 
 	static Command* Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs);
 
@@ -178,10 +180,12 @@ class RedirectWriteCommand : public InternalCommand
 
 class RedirectAppendCommand : public InternalCommand
 {
-	public:
+	protected:
 
 	std::string command;
 	std::string output;
+
+	public:
 
 	static Command* Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs);
 
@@ -194,10 +198,12 @@ class RedirectAppendCommand : public InternalCommand
 
 class PipeOutCommand : public InternalCommand
 {
-	public:
+	protected:
 
 	std::string left;
 	std::string right;
+
+	public:
 
 	static Command* Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs);
 
@@ -210,16 +216,48 @@ class PipeOutCommand : public InternalCommand
 
 class PipeErrCommand : public InternalCommand
 {
-	public:
+	protected:
 
 	std::string left;
 	std::string right;
+
+	public:
 
 	static Command* Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs);
 
 	PipeErrCommand(const std::string& cmdStr, const std::string& left, const std::string& right);
 
 	virtual ~PipeErrCommand() override = default;
+
+	void Execute() override;
+};
+
+class PrintDirCommand : public InternalCommand
+{
+	public:
+
+	static Command* Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs);
+
+	PrintDirCommand(const std::string& cmdStr);
+
+	virtual ~PrintDirCommand() override = default;
+
+	void Execute() override;
+};
+
+class ChangeDirCommand : public InternalCommand
+{
+	protected:
+
+	std::string path;
+
+	public:
+
+	static Command* Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs);
+
+	ChangeDirCommand(const std::string& cmdStr, const std::string& path);
+
+	virtual ~ChangeDirCommand() override = default;
 
 	void Execute() override;
 };

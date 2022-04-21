@@ -13,6 +13,7 @@ Smash::Smash()
 {
 	currentPid = -1;
 	prompt = "smash";
+	prevPath = "";
 }
 
 Smash::~Smash()
@@ -66,6 +67,10 @@ Command* Smash::CreateCommand(const string& cmdStr, const vector<string>& cmdArg
 			case (Commands::PipeOut): return PipeOutCommand::Create(cmdStr, cmdArgs);
 
 			case (Commands::PipeErr): return PipeErrCommand::Create(cmdStr, cmdArgs);
+
+			case (Commands::PrintDir): return PrintDirCommand::Create(cmdStr, cmdArgs);
+
+			case (Commands::ChangeDir): return ChangeDirCommand::Create(cmdStr, cmdArgs);
 
 			default: return nullptr;
 		}

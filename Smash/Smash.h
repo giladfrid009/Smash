@@ -13,6 +13,7 @@ class Smash
 	JobsList jobs;
 	pid_t currentPid;
 	std::string prompt;
+	std::string prevPath;
 
 	Smash();
 
@@ -43,6 +44,8 @@ class Smash
 	friend void ChangePromptCommand::Execute();
 
 	friend void QuitCommand::Execute();
+
+	friend void ChangeDirCommand::Execute();
 
 	private:
 
