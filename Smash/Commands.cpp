@@ -834,12 +834,7 @@ Command* TouchCommand::Create(const string& cmdStr, const vector<string>& cmdArg
 		return nullptr;
 	}
 
-	tm timeStruct;
-	timeStruct.tm_wday = 0;
-	timeStruct.tm_yday = 0;
-	timeStruct.tm_isdst = 0; 	//todo: check tm_isdst
-	timeStruct.tm_gmtoff = 0;
-	timeStruct.tm_zone = 0;
+	tm timeStruct = {0};
 
 	char* res = strptime(cmdArgs[2].c_str(), "%S:%M:%H:%d:%m:%Y", &timeStruct);
 
@@ -851,7 +846,7 @@ Command* TouchCommand::Create(const string& cmdStr, const vector<string>& cmdArg
 
 	time_t time = mktime(&timeStruct);
 
-	if (time < 0)
+	if (time == -1)
 	{
 		return nullptr;
 	}
@@ -867,13 +862,12 @@ TouchCommand::TouchCommand(const string& cmdStr, const string& path, time_t time
 
 void TouchCommand::Execute()
 {
-	utimbuf fileAttrs{.actime = time, .modtime = time};
+	utimbuf fileTimes{.actime = time, .modtime = time};
 
-	int res = utime(path.c_str(), &fileAttrs);
+	int res = utime(path.c_str(), &fileTimes);
 
 	if (res < 0)
 	{
 		SysError("utime");
-		return;
 	}
 }
