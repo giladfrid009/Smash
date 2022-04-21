@@ -76,6 +76,8 @@ Command* Smash::CreateCommand(const string& cmdStr, const vector<string>& cmdArg
 
 			case (Commands::Tail): return TailCommand::Create(cmdStr, cmdArgs);
 
+			case (Commands::Timeout): return TimeoutCommand::Create(cmdStr, cmdArgs);
+
 			default: return nullptr;
 		}
 	}
@@ -141,5 +143,3 @@ void Smash::ExecuteCommand(const string& cmdStr)
 	cmd->Execute();
 	delete cmd;
 }
-
-

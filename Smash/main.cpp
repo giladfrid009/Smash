@@ -22,9 +22,13 @@ int main(int argc, char* argv[])
 		perror("smash error: signal failed");
 	}
 
-	if (signal(SIGALRM, Handler_Alarm) == SIG_ERR) //todo: fix later
+	struct sigaction sa = {0}; //todo: maybbe remove, move back to old handler
+	sa.sa_sigaction = Handler_Alarm;
+	sa.sa_flags = SA_SIGINFO;
+
+	if (sigaction(SIGALRM, &sa, nullptr) < 0)
 	{
-		perror("smash error: signal failed");
+		perror("smash error: sigaction failed");
 	}
 
 	Smash& smash = Smash::Instance();
@@ -39,3 +43,4 @@ int main(int argc, char* argv[])
 
 	return 0;
 }
+

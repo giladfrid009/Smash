@@ -47,6 +47,8 @@ class Smash
 
 	friend void ChangeDirCommand::Execute();
 
+	friend void TimeoutCommand::Execute();
+
 	private:
 
 	Command* CreateCommand(const std::string& cmdStr, const std::vector<std::string>& cmdArgs) const;

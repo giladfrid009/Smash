@@ -972,3 +972,41 @@ void TailCommand::Execute()
 
 	if (res < 0) { SysError("close"); }
 }
+
+Command* TimeoutCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
+{
+	if (CommandType(cmdStr) != Commands::Timeout)
+	{
+		return nullptr;
+	}
+
+	try
+	{
+		int duration = std::stoi(cmdArgs[1]);
+
+		int cmdStart = cmdStr.find_first_of(cmdArgs[1]) + 2;
+
+		string cmd = cmdStr.substr(cmdStart, cmd.size());
+
+		return new TimeoutCommand(cmdStr, duration, cmd);
+	}
+	catch (...)
+	{
+		return nullptr;
+	}
+
+	return nullptr;
+}
+
+TimeoutCommand::TimeoutCommand(const std::string& cmdStr, int duration, const std::string& cmd) : InternalCommand(cmdStr)
+{
+	this->duration = duration;
+	this->cmd = cmd;
+}
+
+void TimeoutCommand::Execute()
+{
+	Smash& instance = Smash::Instance();
+
+	instance.ExecuteCommand(cmd);
+}

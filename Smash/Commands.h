@@ -298,4 +298,22 @@ class TailCommand : public InternalCommand
 	void Execute() override;
 };
 
+class TimeoutCommand : public InternalCommand
+{
+	protected:
+
+	std::string cmd;
+	int duration;
+
+	public:
+
+	static Command* Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs);
+
+	TimeoutCommand(const std::string& cmdStr, int duration, const std::string& cmd);
+
+	virtual ~TimeoutCommand() override = default;
+
+	void Execute() override;
+};
+
 #endif //SMASH_COMMAND_H
