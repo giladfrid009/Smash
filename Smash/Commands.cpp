@@ -562,7 +562,7 @@ PipeOutCommand::PipeOutCommand(const string& cmdStr, const string& left, const s
 
 static string ReadStdin()
 {
-	//fcntl(STDIN_FILENO, F_SETFL, fcntl(STDIN_FILENO, F_GETFL) | O_NONBLOCK);
+	fcntl(STDIN_FILENO, F_SETFL, fcntl(STDIN_FILENO, F_GETFL) | O_NONBLOCK);
 
 	string output;
 
@@ -573,39 +573,57 @@ static string ReadStdin()
 		output.append(readBuff);
 	}
 
-	//fcntl(STDIN_FILENO, F_SETFL, fcntl(STDIN_FILENO, F_GETFL) & (~O_NONBLOCK));
+	fcntl(STDIN_FILENO, F_SETFL, fcntl(STDIN_FILENO, F_GETFL) & (~O_NONBLOCK));
 
 	return output;
 }
 
 void PipeOutCommand::Execute()
 {
-	//todo: fix PipeOut
-	//todo: add error checking
-	//todo: fix PipeErrCommand
-
 	Smash& instance = Smash::Instance();
 
 	int inCopy = dup(STDIN_FILENO);
+
+	if (inCopy < 0) { SysError("dup"); return; }
+
 	int outCopy = dup(STDOUT_FILENO);
+
+	if (outCopy < 0) { SysError("dup"); return; }
 
 	int pipeFds[2];
 
-	pipe(pipeFds);
+	int res = pipe(pipeFds);
+
+	if (res < 0) { SysError("pipe"); return; }
 
 	int readPipe = pipeFds[0];
 	int writePipe = pipeFds[1];
 
-	dup2(writePipe, STDOUT_FILENO);
-	close(writePipe);
+	res = dup2(writePipe, STDOUT_FILENO);
+
+	if (res < 0) { SysError("dup2"); return; }
+
+	res = close(writePipe);
+
+	if (res < 0) { SysError("close"); return; }
 
 	instance.ExecuteCommand(left);
 
-	dup2(outCopy, STDOUT_FILENO);
-	close(outCopy);
+	res = dup2(outCopy, STDOUT_FILENO);
 
-	dup2(readPipe, STDIN_FILENO);
-	close(readPipe);
+	if (res < 0) { SysError("dup2"); return; }
+
+	res = close(outCopy);
+
+	if (res < 0) { SysError("close"); return; }
+
+	res = dup2(readPipe, STDIN_FILENO);
+
+	if (res < 0) { SysError("dup2"); return; }
+
+	res = close(readPipe);
+
+	if (res < 0) { SysError("close"); return; }
 
 	if (CommandType(right) != Commands::Unknown)
 	{
@@ -616,8 +634,13 @@ void PipeOutCommand::Execute()
 		instance.ExecuteCommand(right);
 	}
 
-	dup2(inCopy, STDIN_FILENO);
-	close(inCopy);
+	res = dup2(inCopy, STDIN_FILENO);
+
+	if (res < 0) { SysError("dup2"); return; }
+
+	res = close(inCopy);
+
+	if (res < 0) { SysError("close"); return; }
 }
 
 Command* PipeErrCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
@@ -649,6 +672,10 @@ void PipeErrCommand::Execute()
 {
 	Smash& instance = Smash::Instance();
 
+	int inCopy = dup(STDIN_FILENO);
+
+	if (inCopy < 0) { SysError("dup"); return; }
+
 	int errCopy = dup(STDERR_FILENO);
 
 	if (errCopy < 0) { SysError("dup"); return; }
@@ -666,36 +693,42 @@ void PipeErrCommand::Execute()
 
 	if (res < 0) { SysError("dup2"); return; }
 
+	res = close(writePipe);
+
+	if (res < 0) { SysError("close"); return; }
+
 	instance.ExecuteCommand(left);
-
-	res = fcntl(readPipe, F_SETFL, fcntl(readPipe, F_GETFL) | O_NONBLOCK);
-
-	if (res < 0) { SysError("fcntl"); return; }
-
-	string leftError;
-
-	char readBuff[ReadSize];
-
-	while (read(readPipe, readBuff, ReadSize) > 0)
-	{
-		leftError.append(readBuff);
-	}
 
 	res = dup2(errCopy, STDERR_FILENO);
 
 	if (res < 0) { SysError("dup2"); return; }
 
-	instance.ExecuteCommand(right.append(" ").append(leftError));
-
 	res = close(errCopy);
 
-	if (res < 0) { SysError("close"); }
+	if (res < 0) { SysError("close"); return; }
+
+	res = dup2(readPipe, STDIN_FILENO);
+
+	if (res < 0) { SysError("dup2"); return; }
 
 	res = close(readPipe);
 
-	if (res < 0) { SysError("close"); }
+	if (res < 0) { SysError("close"); return; }
 
-	res = close(writePipe);
+	if (CommandType(right) != Commands::Unknown)
+	{
+		instance.ExecuteCommand(right + " " + ReadStdin());
+	}
+	else
+	{
+		instance.ExecuteCommand(right);
+	}
 
-	if (res < 0) { SysError("close"); }
+	res = dup2(inCopy, STDIN_FILENO);
+
+	if (res < 0) { SysError("dup2"); return; }
+
+	res = close(inCopy);
+
+	if (res < 0) { SysError("close"); return; }
 }
