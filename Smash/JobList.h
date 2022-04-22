@@ -45,6 +45,8 @@ class JobsList
 
 	void ResetTime(int jobID);
 
+	void PrintCommand(int jobID) const;
+
 	int MaxStopped();
 
 	int MaxID() const;

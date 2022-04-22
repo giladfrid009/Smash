@@ -143,8 +143,10 @@ void KillCommand::Execute()
 
 	if (res < 0)
 	{
-		SysError("kill");
+		SysError("kill"); return;
 	}
+
+	cout << "signal number " << signalNum << " was sent to pid " << pid << endl;
 }
 
 Command* BackgroundCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
@@ -225,6 +227,10 @@ void BackgroundCommand::Execute()
 			return;
 		}
 	}
+
+	instance.jobs.PrintCommand(dstID);
+
+	cout << " : " << instance.jobs.GetPID(dstID) << endl;
 
 	KillCommand killComm("", SIGCONT, dstID);
 
@@ -374,6 +380,10 @@ void ForegroundCommand::Execute()
 	}
 
 	pid_t pid = instance.jobs.GetPID(dstID);
+
+	instance.jobs.PrintCommand(dstID);
+
+	cout << " : " << pid << endl;
 
 	int exitStat;
 

@@ -153,3 +153,13 @@ void JobsList::SetStatus(int jobID, JobStatus status)
 
 	return jobs.at(jobID).SetStatus(status);
 }
+
+void JobsList::PrintCommand(int jobID) const
+{
+	if (jobs.count(jobID) == 0)
+	{
+		return;
+	}
+
+	jobs.at(jobID).PrintCommand();
+}

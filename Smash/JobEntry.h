@@ -35,6 +35,8 @@ class JobEntry
 
 	int ID() const;
 
+	void PrintCommand() const;
+
 	Command* CommandPtr() const;
 
 	void ResetTime();

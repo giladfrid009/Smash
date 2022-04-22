@@ -1,5 +1,6 @@
 #include "JobEntry.h"
 #include <iostream>
+#include <string>
 
 JobEntry::JobEntry()
 {
@@ -74,7 +75,7 @@ void JobEntry::PrintJob() const
 
 	int diff = (int)difftime(time(nullptr), startTime);
 
-	std::cout << "[" << jobID << "] " << command->ToString() << " : " << diff;
+	std::cout << "[" << jobID << "] " << command->ToString() << " : " << pid << " " << diff << " secs";
 
 	if (status == JobStatus::Stopped)
 	{
@@ -92,4 +93,12 @@ void JobEntry::PrintQuit() const
 	}
 
 	std::cout << pid << ": " << command->ToString() << std::endl;
+}
+
+void JobEntry::PrintCommand() const
+{
+	if (command != nullptr)
+	{
+		std::cout << command->ToString();
+	}
 }
