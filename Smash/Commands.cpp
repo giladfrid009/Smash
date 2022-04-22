@@ -109,7 +109,7 @@ Command* KillCommand::Create(const string& cmdStr, const vector<string>& cmdArgs
 
 	if (cmdArgs.size() != 3)
 	{
-		cerr << "smash error: kill: invalid arguments" << endl;
+		cout << "smash error: kill: invalid arguments" << endl;
 		return nullptr;
 	}
 
@@ -122,7 +122,7 @@ Command* KillCommand::Create(const string& cmdStr, const vector<string>& cmdArgs
 	}
 	catch (...)
 	{
-		cerr << "smash error: kill: invalid arguments" << endl;
+		cout << "smash error: kill: invalid arguments" << endl;
 		return nullptr;
 	}
 }
@@ -135,7 +135,7 @@ void KillCommand::Execute()
 
 	if (pid < 0)
 	{
-		cerr << "smash error: kill: job-id " << jobID << " does not exist" << endl;
+		cout << "smash error: kill: job-id " << jobID << " does not exist" << endl;
 		return;
 	}
 
@@ -171,12 +171,12 @@ Command* BackgroundCommand::Create(const string& cmdStr, const vector<string>& c
 		}
 		catch (...)
 		{
-			cerr << "smash error: bg: invalid arguments" << endl;
+			cout << "smash error: bg: invalid arguments" << endl;
 			return nullptr;
 		}
 	}
 
-	cerr << "smash error: bg: invalid arguments" << endl;
+	cout << "smash error: bg: invalid arguments" << endl;
 
 	return nullptr;
 }
@@ -205,13 +205,13 @@ void BackgroundCommand::Execute()
 
 		if (status == JobStatus::Finished || status == JobStatus::Unknown)
 		{
-			cerr << "smash error: bg: job-id " << jobID << " does not exist" << endl;
+			cout << "smash error: bg: job-id " << jobID << " does not exist" << endl;
 			return;
 		}
 
 		if (status == JobStatus::Running)
 		{
-			cerr << "smash error: bg: job-id " << jobID << " is already running in the background" << endl;
+			cout << "smash error: bg: job-id " << jobID << " is already running in the background" << endl;
 			return;
 		}
 
@@ -223,18 +223,23 @@ void BackgroundCommand::Execute()
 
 		if (dstID == -1)
 		{
-			cerr << "smash error: bg: there is no stopped jobs to resume" << endl;
+			cout << "smash error: bg: there is no stopped jobs to resume" << endl;
 			return;
 		}
 	}
 
+	pid_t pid = instance.jobs.GetPID(dstID);
+
 	instance.jobs.PrintCommand(dstID);
 
-	cout << " : " << instance.jobs.GetPID(dstID) << endl;
+	cout << " : " << pid << endl;
 
-	KillCommand killComm("", SIGCONT, dstID);
+	int res = kill(pid, SIGCONT);
 
-	killComm.Execute();
+	if (res < 0)
+	{
+		SysError("kill"); return;
+	}
 
 	instance.jobs.SetStatus(dstID, JobStatus::Running);
 }
@@ -319,12 +324,12 @@ Command* ForegroundCommand::Create(const string& cmdStr, const vector<string>& c
 		}
 		catch (...)
 		{
-			cerr << "smash error: fg: invalid arguments" << endl;
+			cout << "smash error: fg: invalid arguments" << endl;
 			return nullptr;
 		}
 	}
 
-	cerr << "smash error: fg: invalid arguments" << endl;
+	cout << "smash error: fg: invalid arguments" << endl;
 
 	return nullptr;
 }
@@ -353,7 +358,7 @@ void ForegroundCommand::Execute()
 
 		if (status == JobStatus::Finished || status == JobStatus::Unknown)
 		{
-			cerr << "smash error: fg: job-id " << jobID << " does not exist" << endl;
+			cout << "smash error: fg: job-id " << jobID << " does not exist" << endl;
 			return;
 		}
 
@@ -365,21 +370,25 @@ void ForegroundCommand::Execute()
 
 		if (dstID == -1)
 		{
-			cerr << "smash error: fg: jobs list is empty" << endl;
+			cout << "smash error: fg: jobs list is empty" << endl;
 			return;
 		}
 	}
 
+	pid_t pid = instance.jobs.GetPID(dstID);
+
 	if (instance.jobs.GetStatus(dstID) == JobStatus::Stopped)
 	{
-		KillCommand killComm("", SIGCONT, dstID);
+		int res = kill(pid, SIGCONT);
 
-		killComm.Execute();
+		if (res < 0)
+		{
+			SysError("kill"); return;
+		}
 
 		instance.jobs.SetStatus(dstID, JobStatus::Running);
 	}
 
-	pid_t pid = instance.jobs.GetPID(dstID);
 
 	instance.jobs.PrintCommand(dstID);
 
@@ -440,7 +449,7 @@ void QuitCommand::Execute()
 
 		instance.jobs.ForEach([] (const JobEntry& job) { job.PrintQuit(); });
 
-		instance.jobs.ForEach([] (const JobEntry& job) { KillCommand kill("", SIGKILL, job.ID()); kill.Execute(); });
+		instance.jobs.ForEach([] (const JobEntry& job) { int res = kill(job.PID(), SIGKILL); if (res < 0) { SysError("kill"); } });
 	}
 
 	exit(0);
@@ -873,6 +882,8 @@ TouchCommand::TouchCommand(const string& cmdStr, const string& path, time_t time
 
 void TouchCommand::Execute()
 {
+	//todo: broken before 1970 in linux
+
 	utimbuf fileTimes{.actime = time, .modtime = time};
 
 	int res = utime(path.c_str(), &fileTimes);
@@ -947,7 +958,6 @@ void TailCommand::Execute()
 		count = curLine;
 	}
 
-	int numLines = curLine;
 	int dstLine = curLine - count;
 
 	int res = close(fd);
