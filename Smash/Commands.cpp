@@ -109,7 +109,7 @@ Command* KillCommand::Create(const string& cmdStr, const vector<string>& cmdArgs
 
 	if (cmdArgs.size() != 3)
 	{
-		cout << "smash error: kill: invalid arguments" << endl;
+		cerr << "smash error: kill: invalid arguments" << endl;
 		return nullptr;
 	}
 
@@ -122,7 +122,7 @@ Command* KillCommand::Create(const string& cmdStr, const vector<string>& cmdArgs
 	}
 	catch (...)
 	{
-		cout << "smash error: kill: invalid arguments" << endl;
+		cerr << "smash error: kill: invalid arguments" << endl;
 		return nullptr;
 	}
 }
@@ -135,7 +135,7 @@ void KillCommand::Execute()
 
 	if (pid < 0)
 	{
-		cout << "smash error: kill: job-id " << jobID << " does not exist" << endl;
+		cerr << "smash error: kill: job-id " << jobID << " does not exist" << endl;
 		return;
 	}
 
@@ -171,12 +171,12 @@ Command* BackgroundCommand::Create(const string& cmdStr, const vector<string>& c
 		}
 		catch (...)
 		{
-			cout << "smash error: bg: invalid arguments" << endl;
+			cerr << "smash error: bg: invalid arguments" << endl;
 			return nullptr;
 		}
 	}
 
-	cout << "smash error: bg: invalid arguments" << endl;
+	cerr << "smash error: bg: invalid arguments" << endl;
 
 	return nullptr;
 }
@@ -205,13 +205,13 @@ void BackgroundCommand::Execute()
 
 		if (status == JobStatus::Finished || status == JobStatus::Unknown)
 		{
-			cout << "smash error: bg: job-id " << jobID << " does not exist" << endl;
+			cerr << "smash error: bg: job-id " << jobID << " does not exist" << endl;
 			return;
 		}
 
 		if (status == JobStatus::Running)
 		{
-			cout << "smash error: bg: job-id " << jobID << " is already running in the background" << endl;
+			cerr << "smash error: bg: job-id " << jobID << " is already running in the background" << endl;
 			return;
 		}
 
@@ -223,7 +223,7 @@ void BackgroundCommand::Execute()
 
 		if (dstID == -1)
 		{
-			cout << "smash error: bg: there is no stopped jobs to resume" << endl;
+			cerr << "smash error: bg: there is no stopped jobs to resume" << endl;
 			return;
 		}
 	}
@@ -324,12 +324,12 @@ Command* ForegroundCommand::Create(const string& cmdStr, const vector<string>& c
 		}
 		catch (...)
 		{
-			cout << "smash error: fg: invalid arguments" << endl;
+			cerr << "smash error: fg: invalid arguments" << endl;
 			return nullptr;
 		}
 	}
 
-	cout << "smash error: fg: invalid arguments" << endl;
+	cerr << "smash error: fg: invalid arguments" << endl;
 
 	return nullptr;
 }
@@ -358,7 +358,7 @@ void ForegroundCommand::Execute()
 
 		if (status == JobStatus::Finished || status == JobStatus::Unknown)
 		{
-			cout << "smash error: fg: job-id " << jobID << " does not exist" << endl;
+			cerr << "smash error: fg: job-id " << jobID << " does not exist" << endl;
 			return;
 		}
 
@@ -370,7 +370,7 @@ void ForegroundCommand::Execute()
 
 		if (dstID == -1)
 		{
-			cout << "smash error: fg: jobs list is empty" << endl;
+			cerr << "smash error: fg: jobs list is empty" << endl;
 			return;
 		}
 	}
@@ -791,7 +791,7 @@ Command* ChangeDirCommand::Create(const string& cmdStr, const vector<string>& cm
 
 	if (cmdArgs.size() != 2)
 	{
-		cout << "smash error: cd: too many agruments" << endl;
+		cerr << "smash error: cd: too many agruments" << endl;
 		return nullptr;
 	}
 
@@ -821,7 +821,7 @@ void ChangeDirCommand::Execute()
 	{
 		if (instance.prevPath == "")
 		{
-			cout << "smash error: cd: OLDPWD not set" << endl;
+			cerr << "smash error: cd: OLDPWD not set" << endl;
 			return;
 		}
 
@@ -850,7 +850,7 @@ Command* TouchCommand::Create(const string& cmdStr, const vector<string>& cmdArg
 
 	if (cmdArgs.size() != 3)
 	{
-		cout << "smash error: touch: invalid arguments" << endl;
+		cerr << "smash error: touch: invalid arguments" << endl;
 		return nullptr;
 	}
 
@@ -860,7 +860,7 @@ Command* TouchCommand::Create(const string& cmdStr, const vector<string>& cmdArg
 
 	if (res == nullptr)
 	{
-		cout << "smash error: touch: invalid arguments" << endl;
+		cerr << "smash error: touch: invalid arguments" << endl;
 		return nullptr;
 	}
 
@@ -917,11 +917,11 @@ Command* TailCommand::Create(const std::string& cmdStr, const std::vector<std::s
 	}
 	catch (...)
 	{
-		cout << "smash error: tail: invalid arguments" << endl;
+		cerr << "smash error: tail: invalid arguments" << endl;
 		return nullptr;
 	}
 
-	cout << "smash error: tail: invalid arguments" << endl;
+	cerr << "smash error: tail: invalid arguments" << endl;
 	return nullptr;
 }
 
