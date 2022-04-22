@@ -31,7 +31,7 @@ class Smash
 
 	pid_t CurrentPid() const;
 
-	void ExecuteCommand(const std::string& cmdStr);
+	void Execute(const std::string& cmdStr);
 
 	friend void JobsCommand::Execute();
 
@@ -46,8 +46,6 @@ class Smash
 	friend void QuitCommand::Execute();
 
 	friend void ChangeDirCommand::Execute();
-
-	friend void TimeoutCommand::Execute();
 
 	private:
 

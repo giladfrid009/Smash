@@ -76,7 +76,7 @@ Command* Smash::CreateCommand(const string& cmdStr, const vector<string>& cmdArg
 
 			case (Commands::Tail): return TailCommand::Create(cmdStr, cmdArgs);
 
-			case (Commands::Timeout): return TimeoutCommand::Create(cmdStr, cmdArgs);
+			case (Commands::Timeout): return nullptr;
 
 			default: return nullptr;
 		}
@@ -87,7 +87,7 @@ Command* Smash::CreateCommand(const string& cmdStr, const vector<string>& cmdArg
 	}
 }
 
-void Smash::ExecuteCommand(const string& cmdStr)
+void Smash::Execute(const string& cmdStr)
 {
 	bool inBackground = IsRunInBackground(cmdStr);
 
@@ -118,7 +118,7 @@ void Smash::ExecuteCommand(const string& cmdStr)
 		}
 		else if (inBackground)
 		{
-			jobs.AddJob(pid, cmd);
+			jobs.Add(pid, cmd);
 			return;
 		}
 
@@ -132,7 +132,7 @@ void Smash::ExecuteCommand(const string& cmdStr)
 
 		if (WIFSTOPPED(exitStat))
 		{
-			jobs.AddJob(pid, cmd, JobStatus::Stopped);
+			jobs.Add(pid, cmd, JobStatus::Stopped);
 			return;
 		}
 

@@ -477,7 +477,7 @@ void RedirectWriteCommand::Execute()
 
 	if (res < 0 || res != STDOUT_FILENO) { SysError("open"); return; }
 
-	instance.ExecuteCommand(command);
+	instance.Execute(command);
 
 	res = dup2(outCopy, STDOUT_FILENO);
 
@@ -527,7 +527,7 @@ void RedirectAppendCommand::Execute()
 
 	if (res < 0 || res != STDOUT_FILENO) { SysError("open"); return; }
 
-	instance.ExecuteCommand(command);
+	instance.Execute(command);
 
 	res = dup2(outCopy, STDOUT_FILENO);
 
@@ -608,7 +608,7 @@ void PipeOutCommand::Execute()
 
 	if (res < 0) { SysError("close"); return; }
 
-	instance.ExecuteCommand(left);
+	instance.Execute(left);
 
 	res = dup2(outCopy, STDOUT_FILENO);
 
@@ -628,11 +628,11 @@ void PipeOutCommand::Execute()
 
 	if (CommandType(right) != Commands::Unknown)
 	{
-		instance.ExecuteCommand(right + " " + ReadStdin());
+		instance.Execute(right + " " + ReadStdin());
 	}
 	else
 	{
-		instance.ExecuteCommand(right);
+		instance.Execute(right);
 	}
 
 	res = dup2(inCopy, STDIN_FILENO);
@@ -698,7 +698,7 @@ void PipeErrCommand::Execute()
 
 	if (res < 0) { SysError("close"); return; }
 
-	instance.ExecuteCommand(left);
+	instance.Execute(left);
 
 	res = dup2(errCopy, STDERR_FILENO);
 
@@ -718,11 +718,11 @@ void PipeErrCommand::Execute()
 
 	if (CommandType(right) != Commands::Unknown)
 	{
-		instance.ExecuteCommand(right + " " + ReadStdin());
+		instance.Execute(right + " " + ReadStdin());
 	}
 	else
 	{
-		instance.ExecuteCommand(right);
+		instance.Execute(right);
 	}
 
 	res = dup2(inCopy, STDIN_FILENO);
@@ -971,42 +971,4 @@ void TailCommand::Execute()
 	res = close(fd);
 
 	if (res < 0) { SysError("close"); }
-}
-
-Command* TimeoutCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
-{
-	if (CommandType(cmdStr) != Commands::Timeout)
-	{
-		return nullptr;
-	}
-
-	try
-	{
-		int duration = std::stoi(cmdArgs[1]);
-
-		int cmdStart = cmdStr.find_first_of(cmdArgs[1]) + 2;
-
-		string cmd = cmdStr.substr(cmdStart, cmd.size());
-
-		return new TimeoutCommand(cmdStr, duration, cmd);
-	}
-	catch (...)
-	{
-		return nullptr;
-	}
-
-	return nullptr;
-}
-
-TimeoutCommand::TimeoutCommand(const std::string& cmdStr, int duration, const std::string& cmd) : InternalCommand(cmdStr)
-{
-	this->duration = duration;
-	this->cmd = cmd;
-}
-
-void TimeoutCommand::Execute()
-{
-	Smash& instance = Smash::Instance();
-
-	instance.ExecuteCommand(cmd);
 }

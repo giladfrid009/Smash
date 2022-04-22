@@ -3,6 +3,6 @@
 
 void Handler_CtrlZ(int sigNum);
 void Handler_CtrlC(int sigNum);
-void Handler_Alarm(int signalNum, siginfo_t* info, void* context);
+void Handler_Alarm(int signalNum);
 
 #endif //SMASH_SIGHANDLERS_H

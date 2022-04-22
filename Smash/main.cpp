@@ -22,13 +22,9 @@ int main(int argc, char* argv[])
 		perror("smash error: signal failed");
 	}
 
-	struct sigaction sa = {0}; //todo: maybbe remove, move back to old handler
-	sa.sa_sigaction = Handler_Alarm;
-	sa.sa_flags = SA_SIGINFO;
-
-	if (sigaction(SIGALRM, &sa, nullptr) < 0)
+	if (signal(SIGALRM, Handler_Alarm) == SIG_ERR)
 	{
-		perror("smash error: sigaction failed");
+		perror("smash error: signal failed");
 	}
 
 	Smash& smash = Smash::Instance();
@@ -36,9 +32,12 @@ int main(int argc, char* argv[])
 	while (true)
 	{
 		std::cout << smash.Prompt();
+
 		std::string cmdStr;
+
 		std::getline(std::cin, cmdStr);
-		smash.ExecuteCommand(cmdStr);
+
+		smash.Execute(cmdStr);
 	}
 
 	return 0;

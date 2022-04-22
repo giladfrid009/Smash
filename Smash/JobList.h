@@ -29,7 +29,7 @@ class JobsList
 
 	~JobsList();
 
-	void AddJob(pid_t pid, Command* command, JobStatus status = JobStatus::Running);
+	void Add(pid_t pid, Command* command, JobStatus status = JobStatus::Running);
 
 	long unsigned int Size() const;
 

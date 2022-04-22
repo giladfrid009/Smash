@@ -59,8 +59,7 @@ void Handler_CtrlC(int signalNum)
 	std::cout << "smash: process " << pid << " was killed" << std::endl;
 }
 
-//todo: maybe restore old handler
-void Handler_Alarm(int signalNum, siginfo_t* info, void* context)
+void Handler_Alarm(int signalNum)
 {
 	if (signalNum != SIGALRM)
 	{
@@ -68,6 +67,4 @@ void Handler_Alarm(int signalNum, siginfo_t* info, void* context)
 	}
 
 	std::cout << "smash: got an alarm" << std::endl;
-
-	pid_t pid = info->si_pid;
 }

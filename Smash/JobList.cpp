@@ -17,7 +17,7 @@ JobsList::~JobsList()
 	}
 }
 
-void JobsList::AddJob(pid_t pid, Command* command, JobStatus status)
+void JobsList::Add(pid_t pid, Command* command, JobStatus status)
 {
 	if (command == nullptr)
 	{
