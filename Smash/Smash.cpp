@@ -1,5 +1,6 @@
 #include "Smash.h"
 #include "Commands.h"
+#include "Redirect.h"
 #include "Parser.h"
 #include <vector>
 #include <string>
