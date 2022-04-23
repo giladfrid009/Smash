@@ -1,4 +1,3 @@
-
 #ifndef JOBLIST_H
 #define JOBLIST_H
 

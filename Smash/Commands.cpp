@@ -486,19 +486,19 @@ void RedirectWriteCommand::Execute()
 
 	int outCopy = dup(STDOUT_FILENO);
 
-	if (outCopy < 0) 
-	{ 
-		SysError("dup"); 
-		return; 
+	if (outCopy < 0)
+	{
+		SysError("dup");
+		return;
 	}
 
 	int res = close(STDOUT_FILENO);
 
-	if (res < 0) 
-	{ 
-		SysError("close"); 
+	if (res < 0)
+	{
+		SysError("close");
 		close(outCopy);
-		return; 
+		return;
 	}
 
 	int fd = open(output.c_str(), O_WRONLY | O_CREAT | O_TRUNC);
@@ -516,12 +516,17 @@ void RedirectWriteCommand::Execute()
 
 	res = dup2(outCopy, STDOUT_FILENO);
 
-	if (res < 0) 
-	{ 
-		SysError("dup2"); 
+	if (res < 0)
+	{
+		SysError("dup2");
 	}
 
 	res = close(outCopy);
+
+	if (res < 0)
+	{
+		SysError("close");
+	}
 }
 
 Command* RedirectAppendCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
@@ -555,42 +560,47 @@ void RedirectAppendCommand::Execute()
 
 	int outCopy = dup(STDOUT_FILENO);
 
-	if (outCopy < 0) 
-	{ 
-		SysError("dup"); 
-		return; 
+	if (outCopy < 0)
+	{
+		SysError("dup");
+		return;
 	}
 
 	int res = close(STDOUT_FILENO);
 
-	if (res < 0) 
-	{ 
+	if (res < 0)
+	{
 		SysError("close");
 		close(outCopy);
-		return; 
+		return;
 	}
 
 	int fd = open(output.c_str(), O_WRONLY | O_APPEND | O_CREAT);
 
 	if (fd < 0 || fd != STDOUT_FILENO)
-	{ 
-		SysError("open"); 
+	{
+		SysError("open");
 		close(fd);
 		dup2(outCopy, STDOUT_FILENO);
 		close(outCopy);
-		return; 
+		return;
 	}
 
 	instance.Execute(command);
 
 	res = dup2(outCopy, STDOUT_FILENO);
 
-	if (res < 0) 
-	{ 
-		SysError("dup2"); 
+	if (res < 0)
+	{
+		SysError("dup2");
 	}
 
 	res = close(outCopy);
+
+	if (res < 0)
+	{
+		SysError("close");
+	}
 }
 
 Command* PipeOutCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
@@ -653,31 +663,31 @@ void PipeOutCommand::Execute()
 
 	int inCopy = dup(STDIN_FILENO);
 
-	if (inCopy < 0) 
-	{ 
-		SysError("dup"); 
-		return; 
+	if (inCopy < 0)
+	{
+		SysError("dup");
+		return;
 	}
 
 	int outCopy = dup(STDOUT_FILENO);
 
-	if (outCopy < 0) 
-	{ 
-		SysError("dup"); 
+	if (outCopy < 0)
+	{
+		SysError("dup");
 		close(inCopy);
-		return; 
+		return;
 	}
 
 	int pipeFds[2];
 
 	int res = pipe(pipeFds);
 
-	if (res < 0) 
-	{ 
-		SysError("pipe"); 
+	if (res < 0)
+	{
+		SysError("pipe");
 		close(inCopy);
 		close(outCopy);
-		return; 
+		return;
 	}
 
 	int readPipe = pipeFds[0];
@@ -685,69 +695,69 @@ void PipeOutCommand::Execute()
 
 	res = dup2(writePipe, STDOUT_FILENO);
 
-	if (res < 0) 
-	{ 
-		SysError("dup2"); 
+	if (res < 0)
+	{
+		SysError("dup2");
 		close(inCopy);
 		close(outCopy);
 		close(readPipe);
 		close(writePipe);
-		return; 
+		return;
 	}
 
 	res = close(writePipe);
 
-	if (res < 0) 
-	{ 
-		SysError("close"); 
+	if (res < 0)
+	{
+		SysError("close");
 		dup2(outCopy, STDOUT_FILENO);
 		close(inCopy);
 		close(outCopy);
 		close(readPipe);
-		return; 
+		return;
 	}
 
 	instance.Execute(left);
 
 	res = dup2(outCopy, STDOUT_FILENO);
 
-	if (res < 0) 
-	{ 
-		SysError("dup2"); 
+	if (res < 0)
+	{
+		SysError("dup2");
 		close(inCopy);
 		close(outCopy);
 		close(readPipe);
-		return; 
+		return;
 	}
 
 	res = close(outCopy);
 
-	if (res < 0) 
+	if (res < 0)
 	{
-		SysError("close"); 
+		SysError("close");
 		close(inCopy);
 		close(readPipe);
-		return; 
+		return;
 	}
 
 	res = dup2(readPipe, STDIN_FILENO);
 
-	if (res < 0) 
-	{ 
-		SysError("dup2"); 
+	if (res < 0)
+	{
+		SysError("dup2");
 		close(inCopy);
 		close(readPipe);
-		return; 
+		return;
 	}
 
 	res = close(readPipe);
 
-	if (res < 0) 
-	{ 
-		SysError("close"); 
+	if (res < 0)
+	{
+		SysError("close");
 		dup2(inCopy, STDIN_FILENO);
 		close(inCopy);
-		return; 
+		return;
 	}
 
 	if (CommandType(right) != Commands::Unknown)
@@ -761,15 +771,15 @@ void PipeOutCommand::Execute()
 
 	res = dup2(inCopy, STDIN_FILENO);
 
-	if (res < 0) 
-	{ 
+	if (res < 0)
+	{
 		SysError("dup2");
 	}
 
 	res = close(inCopy);
 
-	if (res < 0) 
-	{ 
+	if (res < 0)
+	{
 		SysError("close");
 	}
 }
@@ -1113,10 +1123,10 @@ void TailCommand::Execute()
 {
 	int fd = open(path.c_str(), O_RDONLY);
 
-	if (fd < 0) 
-	{ 
+	if (fd < 0)
+	{
 		SysError("open");
-		return; 
+		return;
 	}
 
 	char curChar;
@@ -1139,18 +1149,18 @@ void TailCommand::Execute()
 
 	int res = close(fd);
 
-	if (res < 0) 
-	{ 
-		SysError("close"); 
-		return; 
+	if (res < 0)
+	{
+		SysError("close");
+		return;
 	}
 
 	fd = open(path.c_str(), O_RDONLY);
 
-	if (fd < 0) 
-	{ 
-		SysError("open"); 
-		return; 
+	if (fd < 0)
+	{
+		SysError("open");
+		return;
 	}
 
 	curLine = 0;
@@ -1175,8 +1185,8 @@ void TailCommand::Execute()
 
 	res = close(fd);
 
-	if (res < 0) 
-	{ 
-		SysError("close"); 
+	if (res < 0)
+	{
+		SysError("close");
 	}
 }
