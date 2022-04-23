@@ -486,21 +486,45 @@ void RedirectWriteCommand::Execute()
 
 	int outCopy = dup(STDOUT_FILENO);
 
-	if (outCopy < 0) { SysError("dup"); return; }
+	if (outCopy < 0) 
+	{ 
+		SysError("dup"); 
+		return; 
+	}
 
 	int res = close(STDOUT_FILENO);
 
-	if (res < 0) { SysError("close"); return; }
+	if (res < 0) 
+	{ 
+		SysError("close"); 
 
-	res = open(output.c_str(), O_WRONLY | O_CREAT | O_TRUNC);
+		dup2(outCopy, STDOUT_FILENO);
+		close(outCopy);
 
-	if (res < 0 || res != STDOUT_FILENO) { SysError("open"); return; }
+		return; 
+	}
+
+	int fd = open(output.c_str(), O_WRONLY | O_CREAT | O_TRUNC);
+
+	if (fd < 0 || fd != STDOUT_FILENO)
+	{
+		SysError("open");
+
+		close(fd);
+		dup2(outCopy, STDOUT_FILENO);
+		close(outCopy);
+
+		return;
+	}
 
 	instance.Execute(command);
 
 	res = dup2(outCopy, STDOUT_FILENO);
 
-	if (res < 0) { SysError("dup2"); return; }
+	if (res < 0) 
+	{ 
+		SysError("dup2"); 
+	}
 
 	res = close(outCopy);
 }
@@ -536,21 +560,45 @@ void RedirectAppendCommand::Execute()
 
 	int outCopy = dup(STDOUT_FILENO);
 
-	if (outCopy < 0) { SysError("dup"); return; }
+	if (outCopy < 0) 
+	{ 
+		SysError("dup"); 
+		return; 
+	}
 
 	int res = close(STDOUT_FILENO);
 
-	if (res < 0) { SysError("close"); return; }
+	if (res < 0) 
+	{ 
+		SysError("close");
 
-	res = open(output.c_str(), O_WRONLY | O_APPEND | O_CREAT);
+		dup2(outCopy, STDOUT_FILENO);
+		close(outCopy);
 
-	if (res < 0 || res != STDOUT_FILENO) { SysError("open"); return; }
+		return; 
+	}
+
+	int fd = open(output.c_str(), O_WRONLY | O_APPEND | O_CREAT);
+
+	if (fd < 0 || fd != STDOUT_FILENO)
+	{ 
+		SysError("open"); 
+
+		close(fd);
+		dup2(outCopy, STDOUT_FILENO);
+		close(outCopy);
+
+		return; 
+	}
 
 	instance.Execute(command);
 
 	res = dup2(outCopy, STDOUT_FILENO);
 
-	if (res < 0) { SysError("dup2"); return; }
+	if (res < 0) 
+	{ 
+		SysError("dup2"); 
+	}
 
 	res = close(outCopy);
 }
