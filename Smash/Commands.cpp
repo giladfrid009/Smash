@@ -1113,7 +1113,11 @@ void TailCommand::Execute()
 {
 	int fd = open(path.c_str(), O_RDONLY);
 
-	if (fd < 0) { SysError("open"); return; }
+	if (fd < 0) 
+	{ 
+		SysError("open");
+		return; 
+	}
 
 	char curChar;
 	int curLine = 0;
@@ -1135,11 +1139,19 @@ void TailCommand::Execute()
 
 	int res = close(fd);
 
-	if (res < 0) { SysError("close"); return; }
+	if (res < 0) 
+	{ 
+		SysError("close"); 
+		return; 
+	}
 
 	fd = open(path.c_str(), O_RDONLY);
 
-	if (fd < 0) { SysError("open"); return; }
+	if (fd < 0) 
+	{ 
+		SysError("open"); 
+		return; 
+	}
 
 	curLine = 0;
 
@@ -1163,5 +1175,8 @@ void TailCommand::Execute()
 
 	res = close(fd);
 
-	if (res < 0) { SysError("close"); }
+	if (res < 0) 
+	{ 
+		SysError("close"); 
+	}
 }
