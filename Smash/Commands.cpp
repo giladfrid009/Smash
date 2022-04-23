@@ -516,17 +516,11 @@ void RedirectWriteCommand::Execute()
 
 	res = dup2(outCopy, STDOUT_FILENO);
 
-	if (res < 0)
-	{
-		SysError("dup2");
-	}
+	if (res < 0) SysError("dup2");
 
 	res = close(outCopy);
 
-	if (res < 0)
-	{
-		SysError("close");
-	}
+	if (res < 0) SysError("close");
 }
 
 Command* RedirectAppendCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
@@ -590,17 +584,11 @@ void RedirectAppendCommand::Execute()
 
 	res = dup2(outCopy, STDOUT_FILENO);
 
-	if (res < 0)
-	{
-		SysError("dup2");
-	}
+	if (res < 0) SysError("dup2");
 
 	res = close(outCopy);
 
-	if (res < 0)
-	{
-		SysError("close");
-	}
+	if (res < 0) SysError("close");
 }
 
 Command* PipeOutCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
@@ -630,14 +618,6 @@ PipeOutCommand::PipeOutCommand(const string& cmdStr, const string& left, const s
 
 static string ReadStdin()
 {
-	int res = fcntl(STDIN_FILENO, F_SETFL, fcntl(STDIN_FILENO, F_GETFL) | O_NONBLOCK);
-
-	if (res < 0)
-	{
-		SysError("fcntl");
-		return "";
-	}
-
 	string output;
 
 	char readBuff[ReadSize];
@@ -645,13 +625,6 @@ static string ReadStdin()
 	while (read(STDIN_FILENO, readBuff, ReadSize) > 0)
 	{
 		output.append(readBuff);
-	}
-
-	res = fcntl(STDIN_FILENO, F_SETFL, fcntl(STDIN_FILENO, F_GETFL) & (~O_NONBLOCK));
-
-	if (res < 0)
-	{
-		SysError("fcntl");
 	}
 
 	return output;
@@ -698,46 +671,28 @@ void PipeOutCommand::Execute()
 	if (res < 0)
 	{
 		SysError("dup2");
-		close(inCopy);
-		close(outCopy);
-		close(readPipe);
 		close(writePipe);
-		return;
+		goto CLEANUP;
 	}
+
+	instance.Execute(left);
 
 	res = close(writePipe);
 
 	if (res < 0)
 	{
 		SysError("close");
-		dup2(outCopy, STDOUT_FILENO);
-		close(inCopy);
-		close(outCopy);
-		close(readPipe);
+		goto CLEANUP;
 		return;
 	}
-
-	instance.Execute(left);
 
 	res = dup2(outCopy, STDOUT_FILENO);
 
 	if (res < 0)
 	{
 		SysError("dup2");
-		close(inCopy);
-		close(outCopy);
-		close(readPipe);
-		return;
-	}
-
-	res = close(outCopy);
-
-	if (res < 0)
-	{
-		SysError("close");
-		close(inCopy);
-		close(readPipe);
-		return;
+		close(STDOUT_FILENO);
+		goto CLEANUP;
 	}
 
 	res = dup2(readPipe, STDIN_FILENO);
@@ -745,19 +700,7 @@ void PipeOutCommand::Execute()
 	if (res < 0)
 	{
 		SysError("dup2");
-		close(inCopy);
-		close(readPipe);
-		return;
-	}
-
-	res = close(readPipe);
-
-	if (res < 0)
-	{
-		SysError("close");
-		dup2(inCopy, STDIN_FILENO);
-		close(inCopy);
-		return;
+		goto CLEANUP;
 	}
 
 	if (CommandType(right) != Commands::Unknown)
@@ -773,15 +716,23 @@ void PipeOutCommand::Execute()
 
 	if (res < 0)
 	{
+		close(STDIN_FILENO);
 		SysError("dup2");
 	}
 
+CLEANUP:
+
+	res = close(readPipe);
+
+	if (res < 0) SysError("close");
+
 	res = close(inCopy);
 
-	if (res < 0)
-	{
-		SysError("close");
-	}
+	if (res < 0) SysError("close");
+
+	res = close(outCopy);
+
+	if (res < 0) SysError("close");
 }
 
 Command* PipeErrCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
@@ -850,46 +801,28 @@ void PipeErrCommand::Execute()
 	if (res < 0)
 	{
 		SysError("dup2");
-		close(inCopy);
-		close(errCopy);
-		close(readPipe);
 		close(writePipe);
-		return;
+		goto CLEANUP;
 	}
+
+	instance.Execute(left);
 
 	res = close(writePipe);
 
 	if (res < 0)
 	{
 		SysError("close");
-		dup2(errCopy, STDERR_FILENO);
-		close(inCopy);
-		close(errCopy);
-		close(readPipe);
+		goto CLEANUP;
 		return;
 	}
-
-	instance.Execute(left);
 
 	res = dup2(errCopy, STDERR_FILENO);
 
 	if (res < 0)
 	{
 		SysError("dup2");
-		close(inCopy);
-		close(errCopy);
-		close(readPipe);
-		return;
-	}
-
-	res = close(errCopy);
-
-	if (res < 0)
-	{
-		SysError("close");
-		close(inCopy);
-		close(readPipe);
-		return;
+		close(STDERR_FILENO);
+		goto CLEANUP;
 	}
 
 	res = dup2(readPipe, STDIN_FILENO);
@@ -897,19 +830,7 @@ void PipeErrCommand::Execute()
 	if (res < 0)
 	{
 		SysError("dup2");
-		close(inCopy);
-		close(readPipe);
-		return;
-	}
-
-	res = close(readPipe);
-
-	if (res < 0)
-	{
-		SysError("close");
-		dup2(inCopy, STDIN_FILENO);
-		close(inCopy);
-		return;
+		goto CLEANUP;
 	}
 
 	if (CommandType(right) != Commands::Unknown)
@@ -925,15 +846,23 @@ void PipeErrCommand::Execute()
 
 	if (res < 0)
 	{
+		close(STDIN_FILENO);
 		SysError("dup2");
 	}
 
+CLEANUP:
+
+	res = close(readPipe);
+
+	if (res < 0) SysError("close");
+
 	res = close(inCopy);
 
-	if (res < 0)
-	{
-		SysError("close");
-	}
+	if (res < 0) SysError("close");
+
+	res = close(errCopy);
+
+	if (res < 0) SysError("close");
 }
 
 Command* PrintDirCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
