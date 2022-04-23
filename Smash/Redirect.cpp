@@ -20,6 +20,22 @@ static void SysError(string sysCall)
 	perror(formatted.c_str());
 }
 
+static string ReadStdin()
+{
+	const size_t ReadSize = 4096 * sizeof(char);
+
+	string output;
+
+	char readBuff[ReadSize];
+
+	while (read(STDIN_FILENO, readBuff, ReadSize) > 0)
+	{
+		output.append(readBuff);
+	}
+
+	return output;
+}
+
 Command* RedirectWriteCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
 {
 	if (CommandType(cmdArgs) != Commands::RedirectWrite)
@@ -179,22 +195,6 @@ PipeOutCommand::PipeOutCommand(const string& cmdStr, const string& left, const s
 {
 	this->left = RemoveBackgroundSign(left);
 	this->right = RemoveBackgroundSign(right);
-}
-
-static string ReadStdin()
-{
-	const size_t ReadSize = 4096 * sizeof(char);
-
-	string output;
-
-	char readBuff[ReadSize];
-
-	while (read(STDIN_FILENO, readBuff, ReadSize) > 0)
-	{
-		output.append(readBuff);
-	}
-
-	return output;
 }
 
 void PipeOutCommand::Execute()
