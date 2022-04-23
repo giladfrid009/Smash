@@ -677,6 +677,16 @@ void PipeOutCommand::Execute()
 
 	instance.Execute(left);
 
+	res = dup2(outCopy, STDOUT_FILENO);
+
+	if (res < 0)
+	{
+		SysError("dup2");
+		close(STDOUT_FILENO);
+		close(writePipe);
+		goto CLEANUP;
+	}
+
 	res = close(writePipe);
 
 	if (res < 0)
@@ -684,15 +694,6 @@ void PipeOutCommand::Execute()
 		SysError("close");
 		goto CLEANUP;
 		return;
-	}
-
-	res = dup2(outCopy, STDOUT_FILENO);
-
-	if (res < 0)
-	{
-		SysError("dup2");
-		close(STDOUT_FILENO);
-		goto CLEANUP;
 	}
 
 	res = dup2(readPipe, STDIN_FILENO);
@@ -807,6 +808,16 @@ void PipeErrCommand::Execute()
 
 	instance.Execute(left);
 
+	res = dup2(errCopy, STDERR_FILENO);
+
+	if (res < 0)
+	{
+		SysError("dup2");
+		close(STDERR_FILENO);
+		close(writePipe);
+		goto CLEANUP;
+	}
+
 	res = close(writePipe);
 
 	if (res < 0)
@@ -814,15 +825,6 @@ void PipeErrCommand::Execute()
 		SysError("close");
 		goto CLEANUP;
 		return;
-	}
-
-	res = dup2(errCopy, STDERR_FILENO);
-
-	if (res < 0)
-	{
-		SysError("dup2");
-		close(STDERR_FILENO);
-		goto CLEANUP;
 	}
 
 	res = dup2(readPipe, STDIN_FILENO);
