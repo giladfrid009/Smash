@@ -11,7 +11,8 @@ class Smash
 	private:
 
 	JobsList jobs;
-	pid_t currentPid;
+	pid_t selfPID;
+	pid_t runningPID;
 	std::string prompt;
 	std::string prevPath;
 
@@ -29,7 +30,9 @@ class Smash
 
 	std::string Prompt() const;
 
-	pid_t CurrentPid() const;
+	pid_t RunningPID() const;
+
+	pid_t SelfPID() const;
 
 	void Execute(const std::string& cmdStr);
 

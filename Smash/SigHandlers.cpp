@@ -12,8 +12,7 @@ void Handler_CtrlZ(int signalNum)
 
 	std::cout << "smash: got ctrl-Z" << std::endl;
 
-	Smash& instance = Smash::Instance();
-	pid_t pid = instance.CurrentPid();
+	pid_t pid = Smash::Instance().RunningPID();
 
 	if (pid < 0)
 	{
@@ -40,8 +39,7 @@ void Handler_CtrlC(int signalNum)
 
 	std::cout << "smash: got ctrl-C" << std::endl;
 
-	Smash& instance = Smash::Instance();
-	pid_t pid = instance.CurrentPid();
+	pid_t pid = Smash::Instance().RunningPID();
 
 	if (pid < 0)
 	{

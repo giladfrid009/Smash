@@ -63,45 +63,44 @@ RedirectWriteCommand::RedirectWriteCommand(const string& cmdStr, const string& c
 
 void RedirectWriteCommand::Execute()
 {
-	Smash& instance = Smash::Instance();
+	pid_t pid = fork();
 
-	int outCopy = dup(STDOUT_FILENO);
-
-	if (outCopy < 0)
+	if (pid < 0)
 	{
-		SysError("dup");
+		SysError("fork");
 		return;
 	}
 
-	int res = close(STDOUT_FILENO);
-
-	if (res < 0)
+	if (pid == 0)
 	{
-		SysError("close");
-		close(outCopy);
-		return;
+		if (close(STDOUT_FILENO) < 0)
+		{
+			SysError("close");
+			exit(1);
+		}
+
+		int fd = open(output.c_str(), O_WRONLY | O_CREAT | O_TRUNC);
+
+		if (fd < 0)
+		{
+			SysError("open");
+			exit(1);
+		}
+
+		if (fd != STDOUT_FILENO)
+		{
+			exit(1);
+		}
+
+		Smash::Instance().Execute(command);
+
+		exit(0);
 	}
 
-	int fd = open(output.c_str(), O_WRONLY | O_CREAT | O_TRUNC);
-
-	if (fd < 0 || fd != STDOUT_FILENO)
+	if (waitpid(pid, nullptr, 0) < 0)
 	{
-		SysError("open");
-		close(fd);
-		dup2(outCopy, STDOUT_FILENO);
-		close(outCopy);
-		return;
+		SysError("waitpid");
 	}
-
-	instance.Execute(command);
-
-	res = dup2(outCopy, STDOUT_FILENO);
-
-	if (res < 0) SysError("dup2");
-
-	res = close(outCopy);
-
-	if (res < 0) SysError("close");
 }
 
 Command* RedirectAppendCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
@@ -131,45 +130,44 @@ RedirectAppendCommand::RedirectAppendCommand(const string& cmdStr, const string&
 
 void RedirectAppendCommand::Execute()
 {
-	Smash& instance = Smash::Instance();
+	pid_t pid = fork();
 
-	int outCopy = dup(STDOUT_FILENO);
-
-	if (outCopy < 0)
+	if (pid < 0)
 	{
-		SysError("dup");
+		SysError("fork");
 		return;
 	}
 
-	int res = close(STDOUT_FILENO);
-
-	if (res < 0)
+	if (pid == 0)
 	{
-		SysError("close");
-		close(outCopy);
-		return;
+		if (close(STDOUT_FILENO) < 0)
+		{
+			SysError("close");
+			exit(1);
+		}
+
+		int fd = open(output.c_str(), O_WRONLY | O_CREAT | O_APPEND);
+
+		if (fd < 0)
+		{
+			SysError("open");
+			exit(1);
+		}
+
+		if (fd != STDOUT_FILENO)
+		{
+			exit(1);
+		}
+
+		Smash::Instance().Execute(command);
+
+		exit(0);
 	}
 
-	int fd = open(output.c_str(), O_WRONLY | O_APPEND | O_CREAT);
-
-	if (fd < 0 || fd != STDOUT_FILENO)
+	if (waitpid(pid, nullptr, 0) < 0)
 	{
-		SysError("open");
-		close(fd);
-		dup2(outCopy, STDOUT_FILENO);
-		close(outCopy);
-		return;
+		SysError("waitpid");
 	}
-
-	instance.Execute(command);
-
-	res = dup2(outCopy, STDOUT_FILENO);
-
-	if (res < 0) SysError("dup2");
-
-	res = close(outCopy);
-
-	if (res < 0) SysError("close");
 }
 
 Command* PipeOutCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
@@ -201,106 +199,83 @@ void PipeOutCommand::Execute()
 {
 	Smash& instance = Smash::Instance();
 
-	int inCopy = dup(STDIN_FILENO);
+	int fds[2];
 
-	if (inCopy < 0)
-	{
-		SysError("dup");
-		return;
-	}
-
-	int outCopy = dup(STDOUT_FILENO);
-
-	if (outCopy < 0)
-	{
-		SysError("dup");
-		close(inCopy);
-		return;
-	}
-
-	int pipeFds[2];
-
-	int res = pipe(pipeFds);
-
-	if (res < 0)
+	if (pipe(fds) < 0)
 	{
 		SysError("pipe");
-		close(inCopy);
-		close(outCopy);
 		return;
 	}
 
-	int readPipe = pipeFds[0];
-	int writePipe = pipeFds[1];
+	int readPipe = fds[0];
+	int writePipe = fds[1];
 
-	res = dup2(writePipe, STDOUT_FILENO);
+	pid_t leftPID = fork();
 
-	if (res < 0)
+	if (leftPID < 0)
 	{
-		SysError("dup2");
+		SysError("fork");
+		close(readPipe);
 		close(writePipe);
-		goto CLEANUP;
-	}
-
-	instance.Execute(left);
-
-	res = dup2(outCopy, STDOUT_FILENO);
-
-	if (res < 0)
-	{
-		SysError("dup2");
-		close(STDOUT_FILENO);
-		close(writePipe);
-		goto CLEANUP;
-	}
-
-	res = close(writePipe);
-
-	if (res < 0)
-	{
-		SysError("close");
-		goto CLEANUP;
 		return;
 	}
 
-	res = dup2(readPipe, STDIN_FILENO);
-
-	if (res < 0)
+	if (leftPID == 0)
 	{
-		SysError("dup2");
-		goto CLEANUP;
+		if (dup2(writePipe, STDOUT_FILENO) < 0)
+		{
+			SysError("dup2");
+			exit(1);
+		}
+
+		close(readPipe);
+		close(writePipe);
+
+		instance.Execute(left);
+
+		exit(0);
 	}
 
-	if (CommandType(right) != Commands::Unknown)
-	{
-		instance.Execute(right + " " + ReadStdin());
-	}
-	else
-	{
-		instance.Execute(right);
-	}
+	pid_t rightPID = fork();
 
-	res = dup2(inCopy, STDIN_FILENO);
-
-	if (res < 0)
+	if (rightPID < 0)
 	{
-		close(STDIN_FILENO);
-		SysError("dup2");
+		SysError("fork");
+		close(readPipe);
+		close(writePipe);
+		return;
 	}
 
-CLEANUP:
+	if (rightPID == 0)
+	{
+		if (dup2(readPipe, STDIN_FILENO) < 0)
+		{
+			SysError("dup2");
+			exit(1);
+		}
 
-	res = close(readPipe);
+		close(readPipe);
+		close(writePipe);
 
-	if (res < 0) SysError("close");
+		if (CommandType(right) != Commands::Unknown)
+		{
+			instance.Execute(right + " " + ReadStdin());
+		}
+		else
+		{
+			instance.Execute(right);
+		}
 
-	res = close(inCopy);
+		exit(0);
+	}
 
-	if (res < 0) SysError("close");
+	if (close(readPipe) < 0) SysError("close");
 
-	res = close(outCopy);
+	if (close(writePipe) < 0) SysError("close");
 
-	if (res < 0) SysError("close");
+	if (waitpid(leftPID, nullptr, 0) < 0) SysError("waitpid");
+
+	if (waitpid(rightPID, nullptr, 0) < 0) SysError("waitpid");
 }
 
 Command* PipeErrCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
@@ -332,104 +307,81 @@ void PipeErrCommand::Execute()
 {
 	Smash& instance = Smash::Instance();
 
-	int inCopy = dup(STDIN_FILENO);
+	int fds[2];
 
-	if (inCopy < 0)
-	{
-		SysError("dup");
-		return;
-	}
-
-	int errCopy = dup(STDERR_FILENO);
-
-	if (errCopy < 0)
-	{
-		SysError("dup");
-		close(inCopy);
-		return;
-	}
-
-	int pipeFds[2];
-
-	int res = pipe(pipeFds);
-
-	if (res < 0)
+	if (pipe(fds) < 0)
 	{
 		SysError("pipe");
-		close(inCopy);
-		close(errCopy);
 		return;
 	}
 
-	int readPipe = pipeFds[0];
-	int writePipe = pipeFds[1];
+	int readPipe = fds[0];
+	int writePipe = fds[1];
 
-	res = dup2(writePipe, STDERR_FILENO);
+	pid_t leftPID = fork();
 
-	if (res < 0)
+	if (leftPID < 0)
 	{
-		SysError("dup2");
+		SysError("fork");
+		close(readPipe);
 		close(writePipe);
-		goto CLEANUP;
-	}
-
-	instance.Execute(left);
-
-	res = dup2(errCopy, STDERR_FILENO);
-
-	if (res < 0)
-	{
-		SysError("dup2");
-		close(STDERR_FILENO);
-		close(writePipe);
-		goto CLEANUP;
-	}
-
-	res = close(writePipe);
-
-	if (res < 0)
-	{
-		SysError("close");
-		goto CLEANUP;
 		return;
 	}
 
-	res = dup2(readPipe, STDIN_FILENO);
-
-	if (res < 0)
+	if (leftPID == 0)
 	{
-		SysError("dup2");
-		goto CLEANUP;
+		if (dup2(writePipe, STDERR_FILENO) < 0)
+		{
+			SysError("dup2");
+			exit(1);
+		}
+
+		close(readPipe);
+		close(writePipe);
+
+		instance.Execute(left);
+
+		exit(0);
 	}
 
-	if (CommandType(right) != Commands::Unknown)
-	{
-		instance.Execute(right + " " + ReadStdin());
-	}
-	else
-	{
-		instance.Execute(right);
-	}
+	pid_t rightPID = fork();
 
-	res = dup2(inCopy, STDIN_FILENO);
-
-	if (res < 0)
+	if (rightPID < 0)
 	{
-		close(STDIN_FILENO);
-		SysError("dup2");
+		SysError("fork");
+		close(readPipe);
+		close(writePipe);
+		return;
 	}
 
-CLEANUP:
+	if (rightPID == 0)
+	{
+		if (dup2(readPipe, STDIN_FILENO) < 0)
+		{
+			SysError("dup2");
+			exit(1);
+		}
 
-	res = close(readPipe);
+		close(readPipe);
+		close(writePipe);
 
-	if (res < 0) SysError("close");
+		if (CommandType(right) != Commands::Unknown)
+		{
+			instance.Execute(right + " " + ReadStdin());
+		}
+		else
+		{
+			instance.Execute(right);
+		}
 
-	res = close(inCopy);
+		exit(0);
+	}
 
-	if (res < 0) SysError("close");
+	if (close(readPipe) < 0) SysError("close");
 
-	res = close(errCopy);
+	if (close(writePipe) < 0) SysError("close");
 
-	if (res < 0) SysError("close");
+	if (waitpid(leftPID, nullptr, 0) < 0) SysError("waitpid");
+
+	if (waitpid(rightPID, nullptr, 0) < 0) SysError("waitpid");
 }

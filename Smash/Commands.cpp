@@ -286,15 +286,7 @@ ShowPIDCommand::ShowPIDCommand(const string& cmdStr) : InternalCommand(cmdStr)
 
 void ShowPIDCommand::Execute()
 {
-	pid_t pid = getpid();
-
-	if (pid < 0)
-	{
-		SysError("getpid");
-		return;
-	}
-
-	cout << "smash pid is " << pid << endl;
+	cout << "smash pid is " << Smash::Instance().SelfPID() << endl;
 }
 
 Command* ForegroundCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
@@ -391,11 +383,11 @@ void ForegroundCommand::Execute()
 
 	int exitStat;
 
-	instance.currentPid = pid;
+	instance.runningPID = pid;
 
 	pid = waitpid(pid, &exitStat, WUNTRACED);
 
-	instance.currentPid = -1;
+	instance.runningPID = -1;
 
 	if (pid < 0)
 	{

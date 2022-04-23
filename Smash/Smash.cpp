@@ -12,9 +12,16 @@ using std::vector;
 
 Smash::Smash()
 {
-	currentPid = -1;
+	runningPID = -1;
 	prompt = "smash";
 	prevPath = "";
+
+	selfPID = getpid();
+
+	if (selfPID < 0)
+	{
+		perror("smash error: getpid failed");
+	}
 }
 
 Smash::~Smash()
@@ -32,9 +39,14 @@ string Smash::Prompt() const
 	return prompt + "> ";
 }
 
-pid_t Smash::CurrentPid() const
+pid_t Smash::RunningPID() const
 {
-	return currentPid;
+	return runningPID;
+}
+
+pid_t Smash::SelfPID() const
+{
+	return selfPID;
 }
 
 Command* Smash::CreateCommand(const string& cmdStr, const vector<string>& cmdArgs) const
@@ -125,11 +137,11 @@ void Smash::Execute(const string& cmdStr)
 
 		int exitStat;
 
-		currentPid = pid;
+		runningPID = pid;
 
 		waitpid(pid, &exitStat, WUNTRACED);
 
-		currentPid = -1;
+		runningPID = -1;
 
 		if (WIFSTOPPED(exitStat))
 		{
