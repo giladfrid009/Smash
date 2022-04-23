@@ -497,10 +497,7 @@ void RedirectWriteCommand::Execute()
 	if (res < 0) 
 	{ 
 		SysError("close"); 
-
-		dup2(outCopy, STDOUT_FILENO);
 		close(outCopy);
-
 		return; 
 	}
 
@@ -509,11 +506,9 @@ void RedirectWriteCommand::Execute()
 	if (fd < 0 || fd != STDOUT_FILENO)
 	{
 		SysError("open");
-
 		close(fd);
 		dup2(outCopy, STDOUT_FILENO);
 		close(outCopy);
-
 		return;
 	}
 
@@ -571,10 +566,7 @@ void RedirectAppendCommand::Execute()
 	if (res < 0) 
 	{ 
 		SysError("close");
-
-		dup2(outCopy, STDOUT_FILENO);
 		close(outCopy);
-
 		return; 
 	}
 
@@ -583,11 +575,9 @@ void RedirectAppendCommand::Execute()
 	if (fd < 0 || fd != STDOUT_FILENO)
 	{ 
 		SysError("open"); 
-
 		close(fd);
 		dup2(outCopy, STDOUT_FILENO);
 		close(outCopy);
-
 		return; 
 	}
 
@@ -630,7 +620,13 @@ PipeOutCommand::PipeOutCommand(const string& cmdStr, const string& left, const s
 
 static string ReadStdin()
 {
-	fcntl(STDIN_FILENO, F_SETFL, fcntl(STDIN_FILENO, F_GETFL) | O_NONBLOCK);
+	int res = fcntl(STDIN_FILENO, F_SETFL, fcntl(STDIN_FILENO, F_GETFL) | O_NONBLOCK);
+
+	if (res < 0)
+	{
+		SysError("fcntl");
+		return "";
+	}
 
 	string output;
 
@@ -641,7 +637,12 @@ static string ReadStdin()
 		output.append(readBuff);
 	}
 
-	fcntl(STDIN_FILENO, F_SETFL, fcntl(STDIN_FILENO, F_GETFL) & (~O_NONBLOCK));
+	res = fcntl(STDIN_FILENO, F_SETFL, fcntl(STDIN_FILENO, F_GETFL) & (~O_NONBLOCK));
+
+	if (res < 0)
+	{
+		SysError("fcntl");
+	}
 
 	return output;
 }
@@ -652,46 +653,102 @@ void PipeOutCommand::Execute()
 
 	int inCopy = dup(STDIN_FILENO);
 
-	if (inCopy < 0) { SysError("dup"); return; }
+	if (inCopy < 0) 
+	{ 
+		SysError("dup"); 
+		return; 
+	}
 
 	int outCopy = dup(STDOUT_FILENO);
 
-	if (outCopy < 0) { SysError("dup"); return; }
+	if (outCopy < 0) 
+	{ 
+		SysError("dup"); 
+		close(inCopy);
+		return; 
+	}
 
 	int pipeFds[2];
 
 	int res = pipe(pipeFds);
 
-	if (res < 0) { SysError("pipe"); return; }
+	if (res < 0) 
+	{ 
+		SysError("pipe"); 
+		close(inCopy);
+		close(outCopy);
+		return; 
+	}
 
 	int readPipe = pipeFds[0];
 	int writePipe = pipeFds[1];
 
 	res = dup2(writePipe, STDOUT_FILENO);
 
-	if (res < 0) { SysError("dup2"); return; }
+	if (res < 0) 
+	{ 
+		SysError("dup2"); 
+		close(inCopy);
+		close(outCopy);
+		close(readPipe);
+		close(writePipe);
+		return; 
+	}
 
 	res = close(writePipe);
 
-	if (res < 0) { SysError("close"); return; }
+	if (res < 0) 
+	{ 
+		SysError("close"); 
+		dup2(outCopy, STDOUT_FILENO);
+		close(inCopy);
+		close(outCopy);
+		close(readPipe);
+		return; 
+	}
 
 	instance.Execute(left);
 
 	res = dup2(outCopy, STDOUT_FILENO);
 
-	if (res < 0) { SysError("dup2"); return; }
+	if (res < 0) 
+	{ 
+		SysError("dup2"); 
+		close(inCopy);
+		close(outCopy);
+		close(readPipe);
+		return; 
+	}
 
 	res = close(outCopy);
 
-	if (res < 0) { SysError("close"); return; }
+	if (res < 0) 
+	{
+		SysError("close"); 
+		close(inCopy);
+		close(readPipe);
+		return; 
+	}
 
 	res = dup2(readPipe, STDIN_FILENO);
 
-	if (res < 0) { SysError("dup2"); return; }
+	if (res < 0) 
+	{ 
+		SysError("dup2"); 
+		close(inCopy);
+		close(readPipe);
+		return; 
+	}
 
 	res = close(readPipe);
 
-	if (res < 0) { SysError("close"); return; }
+	if (res < 0) 
+	{ 
+		SysError("close"); 
+		dup2(inCopy, STDIN_FILENO);
+		close(inCopy);
+		return; 
+	}
 
 	if (CommandType(right) != Commands::Unknown)
 	{
@@ -704,11 +761,17 @@ void PipeOutCommand::Execute()
 
 	res = dup2(inCopy, STDIN_FILENO);
 
-	if (res < 0) { SysError("dup2"); return; }
+	if (res < 0) 
+	{ 
+		SysError("dup2");
+	}
 
 	res = close(inCopy);
 
-	if (res < 0) { SysError("close"); return; }
+	if (res < 0) 
+	{ 
+		SysError("close");
+	}
 }
 
 Command* PipeErrCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
@@ -742,46 +805,102 @@ void PipeErrCommand::Execute()
 
 	int inCopy = dup(STDIN_FILENO);
 
-	if (inCopy < 0) { SysError("dup"); return; }
+	if (inCopy < 0)
+	{
+		SysError("dup");
+		return;
+	}
 
 	int errCopy = dup(STDERR_FILENO);
 
-	if (errCopy < 0) { SysError("dup"); return; }
+	if (errCopy < 0)
+	{
+		SysError("dup");
+		close(inCopy);
+		return;
+	}
 
 	int pipeFds[2];
 
 	int res = pipe(pipeFds);
 
-	if (res < 0) { SysError("pipe"); return; }
+	if (res < 0)
+	{
+		SysError("pipe");
+		close(inCopy);
+		close(errCopy);
+		return;
+	}
 
 	int readPipe = pipeFds[0];
 	int writePipe = pipeFds[1];
 
 	res = dup2(writePipe, STDERR_FILENO);
 
-	if (res < 0) { SysError("dup2"); return; }
+	if (res < 0)
+	{
+		SysError("dup2");
+		close(inCopy);
+		close(errCopy);
+		close(readPipe);
+		close(writePipe);
+		return;
+	}
 
 	res = close(writePipe);
 
-	if (res < 0) { SysError("close"); return; }
+	if (res < 0)
+	{
+		SysError("close");
+		dup2(errCopy, STDERR_FILENO);
+		close(inCopy);
+		close(errCopy);
+		close(readPipe);
+		return;
+	}
 
 	instance.Execute(left);
 
 	res = dup2(errCopy, STDERR_FILENO);
 
-	if (res < 0) { SysError("dup2"); return; }
+	if (res < 0)
+	{
+		SysError("dup2");
+		close(inCopy);
+		close(errCopy);
+		close(readPipe);
+		return;
+	}
 
 	res = close(errCopy);
 
-	if (res < 0) { SysError("close"); return; }
+	if (res < 0)
+	{
+		SysError("close");
+		close(inCopy);
+		close(readPipe);
+		return;
+	}
 
 	res = dup2(readPipe, STDIN_FILENO);
 
-	if (res < 0) { SysError("dup2"); return; }
+	if (res < 0)
+	{
+		SysError("dup2");
+		close(inCopy);
+		close(readPipe);
+		return;
+	}
 
 	res = close(readPipe);
 
-	if (res < 0) { SysError("close"); return; }
+	if (res < 0)
+	{
+		SysError("close");
+		dup2(inCopy, STDIN_FILENO);
+		close(inCopy);
+		return;
+	}
 
 	if (CommandType(right) != Commands::Unknown)
 	{
@@ -794,11 +913,17 @@ void PipeErrCommand::Execute()
 
 	res = dup2(inCopy, STDIN_FILENO);
 
-	if (res < 0) { SysError("dup2"); return; }
+	if (res < 0)
+	{
+		SysError("dup2");
+	}
 
 	res = close(inCopy);
 
-	if (res < 0) { SysError("close"); return; }
+	if (res < 0)
+	{
+		SysError("close");
+	}
 }
 
 Command* PrintDirCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
