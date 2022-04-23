@@ -60,7 +60,7 @@ void JobsList::RemoveFinished()
 			continue;
 		}
 
-		delete job.CommandPtr(); //toto: perhaps re-add JobEntry.Destroy
+		delete job.CommandPtr();
 
 		i = jobs.erase(i);
 	}
