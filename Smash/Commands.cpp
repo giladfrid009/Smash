@@ -6,8 +6,6 @@
 #include <vector>
 #include <signal.h>
 #include <exception>
-#include <fcntl.h>
-#include <utime.h>
 
 using std::string;
 using std::vector;
@@ -110,6 +108,12 @@ Command* KillCommand::Create(const string& cmdStr, const vector<string>& cmdArgs
 
 	try
 	{
+		if (cmdArgs[1][0] != '-')
+		{
+			cerr << "smash error: kill: invalid arguments" << endl;
+			return nullptr;
+		}
+
 		int signalNum = (-1) * std::stoi(cmdArgs[1]);
 		int jobID = std::stoi(cmdArgs[2]);
 
@@ -442,8 +446,6 @@ void QuitCommand::Execute()
 	exit(0);
 }
 
-
-
 Command* PrintDirCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
 {
 	if (CommandType(cmdArgs) != Commands::PrintDir)
@@ -530,171 +532,4 @@ void ChangeDirCommand::Execute()
 	}
 
 	instance.prevPath = currPath;
-}
-
-Command* TouchCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
-{
-	if (CommandType(cmdArgs) != Commands::Touch)
-	{
-		return nullptr;
-	}
-
-	if (cmdArgs.size() != 3)
-	{
-		cerr << "smash error: touch: invalid arguments" << endl;
-		return nullptr;
-	}
-
-	tm timeStruct = {0};
-
-	char* res = strptime(cmdArgs[2].c_str(), "%S:%M:%H:%d:%m:%Y", &timeStruct);
-
-	if (res == nullptr)
-	{
-		cerr << "smash error: touch: invalid arguments" << endl;
-		return nullptr;
-	}
-
-	time_t time = mktime(&timeStruct);
-
-	if (time == -1)
-	{
-		return nullptr;
-	}
-
-	return new TouchCommand(cmdStr, cmdArgs[1], time);
-}
-
-TouchCommand::TouchCommand(const string& cmdStr, const string& path, time_t time) : InternalCommand(cmdStr)
-{
-	this->path = path;
-	this->time = time;
-}
-
-void TouchCommand::Execute()
-{
-	//todo: broken before 1970 in linux
-
-	utimbuf fileTimes{.actime = time, .modtime = time};
-
-	int res = utime(path.c_str(), &fileTimes);
-
-	if (res < 0)
-	{
-		SysError("utime");
-	}
-}
-
-Command* TailCommand::Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs)
-{
-	if (CommandType(cmdArgs) != Commands::Tail)
-	{
-		return nullptr;
-	}
-
-	try
-	{
-		if (cmdArgs.size() == 2)
-		{
-			return new TailCommand(cmdStr, cmdArgs[1]);
-		}
-
-		if (cmdArgs.size() == 3)
-		{
-			int count = (-1) * std::stoi(cmdArgs[1]);
-
-			return new TailCommand(cmdStr, cmdArgs[2], count);
-		}
-	}
-	catch (...)
-	{
-		cerr << "smash error: tail: invalid arguments" << endl;
-		return nullptr;
-	}
-
-	cerr << "smash error: tail: invalid arguments" << endl;
-	return nullptr;
-}
-
-TailCommand::TailCommand(const std::string& cmdStr, const std::string& path, int count) : InternalCommand(cmdStr)
-{
-	if (count < 0)
-	{
-		throw std::invalid_argument("count");
-	}
-
-	this->path = path;
-	this->count = count;
-}
-
-void TailCommand::Execute()
-{
-	int fd = open(path.c_str(), O_RDONLY);
-
-	if (fd < 0)
-	{
-		SysError("open");
-		return;
-	}
-
-	char curChar;
-	int curLine = 0;
-
-	while (read(fd, &curChar, 1 * sizeof(char)))
-	{
-		if (curChar == '\n')
-		{
-			curLine++;
-		}
-	}
-
-	if (count > curLine)
-	{
-		count = curLine;
-	}
-
-	int dstLine = curLine - count;
-
-	int res = close(fd);
-
-	if (res < 0)
-	{
-		SysError("close");
-		return;
-	}
-
-	fd = open(path.c_str(), O_RDONLY);
-
-	if (fd < 0)
-	{
-		SysError("open");
-		return;
-	}
-
-	curLine = 0;
-
-	while (read(fd, &curChar, 1 * sizeof(char)))
-	{
-		if (curChar == '\n')
-		{
-			curLine++;
-		}
-
-		if (curLine == dstLine && curChar == '\n')
-		{
-			continue;
-		}
-
-		if (curLine >= dstLine)
-		{
-			cout << curChar;
-		}
-	}
-
-	res = close(fd);
-
-	if (res < 0)
-	{
-		SysError("close");
-	}
 }

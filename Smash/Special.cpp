@@ -1,4 +1,4 @@
-#include "Redirect.h"
+#include "Special.h"
 #include "Commands.h"
 #include "Identifiers.h"
 #include "Parser.h"
@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 #include <fcntl.h>
+#include <utime.h>
+#include <sys/stat.h>
 
 using std::string;
 using std::vector;
@@ -18,6 +20,34 @@ static void SysError(string sysCall)
 {
 	string formatted = "smash error: " + sysCall + " failed";
 	perror(formatted.c_str());
+}
+
+static int OpenFile(string path, int flags)
+{
+	int fd = open(path.c_str(), flags);
+
+	if (fd < 0)
+	{
+		SysError("open");
+		return -1;
+	}
+
+	struct stat pathStat;
+
+	if (stat(path.c_str(), &pathStat) < 0)
+	{
+		SysError("stat");
+		close(fd);
+		return -1;
+	}
+
+	if (S_ISREG(pathStat.st_mode) == false)
+	{
+		close(fd);
+		return -1;
+	}
+
+	return fd;
 }
 
 static string ReadStdin()
@@ -63,46 +93,48 @@ RedirectWriteCommand::RedirectWriteCommand(const string& cmdStr, const string& c
 
 void RedirectWriteCommand::Execute()
 {
-	int outCopy = dup(STDOUT_FILENO);
+	pid_t pid = fork();
 
-	if (outCopy < 0)
+	if (pid < 0)
 	{
-		SysError("dup");
+		SysError("fork");
 		return;
 	}
 
-	int fd = open(output.c_str(), O_WRONLY | O_CREAT | O_TRUNC);
-
-	if (fd < 0)
+	if (pid == 0)
 	{
-		SysError("open");
-		close(outCopy);
-		return;
+		if (setpgrp() < 0)
+		{
+			SysError("setpgrp");
+			exit(1);
+		}
+
+		int fd = OpenFile(output, O_WRONLY | O_CREAT | O_TRUNC);
+
+		if (fd < 0)
+		{
+			exit(1);
+		}
+
+		if (dup2(fd, STDOUT_FILENO) < 0)
+		{
+			SysError("dup2");
+			exit(1);
+		}
+
+		if (close(fd) < 0)
+		{
+			SysError("close");
+		}
+
+		Smash::Instance().Execute(command);
+
+		exit(0);
 	}
 
-	if (dup2(fd, STDOUT_FILENO) < 0)
+	if (waitpid(pid, nullptr, 0) < 0)
 	{
-		SysError("dup2");
-		close(outCopy);
-		close(fd);
-		return;
-	}
-
-	Smash::Instance().Execute(command);
-
-	if (dup2(outCopy, STDOUT_FILENO) < 0)
-	{
-		SysError("dup2");
-	}
-
-	if (close(outCopy) < 0)
-	{
-		SysError("close");
-	}
-
-	if (close(fd) < 0)
-	{
-		SysError("close");
+		SysError("waitpid");
 	}
 }
 
@@ -133,46 +165,48 @@ RedirectAppendCommand::RedirectAppendCommand(const string& cmdStr, const string&
 
 void RedirectAppendCommand::Execute()
 {
-	int outCopy = dup(STDOUT_FILENO);
+	pid_t pid = fork();
 
-	if (outCopy < 0)
+	if (pid < 0)
 	{
-		SysError("dup");
+		SysError("fork");
 		return;
 	}
 
-	int fd = open(output.c_str(), O_WRONLY | O_CREAT | O_APPEND);
-
-	if (fd < 0)
+	if (pid == 0)
 	{
-		SysError("open");
-		close(outCopy);
-		return;
+		if (setpgrp() < 0)
+		{
+			SysError("setpgrp");
+			exit(1);
+		}	
+
+		int fd = OpenFile(output, O_WRONLY | O_CREAT | O_APPEND);
+
+		if (fd < 0)
+		{
+			exit(1);
+		}
+
+		if (dup2(fd, STDOUT_FILENO) < 0)
+		{
+			SysError("dup2");
+			exit(1);
+		}
+
+		if (close(fd) < 0)
+		{
+			SysError("dup2");
+		}
+
+		Smash::Instance().Execute(command);
+
+		exit(0);
 	}
 
-	if (dup2(fd, STDOUT_FILENO) < 0)
+	if (waitpid(pid, nullptr, 0) < 0)
 	{
-		SysError("dup2");
-		close(outCopy);
-		close(fd);
-		return;
-	}
-
-	Smash::Instance().Execute(command);
-
-	if (dup2(outCopy, STDOUT_FILENO) < 0)
-	{
-		SysError("dup2");
-	}
-
-	if (close(outCopy) < 0)
-	{
-		SysError("close");
-	}
-
-	if (close(fd) < 0)
-	{
-		SysError("close");
+		SysError("waitpid");
 	}
 }
 
@@ -414,4 +448,171 @@ void PipeErrCommand::Execute()
 	if (waitpid(leftPID, nullptr, 0) < 0) SysError("waitpid");
 
 	if (waitpid(rightPID, nullptr, 0) < 0) SysError("waitpid");
+}
+
+Command* TouchCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
+{
+	if (CommandType(cmdArgs) != Commands::Touch)
+	{
+		return nullptr;
+	}
+
+	if (cmdArgs.size() != 3)
+	{
+		cerr << "smash error: touch: invalid arguments" << endl;
+		return nullptr;
+	}
+
+	tm timeStruct = {0};
+
+	char* res = strptime(cmdArgs[2].c_str(), "%S:%M:%H:%d:%m:%Y", &timeStruct);
+
+	if (res == nullptr)
+	{
+		cerr << "smash error: touch: invalid arguments" << endl;
+		return nullptr;
+	}
+
+	time_t time = mktime(&timeStruct);
+
+	if (time == -1)
+	{
+		return nullptr;
+	}
+
+	return new TouchCommand(cmdStr, cmdArgs[1], time);
+}
+
+TouchCommand::TouchCommand(const string& cmdStr, const string& path, time_t time) : InternalCommand(cmdStr)
+{
+	this->path = path;
+	this->time = time;
+}
+
+void TouchCommand::Execute()
+{
+	//todo: broken before 1970 in linux
+
+	utimbuf fileTimes{.actime = time, .modtime = time};
+
+	int res = utime(path.c_str(), &fileTimes);
+
+	if (res < 0)
+	{
+		SysError("utime");
+	}
+}
+
+Command* TailCommand::Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs)
+{
+	if (CommandType(cmdArgs) != Commands::Tail)
+	{
+		return nullptr;
+	}
+
+	try
+	{
+		if (cmdArgs.size() == 2)
+		{
+			return new TailCommand(cmdStr, cmdArgs[1]);
+		}
+
+		if (cmdArgs.size() == 3)
+		{
+			if (cmdArgs[1][0] != '-')
+			{
+				cerr << "smash error: tail: invalid arguments" << endl;
+				return nullptr;
+			}
+
+			int count = (-1) * std::stoi(cmdArgs[1]);
+
+			return new TailCommand(cmdStr, cmdArgs[2], count);
+		}
+	}
+	catch (...)
+	{
+		cerr << "smash error: tail: invalid arguments" << endl;
+		return nullptr;
+	}
+
+	cerr << "smash error: tail: invalid arguments" << endl;
+	return nullptr;
+}
+
+TailCommand::TailCommand(const std::string& cmdStr, const std::string& path, int count) : InternalCommand(cmdStr)
+{
+	if (count < 0)
+	{
+		throw std::invalid_argument("count");
+	}
+
+	this->path = path;
+	this->count = count;
+}
+
+void TailCommand::Execute()
+{
+	int fd = OpenFile(path, O_RDONLY);
+
+	if (fd < 0)
+	{
+		return;
+	}
+
+	char curChar;
+	int curLine = 0;
+
+	while (read(fd, &curChar, 1 * sizeof(char)))
+	{
+		if (curChar == '\n')
+		{
+			curLine++;
+		}
+	}
+
+	if (count > curLine)
+	{
+		count = curLine;
+	}
+
+	int dstLine = curLine - count;
+
+	if (close(fd) < 0)
+	{
+		SysError("close");
+		return;
+	}
+
+	fd = OpenFile(path, O_RDONLY);
+
+	if (fd < 0)
+	{
+		return;
+	}
+
+	curLine = 0;
+
+	while (read(fd, &curChar, 1 * sizeof(char)))
+	{
+		if (curChar == '\n')
+		{
+			curLine++;
+		}
+
+		if (curLine == dstLine && curChar == '\n')
+		{
+			continue;
+		}
+
+		if (curLine >= dstLine)
+		{
+			cout << curChar;
+		}
+	}
+
+	if (close(fd) < 0)
+	{
+		SysError("close");
+	}
 }

@@ -75,4 +75,40 @@ class PipeErrCommand : public InternalCommand
 	void Execute() override;
 };
 
+class TouchCommand : public InternalCommand
+{
+	protected:
+
+	std::string path;
+	time_t time;
+
+	public:
+
+	static Command* Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs);
+
+	TouchCommand(const std::string& cmdStr, const std::string& path, time_t time);
+
+	virtual ~TouchCommand() override = default;
+
+	void Execute() override;
+};
+
+class TailCommand : public InternalCommand
+{
+	protected:
+
+	std::string path;
+	int count;
+
+	public:
+
+	static Command* Create(const std::string& cmdStr, const std::vector<std::string>& cmdArgs);
+
+	TailCommand(const std::string& cmdStr, const std::string& path, int count = 10);
+
+	virtual ~TailCommand() override = default;
+
+	void Execute() override;
+};
+
 #endif // !REDIRECT_H

@@ -1,8 +1,8 @@
 SUBMITTERS := 314615113_322784729
 COMPILER := g++
 COMPILER_FLAGS := --std=c++11 -Wall
-HDRS := Commands.h Smash.h Parser.h SigHandlers.h Identidiers.h JobList.h JobEntry.h Redirect.h
-SRCS := Commands.cpp Smash.cpp Parser.cpp SigHandlers.cpp JobList.cpp main.cpp JobEntry.cpp Redirect.cpp
+HDRS := Commands.h Smash.h Parser.h SigHandlers.h Identidiers.h JobList.h JobEntry.h Special.h
+SRCS := Commands.cpp Smash.cpp Parser.cpp SigHandlers.cpp JobList.cpp main.cpp JobEntry.cpp Special.cpp
 OBJS=$(subst .cpp,.o,$(SRCS))
 TESTS_INPUTS := $(wildcard test_input*.txt)
 TESTS_OUTPUTS := $(subst input,output,$(TESTS_INPUTS))

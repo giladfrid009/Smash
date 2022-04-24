@@ -78,7 +78,7 @@
     <ClCompile Include="Commands.cpp" />
     <ClCompile Include="JobEntry.cpp" />
     <ClCompile Include="JobList.cpp" />
-    <ClCompile Include="Redirect.cpp" />
+    <ClCompile Include="Special.cpp" />
     <ClCompile Include="Smash.cpp" />
     <ClCompile Include="Parser.cpp" />
     <ClCompile Include="SigHandlers.cpp" />
@@ -90,7 +90,7 @@
     <ClInclude Include="JobEntry.h" />
     <ClInclude Include="JobList.h" />
     <ClInclude Include="Parser.h" />
-    <ClInclude Include="Redirect.h" />
+    <ClInclude Include="Special.h" />
     <ClInclude Include="SigHandlers.h" />
     <ClInclude Include="Smash.h" />
   </ItemGroup>
