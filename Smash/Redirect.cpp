@@ -63,51 +63,46 @@ RedirectWriteCommand::RedirectWriteCommand(const string& cmdStr, const string& c
 
 void RedirectWriteCommand::Execute()
 {
-	Smash& instance = Smash::Instance();
+	int outCopy = dup(STDOUT_FILENO);
 
-	pid_t pid = fork();
-
-	if (pid < 0)
+	if (outCopy < 0)
 	{
-		SysError("fork");
+		SysError("dup");
 		return;
 	}
 
-	if (pid == 0)
+	int fd = open(output.c_str(), O_WRONLY | O_CREAT | O_TRUNC);
+
+	if (fd < 0)
 	{
-		if (setpgrp() < 0)
-		{
-			SysError("setpgrp");
-			exit(1);
-		}
-
-		int fd = open(output.c_str(), O_WRONLY | O_CREAT | O_TRUNC);
-
-		if (fd < 0)
-		{
-			SysError("open");
-			exit(1);
-		}
-
-		if (dup2(fd, STDOUT_FILENO) < 0)
-		{
-			SysError("dup2");
-			exit(1);
-		}
-
-		if (close(fd) < 0)
-		{
-			SysError("close");
-		}
-
-		instance.Execute(command);
-
-		exit(0);
+		SysError("open");
+		close(outCopy);
+		return;
 	}
 
-	if (waitpid(pid, nullptr, 0) < 0)
+	if (dup2(fd, STDOUT_FILENO) < 0)
 	{
-		SysError("waitpid");
+		SysError("dup2");
+		close(outCopy);
+		close(fd);
+		return;
+	}
+
+	Smash::Instance().Execute(command);
+
+	if (dup2(outCopy, STDOUT_FILENO) < 0)
+	{
+		SysError("dup2");
+	}
+
+	if (close(outCopy) < 0)
+	{
+		SysError("close");
+	}
+
+	if (close(fd) < 0)
+	{
+		SysError("close");
 	}
 }
 
@@ -138,51 +133,46 @@ RedirectAppendCommand::RedirectAppendCommand(const string& cmdStr, const string&
 
 void RedirectAppendCommand::Execute()
 {
-	Smash& instance = Smash::Instance();
+	int outCopy = dup(STDOUT_FILENO);
 
-	pid_t pid = fork();
-
-	if (pid < 0)
+	if (outCopy < 0)
 	{
-		SysError("fork");
+		SysError("dup");
 		return;
 	}
 
-	if (pid == 0)
+	int fd = open(output.c_str(), O_WRONLY | O_CREAT | O_APPEND);
+
+	if (fd < 0)
 	{
-		if (setpgrp() < 0)
-		{
-			SysError("setpgrp");
-			exit(1);
-		}
-
-		int fd = open(output.c_str(), O_WRONLY | O_CREAT | O_APPEND);
-
-		if (fd < 0)
-		{
-			SysError("open");
-			exit(1);
-		}
-
-		if (dup2(fd, STDOUT_FILENO) < 0)
-		{
-			SysError("dup2");
-			exit(1);
-		}
-
-		if (close(fd) < 0)
-		{
-			SysError("dup2");
-		}
-
-		instance.Execute(command);
-
-		exit(0);
+		SysError("open");
+		close(outCopy);
+		return;
 	}
 
-	if (waitpid(pid, nullptr, 0) < 0)
+	if (dup2(fd, STDOUT_FILENO) < 0)
 	{
-		SysError("waitpid");
+		SysError("dup2");
+		close(outCopy);
+		close(fd);
+		return;
+	}
+
+	Smash::Instance().Execute(command);
+
+	if (dup2(outCopy, STDOUT_FILENO) < 0)
+	{
+		SysError("dup2");
+	}
+
+	if (close(outCopy) < 0)
+	{
+		SysError("close");
+	}
+
+	if (close(fd) < 0)
+	{
+		SysError("close");
 	}
 }
 
