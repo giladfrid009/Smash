@@ -79,12 +79,6 @@ void RedirectWriteCommand::Execute()
 			exit(1);
 		}
 
-		if (close(STDOUT_FILENO) < 0)
-		{
-			SysError("close");
-			exit(1);
-		}
-
 		int fd = open(output.c_str(), O_WRONLY | O_CREAT | O_TRUNC);
 
 		if (fd < 0)
@@ -93,9 +87,15 @@ void RedirectWriteCommand::Execute()
 			exit(1);
 		}
 
-		if (fd != STDOUT_FILENO)
+		if (dup2(fd, STDOUT_FILENO) < 0)
 		{
+			SysError("dup2");
 			exit(1);
+		}
+
+		if (close(fd) < 0)
+		{
+			SysError("close");
 		}
 
 		Smash::Instance().Execute(command);
@@ -152,12 +152,6 @@ void RedirectAppendCommand::Execute()
 			exit(1);
 		}
 
-		if (close(STDOUT_FILENO) < 0)
-		{
-			SysError("close");
-			exit(1);
-		}
-
 		int fd = open(output.c_str(), O_WRONLY | O_CREAT | O_APPEND);
 
 		if (fd < 0)
@@ -166,9 +160,15 @@ void RedirectAppendCommand::Execute()
 			exit(1);
 		}
 
-		if (fd != STDOUT_FILENO)
+		if (dup2(fd, STDOUT_FILENO) < 0)
 		{
+			SysError("dup2");
 			exit(1);
+		}
+
+		if (close(fd) < 0)
+		{
+			SysError("dup2");
 		}
 
 		Smash::Instance().Execute(command);
