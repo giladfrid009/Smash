@@ -63,6 +63,8 @@ RedirectWriteCommand::RedirectWriteCommand(const string& cmdStr, const string& c
 
 void RedirectWriteCommand::Execute()
 {
+	Smash& instance = Smash::Instance();
+
 	pid_t pid = fork();
 
 	if (pid < 0)
@@ -98,7 +100,7 @@ void RedirectWriteCommand::Execute()
 			SysError("close");
 		}
 
-		Smash::Instance().Execute(command);
+		instance.Execute(command);
 
 		exit(0);
 	}
@@ -136,6 +138,8 @@ RedirectAppendCommand::RedirectAppendCommand(const string& cmdStr, const string&
 
 void RedirectAppendCommand::Execute()
 {
+	Smash& instance = Smash::Instance();
+
 	pid_t pid = fork();
 
 	if (pid < 0)
@@ -171,7 +175,7 @@ void RedirectAppendCommand::Execute()
 			SysError("dup2");
 		}
 
-		Smash::Instance().Execute(command);
+		instance.Execute(command);
 
 		exit(0);
 	}

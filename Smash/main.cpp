@@ -7,6 +7,7 @@
 #include <string>
 #include <sys/wait.h>
 #include <signal.h>
+#include <fcntl.h>
 
 using std::string;
 
