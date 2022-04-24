@@ -41,7 +41,7 @@ static int OpenFile(string path, int flags)
 		return -1;
 	}
 
-	if (S_ISREG(pathStat.st_mode) == false)
+	if (S_ISDIR(pathStat.st_mode))
 	{
 		close(fd);
 		return -1;
@@ -572,7 +572,7 @@ void TailCommand::Execute()
 
 	ssize_t num;
 
-	while ((num = read(fd, &curChar, 1 * sizeof(char))) > 0)
+	while ((num = read(fd, &curChar, sizeof(char))) > 0)
 	{
 		if (curChar == '\n')
 		{
@@ -609,7 +609,7 @@ void TailCommand::Execute()
 
 	curLine = 0;
 
-	while ((num = read(fd, &curChar, 1 * sizeof(char))) > 0)
+	while ((num = read(fd, &curChar, sizeof(char))) > 0)
 	{
 		if (curChar == '\n')
 		{
