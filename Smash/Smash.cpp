@@ -100,7 +100,6 @@ Command* Smash::CreateCommand(const string& cmdStr, const vector<string>& cmdArg
 	}
 }
 
-//todo: when running execute from fork it will continue running one more smash instance from there since we're not doing exit(0)?
 void Smash::Execute(const string& cmdStr)
 {
 	bool inBackground = IsRunInBackground(cmdStr);

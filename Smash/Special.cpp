@@ -58,9 +58,16 @@ static string ReadStdin()
 
 	char readBuff[ReadSize];
 
-	while (read(STDIN_FILENO, readBuff, ReadSize) > 0)
+	ssize_t num;
+
+	while ((num = read(STDIN_FILENO, readBuff, ReadSize)) > 0)
 	{
 		output.append(readBuff);
+	}
+
+	if (num < 0)
+	{
+		SysError("read");
 	}
 
 	return output;
@@ -563,12 +570,21 @@ void TailCommand::Execute()
 	char curChar;
 	int curLine = 0;
 
-	while (read(fd, &curChar, 1 * sizeof(char)))
+	ssize_t num;
+
+	while ((num = read(fd, &curChar, 1 * sizeof(char))) > 0)
 	{
 		if (curChar == '\n')
 		{
 			curLine++;
 		}
+	}
+
+	if (num < 0)
+	{
+		SysError("read");
+		close(fd);
+		return;
 	}
 
 	if (count > curLine)
@@ -593,7 +609,7 @@ void TailCommand::Execute()
 
 	curLine = 0;
 
-	while (read(fd, &curChar, 1 * sizeof(char)))
+	while ((num = read(fd, &curChar, 1 * sizeof(char))) > 0)
 	{
 		if (curChar == '\n')
 		{
@@ -609,6 +625,11 @@ void TailCommand::Execute()
 		{
 			cout << curChar;
 		}
+	}
+
+	if (num < 0)
+	{
+		SysError("read");
 	}
 
 	if (close(fd) < 0)
