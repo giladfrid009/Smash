@@ -73,6 +73,12 @@ void RedirectWriteCommand::Execute()
 
 	if (pid == 0)
 	{
+		if (setpgrp() < 0)
+		{
+			SysError("setpgrp");
+			exit(1);
+		}
+
 		if (close(STDOUT_FILENO) < 0)
 		{
 			SysError("close");
@@ -140,6 +146,12 @@ void RedirectAppendCommand::Execute()
 
 	if (pid == 0)
 	{
+		if (setpgrp() < 0)
+		{
+			SysError("setpgrp");
+			exit(1);
+		}
+
 		if (close(STDOUT_FILENO) < 0)
 		{
 			SysError("close");
@@ -222,6 +234,12 @@ void PipeOutCommand::Execute()
 
 	if (leftPID == 0)
 	{
+		if (setpgrp() < 0)
+		{
+			SysError("setpgrp");
+			exit(1);
+		}
+
 		if (dup2(writePipe, STDOUT_FILENO) < 0)
 		{
 			SysError("dup2");
@@ -248,6 +266,12 @@ void PipeOutCommand::Execute()
 
 	if (rightPID == 0)
 	{
+		if (setpgrp() < 0)
+		{
+			SysError("setpgrp");
+			exit(1);
+		}
+
 		if (dup2(readPipe, STDIN_FILENO) < 0)
 		{
 			SysError("dup2");
@@ -330,6 +354,12 @@ void PipeErrCommand::Execute()
 
 	if (leftPID == 0)
 	{
+		if (setpgrp() < 0)
+		{
+			SysError("setpgrp");
+			exit(1);
+		}
+
 		if (dup2(writePipe, STDERR_FILENO) < 0)
 		{
 			SysError("dup2");
@@ -356,6 +386,12 @@ void PipeErrCommand::Execute()
 
 	if (rightPID == 0)
 	{
+		if (setpgrp() < 0)
+		{
+			SysError("setpgrp");
+			exit(1);
+		}
+
 		if (dup2(readPipe, STDIN_FILENO) < 0)
 		{
 			SysError("dup2");

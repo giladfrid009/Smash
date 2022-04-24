@@ -122,14 +122,23 @@ void Smash::Execute(const string& cmdStr)
 		if (pid < 0)
 		{
 			perror("smash error: fork failed");
-		}
-		else if (pid == 0)
-		{
-			setpgrp();
-			cmd->Execute();
 			return;
 		}
-		else if (inBackground)
+
+		if (pid == 0)
+		{
+			if (setpgrp() < 0)
+			{
+				perror("smash error: setpgrp failed");
+				exit(1);
+			}
+
+			cmd->Execute();
+
+			exit(0);
+		}
+
+		if (inBackground)
 		{
 			jobs.Add(pid, cmd);
 			return;
