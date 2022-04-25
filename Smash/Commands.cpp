@@ -493,7 +493,7 @@ Command* ChangeDirCommand::Create(const string& cmdStr, const vector<string>& cm
 
 ChangeDirCommand::ChangeDirCommand(const string& cmdStr, const string& path) : InternalCommand(cmdStr)
 {
-	this->path = Trim(path);
+	this->path = Trim(RemoveBackgroundSign(path));
 }
 
 void ChangeDirCommand::Execute()

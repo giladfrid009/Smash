@@ -94,8 +94,8 @@ Command* RedirectWriteCommand::Create(const string& cmdStr, const vector<string>
 
 RedirectWriteCommand::RedirectWriteCommand(const string& cmdStr, const string& command, const string& output) : InternalCommand(cmdStr)
 {
-	this->command = RemoveBackgroundSign(command);
-	this->output = Trim(output);
+	this->command = Trim(RemoveBackgroundSign(command));
+	this->output = Trim(RemoveBackgroundSign(output));
 }
 
 void RedirectWriteCommand::Execute()
@@ -166,8 +166,8 @@ Command* RedirectAppendCommand::Create(const string& cmdStr, const vector<string
 
 RedirectAppendCommand::RedirectAppendCommand(const string& cmdStr, const string& command, const string& output) : InternalCommand(cmdStr)
 {
-	this->command = RemoveBackgroundSign(command);
-	this->output = Trim(output);
+	this->command = Trim(RemoveBackgroundSign(command));
+	this->output = Trim(RemoveBackgroundSign(output));
 }
 
 void RedirectAppendCommand::Execute()
@@ -238,8 +238,8 @@ Command* PipeOutCommand::Create(const string& cmdStr, const vector<string>& cmdA
 
 PipeOutCommand::PipeOutCommand(const string& cmdStr, const string& left, const string& right) : InternalCommand(cmdStr)
 {
-	this->left = RemoveBackgroundSign(left);
-	this->right = RemoveBackgroundSign(right);
+	this->left = Trim(RemoveBackgroundSign(left));
+	this->right = Trim(RemoveBackgroundSign(right));
 }
 
 void PipeOutCommand::Execute()
@@ -358,8 +358,8 @@ Command* PipeErrCommand::Create(const string& cmdStr, const vector<string>& cmdA
 
 PipeErrCommand::PipeErrCommand(const string& cmdStr, const string& left, const string& right) : InternalCommand(cmdStr)
 {
-	this->left = RemoveBackgroundSign(left);
-	this->right = RemoveBackgroundSign(right);
+	this->left = Trim(RemoveBackgroundSign(left));
+	this->right = Trim(RemoveBackgroundSign(right));
 }
 
 void PipeErrCommand::Execute()
@@ -492,7 +492,7 @@ Command* TouchCommand::Create(const string& cmdStr, const vector<string>& cmdArg
 
 TouchCommand::TouchCommand(const string& cmdStr, const string& path, time_t time) : InternalCommand(cmdStr)
 {
-	this->path = path;
+	this->path = Trim(path);
 	this->time = time;
 }
 
