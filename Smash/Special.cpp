@@ -560,6 +560,8 @@ TailCommand::TailCommand(const std::string& cmdStr, const std::string& path, int
 
 void TailCommand::Execute()
 {
+	const char NewLine = '\n';
+
 	int fd = OpenFile(path, O_RDONLY);
 
 	if (fd < 0)
@@ -574,7 +576,7 @@ void TailCommand::Execute()
 
 	while ((num = read(fd, &curChar, sizeof(char))) > 0)
 	{
-		if (curChar == '\n')
+		if (curChar == NewLine)
 		{
 			curLine++;
 		}
@@ -587,9 +589,9 @@ void TailCommand::Execute()
 		return;
 	}
 
-	if (curChar != '\n')
+	if (curChar != NewLine)
 	{
-		curLine += 1;
+		curLine++;
 	}
 
 	if (count > curLine)
@@ -616,12 +618,12 @@ void TailCommand::Execute()
 
 	while ((num = read(fd, &curChar, sizeof(char))) > 0)
 	{
-		if (curChar == '\n')
+		if (curChar == NewLine)
 		{
 			curLine++;
 		}
 
-		if (curLine == dstLine && curChar == '\n')
+		if (curLine == dstLine && curChar == NewLine)
 		{
 			continue;
 		}
