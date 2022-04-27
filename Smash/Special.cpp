@@ -24,7 +24,7 @@ static void SysError(string sysCall)
 
 static int OpenFile(string path, int flags)
 {
-	int fd = open(path.c_str(), flags);
+	int fd = open(path.c_str(), flags, S_IRWXU | S_IRWXG | S_IRWXO);
 
 	if (fd < 0)
 	{
