@@ -587,6 +587,11 @@ void TailCommand::Execute()
 		return;
 	}
 
+	if (curChar != '\n')
+	{
+		curLine += 1;
+	}
+
 	if (count > curLine)
 	{
 		count = curLine;
