@@ -52,7 +52,7 @@ void ExternalCommand::Execute()
 		formatted = " ";
 	}
 
-	char* const args[] = {"bash", "-c", &formatted[0], NULL};
+	char* const args[] = {"/bin/bash", "-c", &formatted[0], NULL};
 
 	execv("/bin/bash", args);
 
