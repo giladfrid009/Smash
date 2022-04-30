@@ -104,6 +104,7 @@ void RedirectWriteCommand::Execute()
 
 	if (fd < 0)
 	{
+		SysError("open");
 		return;
 	}
 
