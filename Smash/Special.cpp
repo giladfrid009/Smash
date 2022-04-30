@@ -100,48 +100,45 @@ RedirectWriteCommand::RedirectWriteCommand(const string& cmdStr, const string& c
 
 void RedirectWriteCommand::Execute()
 {
-	pid_t pid = fork();
+	int fd = OpenFile(output, O_WRONLY | O_CREAT | O_TRUNC);
 
-	if (pid < 0)
+	if (fd < 0)
 	{
-		SysError("fork");
 		return;
 	}
 
-	if (pid == 0)
+	int outCopy = dup(STDOUT_FILENO);
+
+	if (outCopy < 0)
 	{
-		if (setpgrp() < 0)
-		{
-			SysError("setpgrp");
-			exit(1);
-		}
-
-		int fd = OpenFile(output, O_WRONLY | O_CREAT | O_TRUNC);
-
-		if (fd < 0)
-		{
-			exit(1);
-		}
-
-		if (dup2(fd, STDOUT_FILENO) < 0)
-		{
-			SysError("dup2");
-			exit(1);
-		}
-
-		if (close(fd) < 0)
-		{
-			SysError("close");
-		}
-
-		Smash::Instance().Execute(command);
-
-		exit(0);
+		SysError("dup");
+		close(fd);
+		return;
 	}
 
-	if (waitpid(pid, nullptr, 0) < 0)
+	if (dup2(fd, STDOUT_FILENO) < 0)
 	{
-		SysError("waitpid");
+		SysError("dup2");
+		close(fd);
+		close(outCopy);
+		return;
+	}
+
+	Smash::Instance().Execute(command);
+
+	if (dup2(outCopy, STDOUT_FILENO) < 0)
+	{
+		SysError("dup2");
+	}
+
+	if (close(fd) < 0)
+	{
+		SysError("close");
+	}
+
+	if (close(outCopy) < 0)
+	{
+		SysError("close");
 	}
 }
 
@@ -172,48 +169,45 @@ RedirectAppendCommand::RedirectAppendCommand(const string& cmdStr, const string&
 
 void RedirectAppendCommand::Execute()
 {
-	pid_t pid = fork();
+	int fd = OpenFile(output, O_WRONLY | O_CREAT | O_APPEND);
 
-	if (pid < 0)
+	if (fd < 0)
 	{
-		SysError("fork");
 		return;
 	}
 
-	if (pid == 0)
+	int outCopy = dup(STDOUT_FILENO);
+
+	if (outCopy < 0)
 	{
-		if (setpgrp() < 0)
-		{
-			SysError("setpgrp");
-			exit(1);
-		}	
-
-		int fd = OpenFile(output, O_WRONLY | O_CREAT | O_APPEND);
-
-		if (fd < 0)
-		{
-			exit(1);
-		}
-
-		if (dup2(fd, STDOUT_FILENO) < 0)
-		{
-			SysError("dup2");
-			exit(1);
-		}
-
-		if (close(fd) < 0)
-		{
-			SysError("dup2");
-		}
-
-		Smash::Instance().Execute(command);
-
-		exit(0);
+		SysError("dup");
+		close(fd);
+		return;
 	}
 
-	if (waitpid(pid, nullptr, 0) < 0)
+	if (dup2(fd, STDOUT_FILENO) < 0)
 	{
-		SysError("waitpid");
+		SysError("dup2");
+		close(fd);
+		close(outCopy);
+		return;
+	}
+
+	Smash::Instance().Execute(command);
+
+	if (dup2(outCopy, STDOUT_FILENO) < 0)
+	{
+		SysError("dup2");
+	}
+
+	if (close(fd) < 0)
+	{
+		SysError("close");
+	}
+
+	if (close(outCopy) < 0)
+	{
+		SysError("close");
 	}
 }
 
@@ -242,6 +236,7 @@ PipeOutCommand::PipeOutCommand(const string& cmdStr, const string& left, const s
 	this->right = Trim(RemoveBackgroundSign(right));
 }
 
+//todo: fix. left side must be in the current process.
 void PipeOutCommand::Execute()
 {
 	Smash& instance = Smash::Instance();
@@ -362,6 +357,7 @@ PipeErrCommand::PipeErrCommand(const string& cmdStr, const string& left, const s
 	this->right = Trim(RemoveBackgroundSign(right));
 }
 
+//todo: fix. left side must be in the current process.
 void PipeErrCommand::Execute()
 {
 	Smash& instance = Smash::Instance();
