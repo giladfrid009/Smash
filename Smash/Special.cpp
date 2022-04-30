@@ -236,7 +236,6 @@ PipeOutCommand::PipeOutCommand(const string& cmdStr, const string& left, const s
 	this->right = Trim(RemoveBackgroundSign(right));
 }
 
-//todo: fix. left side must be in the current process.
 void PipeOutCommand::Execute()
 {
 	Smash& instance = Smash::Instance();
@@ -251,38 +250,6 @@ void PipeOutCommand::Execute()
 
 	int readPipe = fds[0];
 	int writePipe = fds[1];
-
-	pid_t leftPID = fork();
-
-	if (leftPID < 0)
-	{
-		SysError("fork");
-		close(readPipe);
-		close(writePipe);
-		return;
-	}
-
-	if (leftPID == 0)
-	{
-		if (setpgrp() < 0)
-		{
-			SysError("setpgrp");
-			exit(1);
-		}
-
-		if (dup2(writePipe, STDOUT_FILENO) < 0)
-		{
-			SysError("dup2");
-			exit(1);
-		}
-
-		close(readPipe);
-		close(writePipe);
-
-		instance.Execute(left);
-
-		exit(0);
-	}
 
 	pid_t rightPID = fork();
 
@@ -308,28 +275,83 @@ void PipeOutCommand::Execute()
 			exit(1);
 		}
 
-		close(readPipe);
-		close(writePipe);
+		if (close(readPipe) < 0)
+		{
+			SysError("close");
+			exit(1);
+		}
+
+		if (close(writePipe) < 0)
+		{
+			SysError("close");
+			exit(1);
+		}
 
 		if (CommandType(right) != Commands::Unknown)
 		{
-			instance.Execute(right + " " + ReadStdin());
+			instance.Execute(right + " " + ReadStdin(), true);
 		}
 		else
 		{
-			instance.Execute(right);
+			instance.Execute(right, true);
 		}
 
 		exit(0);
 	}
 
-	if (close(readPipe) < 0) SysError("close");
+	int outCopy = dup(STDOUT_FILENO);
 
-	if (close(writePipe) < 0) SysError("close");
+	if (outCopy < 0)
+	{
+		SysError("dup");
+		goto ERROR;
+	}
 
-	if (waitpid(leftPID, nullptr, 0) < 0) SysError("waitpid");
+	if (close(readPipe) < 0)
+	{
+		SysError("close");
+		goto ERROR;
+	}
 
-	if (waitpid(rightPID, nullptr, 0) < 0) SysError("waitpid");
+	if (dup2(writePipe, STDOUT_FILENO) < 0)
+	{
+		SysError("dup2");
+		goto ERROR;
+	}
+
+	if (close(writePipe))
+	{
+		SysError("close");
+		goto ERROR;
+	}
+
+	instance.Execute(left);
+
+	if (dup2(outCopy, STDOUT_FILENO) < 0)
+	{
+		SysError("dup2");
+	}
+
+	if (close(outCopy) < 0)
+	{
+		SysError("close");
+	}
+
+	if (waitpid(rightPID, nullptr, 0) < 0)
+	{
+		SysError("waitpid");
+	}
+
+	return;
+
+	ERROR:
+
+	kill(rightPID, SIGKILL);
+	waitpid(rightPID, nullptr, 0);
+	dup2(outCopy, STDOUT_FILENO);
+	close(outCopy);
+	close(readPipe);
+	close(writePipe);
 }
 
 Command* PipeErrCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)
@@ -357,7 +379,6 @@ PipeErrCommand::PipeErrCommand(const string& cmdStr, const string& left, const s
 	this->right = Trim(RemoveBackgroundSign(right));
 }
 
-//todo: fix. left side must be in the current process.
 void PipeErrCommand::Execute()
 {
 	Smash& instance = Smash::Instance();
@@ -372,38 +393,6 @@ void PipeErrCommand::Execute()
 
 	int readPipe = fds[0];
 	int writePipe = fds[1];
-
-	pid_t leftPID = fork();
-
-	if (leftPID < 0)
-	{
-		SysError("fork");
-		close(readPipe);
-		close(writePipe);
-		return;
-	}
-
-	if (leftPID == 0)
-	{
-		if (setpgrp() < 0)
-		{
-			SysError("setpgrp");
-			exit(1);
-		}
-
-		if (dup2(writePipe, STDERR_FILENO) < 0)
-		{
-			SysError("dup2");
-			exit(1);
-		}
-
-		close(readPipe);
-		close(writePipe);
-
-		instance.Execute(left);
-
-		exit(0);
-	}
 
 	pid_t rightPID = fork();
 
@@ -429,28 +418,83 @@ void PipeErrCommand::Execute()
 			exit(1);
 		}
 
-		close(readPipe);
-		close(writePipe);
+		if (close(readPipe) < 0)
+		{
+			SysError("close");
+			exit(1);
+		}
+
+		if (close(writePipe) < 0)
+		{
+			SysError("close");
+			exit(1);
+		}
 
 		if (CommandType(right) != Commands::Unknown)
 		{
-			instance.Execute(right + " " + ReadStdin());
+			instance.Execute(right + " " + ReadStdin(), true);
 		}
 		else
 		{
-			instance.Execute(right);
+			instance.Execute(right, true);
 		}
 
 		exit(0);
 	}
 
-	if (close(readPipe) < 0) SysError("close");
+	int errCopy = dup(STDERR_FILENO);
 
-	if (close(writePipe) < 0) SysError("close");
+	if (errCopy < 0)
+	{
+		SysError("dup");
+		goto ERROR;
+	}
 
-	if (waitpid(leftPID, nullptr, 0) < 0) SysError("waitpid");
+	if (close(readPipe) < 0)
+	{
+		SysError("close");
+		goto ERROR;
+	}
 
-	if (waitpid(rightPID, nullptr, 0) < 0) SysError("waitpid");
+	if (dup2(writePipe, STDERR_FILENO) < 0)
+	{
+		SysError("dup2");
+		goto ERROR;
+	}
+
+	if (close(writePipe))
+	{
+		SysError("close");
+		goto ERROR;
+	}
+
+	instance.Execute(left);
+
+	if (dup2(errCopy, STDERR_FILENO) < 0)
+	{
+		SysError("dup2");
+	}
+
+	if (close(errCopy) < 0)
+	{
+		SysError("close");
+	}
+
+	if (waitpid(rightPID, nullptr, 0) < 0)
+	{
+		SysError("waitpid");
+	}
+
+	return;
+
+ERROR:
+
+	kill(rightPID, SIGKILL);
+	waitpid(rightPID, nullptr, 0);
+	dup2(errCopy, STDERR_FILENO);
+	close(errCopy);
+	close(readPipe);
+	close(writePipe);
 }
 
 Command* TouchCommand::Create(const string& cmdStr, const vector<string>& cmdArgs)

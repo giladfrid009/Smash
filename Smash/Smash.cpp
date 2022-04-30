@@ -100,15 +100,18 @@ Command* Smash::CreateCommand(const string& cmdStr, const vector<string>& cmdArg
 	}
 }
 
-void Smash::Execute(const string& cmdStr)
+void Smash::Execute(const string& cmdStr, bool isRemote)
 {
-	bool inBackground = IsRunInBackground(cmdStr);
+	bool inBackground = isRemote ? false : IsRunInBackground(cmdStr);
 
 	vector<string> cmdArgs = ParseCommand(cmdStr);
 
 	Command* cmd = CreateCommand(cmdStr, cmdArgs);
 
-	jobs.RemoveFinished();
+	if (isRemote == false)
+	{
+		jobs.RemoveFinished();
+	}
 
 	if (cmd == nullptr)
 	{
