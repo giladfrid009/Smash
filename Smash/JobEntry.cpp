@@ -2,20 +2,22 @@
 #include <iostream>
 #include <string>
 
+using std::string;
+
 JobEntry::JobEntry()
 {
 	jobID = -1;
 	pid = -1;
-	command = nullptr;
+	cmdStr = "";
 	status = JobStatus::Unknown;
 	startTime = time(nullptr);
 }
 
-JobEntry::JobEntry(int jobID, pid_t pid, Command* command, JobStatus status)
+JobEntry::JobEntry(int jobID, pid_t pid, const string& cmdStr, JobStatus status)
 {
 	this->jobID = jobID;
 	this->pid = pid;
-	this->command = command;
+	this->cmdStr = cmdStr;
 	this->status = status;
 	this->startTime = time(nullptr);
 }
@@ -57,11 +59,6 @@ int JobEntry::ID() const
 	return jobID;
 }
 
-Command* JobEntry::CommandPtr() const
-{
-	return command;
-}
-
 void JobEntry::ResetTime()
 {
 	startTime = time(nullptr);
@@ -69,14 +66,9 @@ void JobEntry::ResetTime()
 
 void JobEntry::PrintJob() const
 {
-	if (command == nullptr)
-	{
-		return;
-	}
-
 	int diff = (int)difftime(time(nullptr), startTime);
 
-	std::cout << "[" << jobID << "] " << command->ToString() << " : " << pid << " " << diff << " secs";
+	std::cout << "[" << jobID << "] " << cmdStr << " : " << pid << " " << diff << " secs";
 
 	if (status == JobStatus::Stopped)
 	{
@@ -88,18 +80,10 @@ void JobEntry::PrintJob() const
 
 void JobEntry::PrintQuit() const
 {
-	if (command == nullptr)
-	{
-		return;
-	}
-
-	std::cout << pid << ": " << command->ToString() << std::endl;
+	std::cout << pid << ": " << cmdStr << std::endl;
 }
 
-void JobEntry::PrintCommand() const
+string JobEntry::CommandStr() const
 {
-	if (command != nullptr)
-	{
-		std::cout << command->ToString();
-	}
+	return cmdStr;	
 }

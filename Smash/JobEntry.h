@@ -2,6 +2,7 @@
 #define JOBENTRY_H
 
 #include "Commands.h"
+#include <string>
 
 enum class JobStatus
 {
@@ -17,7 +18,7 @@ class JobEntry
 
 	int jobID;
 	pid_t pid;
-	Command* command;
+	std::string cmdStr;
 	JobStatus status;
 	time_t startTime;
 
@@ -25,7 +26,7 @@ class JobEntry
 
 	JobEntry();
 
-	JobEntry(int jobID, pid_t pid, Command* command, JobStatus status);
+	JobEntry(int jobID, pid_t pid, const std::string& cmdStr, JobStatus status);
 
 	void SetStatus(JobStatus status);
 
@@ -35,15 +36,13 @@ class JobEntry
 
 	int ID() const;
 
-	void PrintCommand() const;
-
-	Command* CommandPtr() const;
-
 	void ResetTime();
 
 	void PrintJob() const;
 
 	void PrintQuit() const;
+
+	std::string CommandStr() const;
 };
 
 #endif // !JOBENTRY_H

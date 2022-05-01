@@ -229,9 +229,7 @@ void BackgroundCommand::Execute()
 
 	pid_t pid = instance.jobs.GetPID(dstID);
 
-	instance.jobs.PrintCommand(dstID);
-
-	cout << " : " << pid << endl;
+	cout << instance.jobs.CommandStr(dstID) << " : " << pid << endl;
 
 	int res = kill(pid, SIGCONT);
 
@@ -380,10 +378,7 @@ void ForegroundCommand::Execute()
 		instance.jobs.SetStatus(dstID, JobStatus::Running);
 	}
 
-
-	instance.jobs.PrintCommand(dstID);
-
-	cout << " : " << pid << endl;
+	cout << instance.jobs.CommandStr(dstID) << " : " << pid << endl;
 
 	int exitStat;
 

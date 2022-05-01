@@ -26,9 +26,9 @@ class JobsList
 
 	void operator=(JobsList const&) = delete;
 
-	~JobsList();
+	~JobsList() = default;
 
-	void Add(pid_t pid, Command* command, JobStatus status = JobStatus::Running);
+	void Add(pid_t pid, std::string cmdStr, JobStatus status = JobStatus::Running);
 
 	long unsigned int Size() const;
 
@@ -44,7 +44,7 @@ class JobsList
 
 	void ResetTime(int jobID);
 
-	void PrintCommand(int jobID) const;
+	std::string CommandStr(int jobID) const;
 
 	int MaxStopped();
 

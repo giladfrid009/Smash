@@ -111,7 +111,6 @@ static bool IsRemoteLegal(vector<string> cmdArgs)
 	return true;
 }
 
-//todo: make sure works correctly, and chrck which commands can properly run in the fork.
 void Smash::ExecuteRemote(const string& cmdStr)
 {
 	vector<string> cmdArgs = ParseCommand(cmdStr);
@@ -207,22 +206,22 @@ void Smash::Execute(const string& cmdStr)
 
 		if (inBackground)
 		{
-			jobs.Add(pid, cmd);
-			return;
+			jobs.Add(pid, cmdStr);
 		}
-
-		int exitStat;
-
-		runningPID = pid;
-
-		waitpid(pid, &exitStat, WUNTRACED);
-
-		runningPID = -1;
-
-		if (WIFSTOPPED(exitStat))
+		else
 		{
-			jobs.Add(pid, cmd, JobStatus::Stopped);
-			return;
+			int exitStat;
+
+			runningPID = pid;
+
+			waitpid(pid, &exitStat, WUNTRACED);
+
+			runningPID = -1;
+
+			if (WIFSTOPPED(exitStat))
+			{
+				jobs.Add(pid, cmdStr, JobStatus::Stopped);
+			}
 		}
 	}
 

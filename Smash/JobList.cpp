@@ -1,6 +1,7 @@
 #include "JobList.h"
 #include <iostream>
 #include <vector>
+#include <string>
 #include <algorithm>
 #include <functional>
 
@@ -9,24 +10,11 @@ using std::map;
 using std::vector;
 using std::pair;
 
-JobsList::~JobsList()
+void JobsList::Add(pid_t pid, std::string cmdStr, JobStatus status)
 {
-	for (const auto& pair : jobs)
-	{
-		delete pair.second.CommandPtr();
-	}
-}
-
-void JobsList::Add(pid_t pid, Command* command, JobStatus status)
-{
-	if (command == nullptr)
-	{
-		return;
-	}
-
 	int newID = NextID();
 
-	JobEntry job = JobEntry(newID, pid, command, status);
+	JobEntry job = JobEntry(newID, pid, cmdStr, status);
 
 	jobs[newID] = job;
 }
@@ -59,8 +47,6 @@ void JobsList::RemoveFinished()
 			i++;
 			continue;
 		}
-
-		delete job.CommandPtr();
 
 		i = jobs.erase(i);
 	}
@@ -154,12 +140,12 @@ void JobsList::SetStatus(int jobID, JobStatus status)
 	return jobs.at(jobID).SetStatus(status);
 }
 
-void JobsList::PrintCommand(int jobID) const
+std::string JobsList::CommandStr(int jobID) const
 {
 	if (jobs.count(jobID) == 0)
 	{
-		return;
+		return "";
 	}
 
-	jobs.at(jobID).PrintCommand();
+	return jobs.at(jobID).CommandStr();
 }
