@@ -34,7 +34,9 @@ class Smash
 
 	pid_t SelfPID() const;
 
-	void Execute(const std::string& cmdStr, bool isRemote = false);
+	void ExecuteRemote(const std::string& cmdStr);
+
+	void Execute(const std::string& cmdStr);
 
 	friend void JobsCommand::Execute();
 

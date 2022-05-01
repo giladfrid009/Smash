@@ -100,31 +100,95 @@ Command* Smash::CreateCommand(const string& cmdStr, const vector<string>& cmdArg
 	}
 }
 
-void Smash::Execute(const string& cmdStr, bool isRemote)
+static bool IsRemoteLegal(vector<string> cmdArgs)
 {
-	bool inBackground = isRemote ? false : IsRunInBackground(cmdStr);
+	Commands cmdType = CommandType(cmdArgs);
 
+	if (cmdType == Commands::Foreground) return false;
+
+	if (cmdType == Commands::Background) return false;
+
+	return true;
+}
+
+//todo: make sure works correctly, and chrck which commands can properly run in the fork.
+void Smash::ExecuteRemote(const string& cmdStr)
+{
 	vector<string> cmdArgs = ParseCommand(cmdStr);
 
-	Command* cmd = CreateCommand(cmdStr, cmdArgs);
-
-	if (isRemote == false)
+	if (IsRemoteLegal(cmdArgs) == false)
 	{
-		jobs.RemoveFinished();
+		return;
 	}
+
+	Command* cmd = CreateCommand(cmdStr, cmdArgs);
 
 	if (cmd == nullptr)
 	{
 		return;
 	}
 
-	if (CommandType(cmdArgs) == Commands::Unknown)
+	if (CommandType(cmdArgs) != Commands::Unknown)
+	{
+		cmd->Execute();
+	}
+	else
 	{
 		pid_t pid = fork();
 
 		if (pid < 0)
 		{
 			perror("smash error: fork failed");
+			delete cmd;
+			return;
+		}
+
+		if (pid == 0)
+		{
+			if (setpgrp() < 0)
+			{
+				perror("smash error: setpgrp failed");
+				exit(1);
+			}
+
+			cmd->Execute();
+
+			exit(0);
+		}
+
+		waitpid(pid, nullptr, 0);
+	}
+
+	delete cmd;
+}
+
+void Smash::Execute(const string& cmdStr)
+{
+	bool inBackground = IsRunInBackground(cmdStr);
+
+	vector<string> cmdArgs = ParseCommand(cmdStr);
+
+	Command* cmd = CreateCommand(cmdStr, cmdArgs);
+	
+	jobs.RemoveFinished();	
+
+	if (cmd == nullptr)
+	{
+		return;
+	}
+
+	if (CommandType(cmdArgs) != Commands::Unknown)
+	{
+		cmd->Execute();
+	}
+	else
+	{
+		pid_t pid = fork();
+
+		if (pid < 0)
+		{
+			perror("smash error: fork failed");
+			delete cmd;
 			return;
 		}
 
@@ -160,11 +224,7 @@ void Smash::Execute(const string& cmdStr, bool isRemote)
 			jobs.Add(pid, cmd, JobStatus::Stopped);
 			return;
 		}
-
-		delete cmd;
-		return;
 	}
 
-	cmd->Execute();
 	delete cmd;
 }

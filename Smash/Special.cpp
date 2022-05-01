@@ -251,9 +251,9 @@ void PipeOutCommand::Execute()
 	int readPipe = fds[0];
 	int writePipe = fds[1];
 
-	pid_t rightPID = fork();
+	pid_t pid = fork();
 
-	if (rightPID < 0)
+	if (pid < 0)
 	{
 		SysError("fork");
 		close(readPipe);
@@ -261,7 +261,7 @@ void PipeOutCommand::Execute()
 		return;
 	}
 
-	if (rightPID == 0)
+	if (pid == 0)
 	{
 		if (setpgrp() < 0)
 		{
@@ -289,11 +289,11 @@ void PipeOutCommand::Execute()
 
 		if (CommandType(right) != Commands::Unknown)
 		{
-			instance.Execute(right + " " + ReadStdin(), true);
+			instance.ExecuteRemote(right + " " + ReadStdin());
 		}
 		else
 		{
-			instance.Execute(right, true);
+			instance.ExecuteRemote(right);
 		}
 
 		exit(0);
@@ -337,7 +337,7 @@ void PipeOutCommand::Execute()
 		SysError("close");
 	}
 
-	if (waitpid(rightPID, nullptr, 0) < 0)
+	if (waitpid(pid, nullptr, 0) < 0)
 	{
 		SysError("waitpid");
 	}
@@ -346,8 +346,8 @@ void PipeOutCommand::Execute()
 
 	ERROR:
 
-	kill(rightPID, SIGKILL);
-	waitpid(rightPID, nullptr, 0);
+	kill(pid, SIGKILL);
+	waitpid(pid, nullptr, 0);
 	dup2(outCopy, STDOUT_FILENO);
 	close(outCopy);
 	close(readPipe);
@@ -394,9 +394,9 @@ void PipeErrCommand::Execute()
 	int readPipe = fds[0];
 	int writePipe = fds[1];
 
-	pid_t rightPID = fork();
+	pid_t pid = fork();
 
-	if (rightPID < 0)
+	if (pid < 0)
 	{
 		SysError("fork");
 		close(readPipe);
@@ -404,7 +404,7 @@ void PipeErrCommand::Execute()
 		return;
 	}
 
-	if (rightPID == 0)
+	if (pid == 0)
 	{
 		if (setpgrp() < 0)
 		{
@@ -432,11 +432,11 @@ void PipeErrCommand::Execute()
 
 		if (CommandType(right) != Commands::Unknown)
 		{
-			instance.Execute(right + " " + ReadStdin(), true);
+			instance.ExecuteRemote(right + " " + ReadStdin());
 		}
 		else
 		{
-			instance.Execute(right, true);
+			instance.ExecuteRemote(right);
 		}
 
 		exit(0);
@@ -480,7 +480,7 @@ void PipeErrCommand::Execute()
 		SysError("close");
 	}
 
-	if (waitpid(rightPID, nullptr, 0) < 0)
+	if (waitpid(pid, nullptr, 0) < 0)
 	{
 		SysError("waitpid");
 	}
@@ -489,8 +489,8 @@ void PipeErrCommand::Execute()
 
 ERROR:
 
-	kill(rightPID, SIGKILL);
-	waitpid(rightPID, nullptr, 0);
+	kill(pid, SIGKILL);
+	waitpid(pid, nullptr, 0);
 	dup2(errCopy, STDERR_FILENO);
 	close(errCopy);
 	close(readPipe);
@@ -538,8 +538,6 @@ TouchCommand::TouchCommand(const string& cmdStr, const string& path, time_t time
 
 void TouchCommand::Execute()
 {
-	//todo: broken before 1970 in linux
-
 	utimbuf fileTimes{.actime = time, .modtime = time};
 
 	int res = utime(path.c_str(), &fileTimes);

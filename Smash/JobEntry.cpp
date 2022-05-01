@@ -51,6 +51,7 @@ pid_t JobEntry::PID() const
 {
 	return pid;
 }
+
 int JobEntry::ID() const
 {
 	return jobID;
