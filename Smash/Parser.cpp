@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include <exception>
+#include <regex>
 
 using std::string;
 using std::vector;
@@ -29,20 +30,52 @@ string Trim(const string& cmdStr)
 	return RightTrim(LeftTrim(cmdStr));
 }
 
+static bool PadSpaces(string& cmdStr, const string& search)
+{
+	size_t pos = cmdStr.find(search);
+
+	if (pos == string::npos)
+	{
+		return false;
+	}
+
+	cmdStr.erase(pos, search.length());
+	cmdStr.insert(pos, "" + search + " ");
+
+	return true;
+}
+
+static string FormatCommand(const string& cmdStr)
+{
+	string formatted = cmdStr;
+
+	bool res = false;
+
+	if (res == false) res = PadSpaces(formatted, I.RedirectAppend);
+
+	if (res == false) res = PadSpaces(formatted, I.RedirectWrite);
+
+	if (res == false) res = PadSpaces(formatted, I.PipeErr);
+
+	if (res == false) res = PadSpaces(formatted, I.PipeOut);
+
+	return Trim(RemoveBackgroundSign(formatted));
+}
+
 vector<string> ParseCommand(const string& cmdStr)
 {
-	string formatted = Trim(RemoveBackgroundSign(cmdStr));
+	string formatted = FormatCommand(cmdStr);
 
 	istringstream iss(formatted);
 	string buffer;
-	vector<string> result;
+	vector<string> cmdArgs;
 
 	while (iss >> buffer)
 	{
-		result.push_back(buffer);
+		cmdArgs.push_back(buffer);
 	}
 
-	return result;
+	return cmdArgs;
 }
 
 vector<string> Split(const string& cmdStr, string seperator)
