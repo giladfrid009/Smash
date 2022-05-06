@@ -5,7 +5,6 @@
 #include <vector>
 #include <algorithm>
 #include <exception>
-#include <regex>
 
 using std::string;
 using std::vector;
