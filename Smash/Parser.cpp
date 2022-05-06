@@ -39,7 +39,7 @@ static bool PadSpaces(string& cmdStr, const string& search)
 	}
 
 	cmdStr.erase(pos, search.length());
-	cmdStr.insert(pos, "" + search + " ");
+	cmdStr.insert(pos, " " + search + " ");
 
 	return true;
 }

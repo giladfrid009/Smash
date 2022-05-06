@@ -479,7 +479,7 @@ Command* ChangeDirCommand::Create(const string& cmdStr, const vector<string>& cm
 
 	if (cmdArgs.size() != 2)
 	{
-		cerr << "smash error: cd: too many agruments" << endl;
+		cerr << "smash error: cd: too many arguments" << endl;
 		return nullptr;
 	}
 

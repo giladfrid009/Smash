@@ -7,7 +7,6 @@
 #include <vector>
 #include <fcntl.h>
 #include <utime.h>
-#include <sys/stat.h>
 
 using std::string;
 using std::vector;
@@ -24,26 +23,11 @@ static void SysError(string sysCall)
 
 static int OpenFile(string path, int flags)
 {
-	int fd = open(path.c_str(), flags, S_IRWXU | S_IRWXG | S_IRWXO);
+	int fd = open(path.c_str(), flags, S_IRUSR | S_IWUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
 
 	if (fd < 0)
 	{
 		SysError("open");
-		return -1;
-	}
-
-	struct stat pathStat;
-
-	if (stat(path.c_str(), &pathStat) < 0)
-	{
-		SysError("stat");
-		close(fd);
-		return -1;
-	}
-
-	if (S_ISDIR(pathStat.st_mode))
-	{
-		close(fd);
 		return -1;
 	}
 
