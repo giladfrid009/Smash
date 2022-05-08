@@ -527,4 +527,6 @@ void ChangeDirCommand::Execute()
 	}
 
 	instance.prevPath = currPath;
+
+	free(currPath);
 }
